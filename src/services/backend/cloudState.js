@@ -272,6 +272,8 @@ export function subscribeToCloudAppState(callback, onError) {
     .on('postgres_changes', { event: '*', schema: 'public', table: 'patrol_reports' }, () => fetchState().catch(onError))
     .on('postgres_changes', { event: '*', schema: 'public', table: 'incidents' }, () => fetchState().catch(onError))
     .on('postgres_changes', { event: '*', schema: 'public', table: 'sos_alerts' }, () => fetchState().catch(onError))
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => fetchState().catch(onError))
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'pending_registrations' }, () => fetchState().catch(onError))
     .subscribe();
 
   return () => {
