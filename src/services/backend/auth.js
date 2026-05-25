@@ -20,8 +20,20 @@ function getFirebaseAuthErrorMessage(error) {
   if (code.includes('invalid login') || code.includes('invalid credentials')) {
     return 'Email atau password Supabase tidak cocok.';
   }
+  if (code.includes('rate limit') || code.includes('rate')) {
+    return 'Batas pengiriman (rate limit) Supabase terlampaui. Silakan tunggu beberapa menit sebelum mencoba lagi.';
+  }
+  if (code.includes('invalid email') || code.includes('email format') || code.includes('invalid_email')) {
+    return 'Format email tidak valid.';
+  }
+  if (code.includes('email not confirmed') || code.includes('unverified') || code.includes('confirm')) {
+    return 'Email belum terkonfirmasi/terverifikasi. Silakan aktivasi akun Anda terlebih dahulu.';
+  }
+  if (code.includes('row-level security') || code.includes('security policy')) {
+    return 'Akses ditolak oleh kebijakan keamanan RLS database.';
+  }
   if (code.includes('email')) {
-    return 'Format email tidak valid atau belum terverifikasi.';
+    return 'Autentikasi gagal karena kendala pada email.';
   }
   if (code.includes('password')) {
     return 'Password minimal 8 karakter.';
