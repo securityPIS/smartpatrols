@@ -8282,6 +8282,11 @@ export function AppProvider({ children }) {
           photoURL: pendingRegistration.photoUrl,
         },
       }));
+      setPendingRegistrations((previousList) =>
+        previousList.map((entry) =>
+          entry.uid === pendingRegistration.uid ? { ...entry, status: 'approved' } : entry
+        )
+      );
       requestCloudSync('urgent');
       setUserFormNotice(`Registrasi ${pendingRegistration.name} disetujui. Aktivasi login penuh menunggu penugasan kapal.`);
     } catch (error) {
@@ -8297,6 +8302,11 @@ export function AppProvider({ children }) {
       await rejectPendingRegistration({
         uid: pendingRegistration.uid,
       });
+      setPendingRegistrations((previousList) =>
+        previousList.map((entry) =>
+          entry.uid === pendingRegistration.uid ? { ...entry, status: 'rejected' } : entry
+        )
+      );
       setUserFormNotice(`Registrasi ${pendingRegistration.name} ditolak.`);
     } catch (error) {
       console.error('Gagal reject onboarding pending', error);

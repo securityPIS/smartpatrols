@@ -41,18 +41,23 @@ function mapPendingRegistration(row = {}) {
 }
 
 function mapOperationalProfilePayload(payload = {}) {
+  const role = sanitizeText(payload.role || 'PETUGAS', 20).toUpperCase();
+  const status = sanitizeText(payload.status || 'off-duty', 20).toLowerCase();
+  const shipAssigned = sanitizeText(payload.shipAssigned || payload.ship_assigned || '', 80) || null;
+  const calculatedEnabled = status !== 'disabled' && (role !== 'PETUGAS' || Boolean(shipAssigned));
+
   return {
     id: sanitizeText(payload.legacyUserId || payload.id || payload.uid || '', 160) || sanitizeText(payload.uid || '', 160),
     auth_uid: sanitizeText(payload.uid || payload.firebaseUid || '', 160) || null,
     email: sanitizeEmail(payload.email || ''),
     name: sanitizeText(payload.name || '', 80) || 'Personil',
-    role: sanitizeText(payload.role || 'PETUGAS', 20).toUpperCase(),
-    status: sanitizeText(payload.status || 'off-duty', 20).toLowerCase(),
-    ship_assigned: sanitizeText(payload.shipAssigned || '', 80) || null,
+    role,
+    status,
+    ship_assigned: shipAssigned,
     type: sanitizeText(payload.type || 'BUJP', 20) || 'BUJP',
     worker_number: sanitizeText(payload.workerNumber || '', 40) || '',
     review_state: sanitizeText(payload.reviewState || 'approved', 20).toLowerCase(),
-    enabled: Boolean(payload.enabled),
+    enabled: payload.enabled !== undefined ? Boolean(payload.enabled) : calculatedEnabled,
     source: sanitizeText(payload.source || 'manual', 40) || 'manual',
   };
 }

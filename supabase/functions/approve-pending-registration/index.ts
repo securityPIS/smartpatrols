@@ -55,6 +55,12 @@ Deno.serve(async (request) => {
       .single();
     if (profileError) throw profileError;
 
+    // Konfirmasi email di auth.users jika disetujui
+    const { error: authUpdateError } = await supabase.auth.admin.updateUserById(uid, {
+      email_confirm: true,
+    });
+    if (authUpdateError) throw authUpdateError;
+
     await supabase.from('pending_registrations').update({
       status: 'approved',
       reviewed_at: new Date().toISOString(),
