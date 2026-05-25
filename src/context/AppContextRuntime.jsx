@@ -4307,7 +4307,7 @@ function createCloudSyncSignalPayload(options = {}) {
 }
 
 async function pickLocalImage(options = {}) {
-  const { cameraOnly = false } = options;
+  const { cameraOnly = false, cameraFacing = 'environment' } = options;
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
@@ -4321,8 +4321,8 @@ async function pickLocalImage(options = {}) {
   input.style.opacity = '0';
   input.style.pointerEvents = 'none';
   if (cameraOnly) {
-    input.capture = 'environment';
-    input.setAttribute('capture', 'environment');
+    input.capture = cameraFacing;
+    input.setAttribute('capture', cameraFacing);
   }
 
   return new Promise((resolve) => {
@@ -7959,7 +7959,7 @@ export function AppProvider({ children }) {
     setUserFormNotice('');
   }, []);
   const handleAuthPhotoUpload = useCallback(async () => {
-    const dataUrl = await pickLocalImage();
+    const dataUrl = await pickLocalImage({ cameraOnly: true, cameraFacing: 'user' });
     if (!dataUrl) return;
     const url = await saveImageToDB(dataUrl);
     if (url) {
@@ -9756,7 +9756,9 @@ export function AppProvider({ children }) {
     setAuthMode,
     authBusy,
     authError,
+    setAuthError,
     authNotice,
+    setAuthNotice,
     authForm,
     setAuthForm,
     handleLogin,
@@ -9769,6 +9771,9 @@ export function AppProvider({ children }) {
     authAccessStatus,
     authBusy,
     authError,
+    setAuthError,
+    authNotice,
+    setAuthNotice,
     authForm,
     authMode,
     authNotice,

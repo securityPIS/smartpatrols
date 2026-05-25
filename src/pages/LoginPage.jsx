@@ -12,9 +12,130 @@ import { Shield, Ship, Eye, EyeOff, Camera } from 'lucide-react';
 import AsyncImage from '../components/AsyncImage';
 
 export default function LoginPage() {
-  const { authMode, setAuthMode, authBusy, authError, authNotice, authForm, setAuthForm, handleLogin, handleRegister, handleAuthPhotoUpload } = useAuth();
+  const { authMode, setAuthMode, authBusy, authError, setAuthError, authNotice, setAuthNotice, authForm, setAuthForm, handleLogin, handleRegister, handleAuthPhotoUpload } = useAuth();
 
   const [showPassword, setShowPassword] = React.useState(false);
+  const [invalidFields, setInvalidFields] = React.useState({});
+
+  // Reset local invalid fields highlight when switching between login and register
+  React.useEffect(() => {
+    setInvalidFields({});
+    setAuthError('');
+    setAuthNotice('');
+  }, [authMode, setAuthError, setAuthNotice]);
+
+  // Clear photo highlight once photo is uploaded
+  React.useEffect(() => {
+    if (authForm.photoUrl && invalidFields.photo) {
+      setInvalidFields(prev => ({ ...prev, photo: false }));
+    }
+  }, [authForm.photoUrl, invalidFields.photo]);
+
+  const formatPhone = (val) => {
+    const clean = val.replace(/\D/g, ''); // Ambil hanya digit
+    const match = clean.slice(0, 17); // Batasi maksimal 17 digit (4+4+4+5)
+    const parts = [];
+    if (match.length > 0) parts.push(match.slice(0, 4));
+    if (match.length > 4) parts.push(match.slice(4, 8));
+    if (match.length > 8) parts.push(match.slice(8, 12));
+    if (match.length > 12) parts.push(match.slice(12, 17));
+    return parts.join('-');
+  };
+
+  const handlePhoneChange = (e) => {
+    const formatted = formatPhone(e.target.value);
+    setAuthForm(prev => ({ ...prev, phone: formatted }));
+    if (invalidFields.phone) {
+      setInvalidFields(prev => ({ ...prev, phone: false }));
+    }
+  };
+
+  const handleFieldChange = (field, value) => {
+    setAuthForm(prev => ({ ...prev, [field]: value }));
+    if (invalidFields[field]) {
+      setInvalidFields(prev => ({ ...prev, [field]: false }));
+    }
+  };
+
+  const getInputClass = (fieldName) => {
+    const base = "w-full bg-[#0b1229] rounded-xl p-3.5 text-sm text-cyan-50 outline-none shadow-sm transition-all";
+    if (authMode === 'register' && invalidFields[fieldName]) {
+      return `${base} border border-rose-500 bg-rose-500/5 shadow-[0_0_10px_rgba(244,63,94,0.25)]`;
+    }
+    return `${base} border border-cyan-800/50 focus:border-cyan-400`;
+  };
+
+  const onSubmitRegister = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+
+    setAuthError('');
+    setAuthNotice('');
+
+    const errors = {};
+
+    // 1. Validasi Foto
+    if (!authForm.photoUrl) {
+      errors.photo = true;
+    }
+
+    // 2. Validasi Nama
+    if (!authForm.name || !authForm.name.trim()) {
+      errors.name = true;
+    }
+
+    // 3. Validasi Nomor Pekerja
+    if (!authForm.workerNumber || !authForm.workerNumber.trim()) {
+      errors.workerNumber = true;
+    }
+
+    // 4. Validasi Format Email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!authForm.email || !authForm.email.trim() || !emailRegex.test(authForm.email)) {
+      errors.email = true;
+    }
+
+    // 5. Validasi Password
+    if (!authForm.password || authForm.password.length < 8) {
+      errors.password = true;
+    }
+
+    // 6. Validasi Konfirmasi Password
+    if (!authForm.confirmPassword || authForm.confirmPassword !== authForm.password) {
+      errors.confirmPassword = true;
+    }
+
+    // 7. Validasi Nomor Telepon
+    const rawPhone = (authForm.phone || '').replace(/\D/g, '');
+    const isPhoneValid = rawPhone.length >= 10 && rawPhone.length <= 17;
+    if (!authForm.phone || !authForm.phone.trim() || !isPhoneValid) {
+      errors.phone = true;
+    }
+
+    setInvalidFields(errors);
+
+    if (Object.keys(errors).length > 0) {
+      if (errors.photo) {
+        setAuthError('Foto profil wajib diambil/diunggah.');
+      } else if (errors.name) {
+        setAuthError('Nama lengkap wajib diisi.');
+      } else if (errors.workerNumber) {
+        setAuthError('Nomor pekerja wajib diisi.');
+      } else if (errors.email) {
+        setAuthError('Format email tidak valid (contoh: nama@domain.com).');
+      } else if (errors.password) {
+        setAuthError('Password wajib diisi dan minimal 8 karakter.');
+      } else if (errors.confirmPassword) {
+        setAuthError('Konfirmasi password tidak cocok.');
+      } else if (errors.phone) {
+        setAuthError('Nomor telepon tidak valid (minimal 10 digit, auto format xxxx-xxxx-xxxx-xxxxx).');
+      } else {
+        setAuthError('Harap isi semua kolom dengan benar.');
+      }
+      return;
+    }
+
+    await handleRegister();
+  };
 
   return (
     <div style={{ fontFamily: '"Chakra Petch", sans-serif' }} className="w-full min-h-screen bg-[#070b19] text-cyan-50 sm:max-w-md sm:mx-auto sm:border-x sm:border-cyan-900/50 sm:shadow-[0_0_40px_rgba(6,182,212,0.1)] relative overflow-hidden">
@@ -48,7 +169,7 @@ export default function LoginPage() {
             <>
               <div className="flex flex-col items-center mb-2">
                 {!authForm.photoUrl ? (
-                  <button onClick={handleAuthPhotoUpload} className="w-24 h-24 rounded-2xl border-2 border-dashed border-cyan-500/50 bg-[#070b19] flex flex-col items-center justify-center text-cyan-500 hover:text-cyan-300 hover:border-cyan-400 transition-colors shadow-sm">
+                  <button onClick={handleAuthPhotoUpload} className={`w-24 h-24 rounded-2xl border-2 border-dashed ${invalidFields.photo ? 'border-rose-500 bg-rose-500/5 shadow-[0_0_10px_rgba(244,63,94,0.25)] text-rose-500' : 'border-cyan-500/50 bg-[#070b19] text-cyan-500 hover:text-cyan-300 hover:border-cyan-400'} flex flex-col items-center justify-center transition-colors shadow-sm`}>
                     <Camera className="w-6 h-6 mb-1" />
                     <span className="text-[9px] font-bold">FOTO</span>
                   </button>
@@ -63,7 +184,7 @@ export default function LoginPage() {
               </div>
               <div>
                 <label className="text-[10px] font-mono text-cyan-500 mb-1.5 block uppercase tracking-widest pl-1">Nama Lengkap</label>
-                <input type="text" value={authForm.name} onChange={e => setAuthForm({ ...authForm, name: e.target.value })} placeholder="Masukkan nama lengkap" className="w-full bg-[#0b1229] border border-cyan-800/50 rounded-xl p-3.5 text-sm text-cyan-50 focus:border-cyan-400 outline-none shadow-sm" />
+                <input type="text" value={authForm.name} onChange={e => handleFieldChange('name', e.target.value)} placeholder="Masukkan nama lengkap" className={getInputClass('name')} />
               </div>
               <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200">
                 Registrasi publik hanya membuat akun Supabase Auth dan profil onboarding terbatas. Role, assignment, dan akses operasional akan ditentukan admin setelah approval.
@@ -71,7 +192,7 @@ export default function LoginPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-[10px] font-mono text-cyan-500 mb-1.5 block uppercase tracking-widest pl-1">Instansi</label>
-                  <select value={authForm.type} onChange={e => setAuthForm({ ...authForm, type: e.target.value })} className="w-full bg-[#0b1229] border border-cyan-800/50 rounded-xl p-3.5 text-sm text-cyan-50 focus:border-cyan-400 outline-none appearance-none shadow-sm">
+                  <select value={authForm.type} onChange={e => handleFieldChange('type', e.target.value)} className="w-full bg-[#0b1229] border border-cyan-800/50 rounded-xl p-3.5 text-sm text-cyan-50 focus:border-cyan-400 outline-none appearance-none shadow-sm">
                     <option value="BUJP">BUJP</option>
                     <option value="TNI">TNI</option>
                     <option value="POLRI">POLRI</option>
@@ -81,7 +202,7 @@ export default function LoginPage() {
                 </div>
                 <div>
                   <label className="text-[10px] font-mono text-cyan-500 mb-1.5 block uppercase tracking-widest pl-1">Nomor Pekerja</label>
-                  <input type="text" value={authForm.workerNumber} onChange={e => setAuthForm({ ...authForm, workerNumber: e.target.value })} placeholder="Contoh: PKJ-001245" className="w-full bg-[#0b1229] border border-cyan-800/50 rounded-xl p-3.5 text-sm text-cyan-50 focus:border-cyan-400 outline-none shadow-sm" />
+                  <input type="text" value={authForm.workerNumber} onChange={e => handleFieldChange('workerNumber', e.target.value)} placeholder="Contoh: PKJ-001245" className={getInputClass('workerNumber')} />
                 </div>
               </div>
             </>
@@ -89,12 +210,12 @@ export default function LoginPage() {
 
           <div>
             <label className="text-[10px] font-mono text-cyan-500 mb-1.5 block uppercase tracking-widest pl-1">Alamat Email</label>
-            <input type="email" value={authForm.email} onChange={e => setAuthForm({ ...authForm, email: e.target.value })} placeholder="nama@domain.com" className="w-full bg-[#0b1229] border border-cyan-800/50 rounded-xl p-3.5 text-sm text-cyan-50 focus:border-cyan-400 outline-none shadow-sm" />
+            <input type="email" value={authForm.email} onChange={e => handleFieldChange('email', e.target.value)} placeholder="nama@domain.com" className={getInputClass('email')} />
           </div>
 
           <div className="relative">
             <label className="text-[10px] font-mono text-cyan-500 mb-1.5 block uppercase tracking-widest pl-1">Password</label>
-            <input type={showPassword ? 'text' : 'password'} value={authForm.password} onChange={e => setAuthForm({ ...authForm, password: e.target.value })} placeholder="********" className="w-full bg-[#0b1229] border border-cyan-800/50 rounded-xl p-3.5 text-sm text-cyan-50 focus:border-cyan-400 outline-none shadow-sm pr-12" />
+            <input type={showPassword ? 'text' : 'password'} value={authForm.password} onChange={e => handleFieldChange('password', e.target.value)} placeholder="********" className={getInputClass('password') + " pr-12"} />
             <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-[34px] text-cyan-600 hover:text-cyan-400 transition-colors">
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
@@ -104,24 +225,17 @@ export default function LoginPage() {
             <>
               <div>
                 <label className="text-[10px] font-mono text-cyan-500 mb-1.5 block uppercase tracking-widest pl-1">Konfirmasi Password</label>
-                <input type="password" value={authForm.confirmPassword} onChange={e => setAuthForm({ ...authForm, confirmPassword: e.target.value })} placeholder="********" className="w-full bg-[#0b1229] border border-cyan-800/50 rounded-xl p-3.5 text-sm text-cyan-50 focus:border-cyan-400 outline-none shadow-sm" />
+                <input type="password" value={authForm.confirmPassword} onChange={e => handleFieldChange('confirmPassword', e.target.value)} placeholder="********" className={getInputClass('confirmPassword')} />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[10px] font-mono text-cyan-500 mb-1.5 block uppercase tracking-widest pl-1">No Telpon</label>
-                  <input type="tel" value={authForm.phone} onChange={e => setAuthForm({ ...authForm, phone: e.target.value })} placeholder="0812..." className="w-full bg-[#0b1229] border border-cyan-800/50 rounded-xl p-3.5 text-sm text-cyan-50 focus:border-cyan-400 outline-none shadow-sm" />
-                </div>
-                <div>
-                  <div className="rounded-xl border border-cyan-800/50 bg-[#0b1229] p-3.5 h-full flex items-center">
-                    <p className="text-[11px] text-cyan-300/80 leading-relaxed">Data sensitif seperti alamat, tanggal lahir, dan kontak darurat akan diisi setelah akun operasional disetujui admin.</p>
-                  </div>
-                </div>
+              <div>
+                <label className="text-[10px] font-mono text-cyan-500 mb-1.5 block uppercase tracking-widest pl-1">No Telpon</label>
+                <input type="tel" value={authForm.phone} onChange={handlePhoneChange} placeholder="0812-xxxx-xxxx-xxxxx" className={getInputClass('phone')} />
               </div>
             </>
           )}
 
-          <button onClick={authMode === 'login' ? handleLogin : handleRegister} disabled={authBusy} className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-black uppercase tracking-widest text-xs rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] disabled:opacity-50 flex items-center justify-center gap-2">
+          <button onClick={authMode === 'login' ? handleLogin : onSubmitRegister} disabled={authBusy} className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-black uppercase tracking-widest text-xs rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] disabled:opacity-50 flex items-center justify-center gap-2">
             {authBusy ? <span className="animate-pulse">Memproses...</span> : authMode === 'login' ? 'Login' : 'Kirim Registrasi'}
           </button>
         </div>
