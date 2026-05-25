@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Tujuan: Warna dasar launcher icon dan boot screen SmartPatrol.
+Caller: Adaptive icon Android dan style splash launch.
+Dependensi: Resource launcher, styles.xml.
+Main Functions: ic_launcher_background, app_boot_background.
+Side Effects: Mengubah warna dasar icon/splash dari putih ke dark navy.
+-->
+<resources>
+    <color name="ic_launcher_background">#0B1229</color>
+    <color name="app_boot_background">#070B19</color>
+</resources>

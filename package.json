@@ -1,0 +1,35 @@
+{
+  "name": "smartpatrol-sql",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test:security": "node --test tests/security/auth-access.test.mjs tests/security/sql-access.test.mjs tests/security/trusted-time.test.mjs",
+    "supabase:start": "supabase start",
+    "supabase:reset": "supabase db reset",
+    "supabase:functions": "supabase functions serve",
+    "setup:admin": "node scripts/setup-admin.mjs"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.3.1",
+    "@tailwindcss/vite": "^4.2.2",
+    "@vitejs/plugin-react": "^6.0.1",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.3"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.3.1",
+    "@capacitor/camera": "^8.2.0",
+    "@capacitor/core": "^8.3.1",
+    "@capacitor/geolocation": "^8.2.0",
+    "@capacitor/network": "^8.0.1",
+    "@supabase/supabase-js": "^2.86.0",
+    "lucide-react": "^1.7.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  }
+}

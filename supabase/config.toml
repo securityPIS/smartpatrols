@@ -1,0 +1,56 @@
+project_id = "smartpatrol-sql"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 17
+
+[studio]
+enabled = true
+port = 54323
+
+[inbucket]
+enabled = true
+port = 54324
+
+[storage]
+enabled = true
+file_size_limit = "12MiB"
+
+[auth]
+enabled = true
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://127.0.0.1:5173"]
+jwt_expiry = 3600
+enable_signup = true
+
+[functions.server-time]
+verify_jwt = false
+
+[functions.resolve-operational-access]
+verify_jwt = true
+
+[functions.approve-pending-registration]
+verify_jwt = true
+
+[functions.reject-pending-registration]
+verify_jwt = true
+
+[functions.revoke-operational-access]
+verify_jwt = true
+
+[functions.sync-operational-access]
+verify_jwt = true
+
+[functions.create-upload-url]
+verify_jwt = true
+
+[functions.provision-operational-user]
+verify_jwt = true

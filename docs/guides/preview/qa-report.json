@@ -1,0 +1,43 @@
+{
+  "generatedAt": "2026-05-18T08:59:58.705Z",
+  "deckPath": "C:\\dev\\SmartPatrol\\docs\\guides\\smartpatrol-guideline-petugas.pptx",
+  "slideCount": 10,
+  "sourcePreviewPaths": [
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\source\\source-slide-01.png",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\source\\source-slide-02.png",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\source\\source-slide-03.png",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\source\\source-slide-04.png",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\source\\source-slide-05.png",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\source\\source-slide-06.png",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\source\\source-slide-07.png",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\source\\source-slide-08.png",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\source\\source-slide-09.png",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\source\\source-slide-10.png"
+  ],
+  "pptxPreviewPaths": [
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\pptx\\pptx-slide-01.png",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\pptx\\pptx-slide-02.png",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\pptx\\pptx-slide-03.png",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\pptx\\pptx-slide-04.png",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\pptx\\pptx-slide-05.png",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\pptx\\pptx-slide-06.png",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\pptx\\pptx-slide-07.png",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\pptx\\pptx-slide-08.png",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\pptx\\pptx-slide-09.png",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\pptx\\pptx-slide-10.png"
+  ],
+  "layoutPaths": [
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\layout\\slide-01.layout.json",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\layout\\slide-02.layout.json",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\layout\\slide-03.layout.json",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\layout\\slide-04.layout.json",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\layout\\slide-05.layout.json",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\layout\\slide-06.layout.json",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\layout\\slide-07.layout.json",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\layout\\slide-08.layout.json",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\layout\\slide-09.layout.json",
+    "C:\\dev\\SmartPatrol\\docs\\guides\\preview\\layout\\slide-10.layout.json"
+  ],
+  "layoutWarnings": [],
+  "pptxParityChecked": true
+}

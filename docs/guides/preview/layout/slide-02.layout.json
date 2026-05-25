@@ -1,0 +1,2066 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/oh37e3",
+    "id": "oh37e3",
+    "slide": 2,
+    "layoutId": "c1d5240e-19de-4d2d-b7c7-ed93ffc45fa2",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "2a9442f0-0a06-4ea0-b863-0bc5c548ba8b",
+    "masterLayoutName": "Master",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1920,
+      "height": 1080
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Aptos",
+      "Aptos Display",
+      "Cascadia Mono"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "c1d5240e-19de-4d2d-b7c7-ed93ffc45fa2",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "2a9442f0-0a06-4ea0-b863-0bc5c548ba8b",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "2a9442f0-0a06-4ea0-b863-0bc5c548ba8b",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1orytsvu",
+      "id": "1",
+      "name": "background",
+      "bbox": [
+        0,
+        0,
+        1920,
+        1080
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.0"
+      },
+      "geometry": "rect",
+      "fillColor": "#06111F"
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/u18jqh0f",
+      "id": "2",
+      "name": "top-accent",
+      "bbox": [
+        0,
+        0,
+        1920,
+        10
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.1"
+      },
+      "geometry": "rect",
+      "fillColor": "#20C7A8"
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/jm1cfa9w",
+      "id": "3",
+      "name": "label-cara-berpikir",
+      "bbox": [
+        88,
+        70,
+        840,
+        22
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.0.0"
+      },
+      "geometry": "rect",
+      "text": "CARA BERPIKIR",
+      "textPreview": "CARA BERPIKIR",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Cascadia Mono",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "CARA BERPIKIR"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "CARA BERPIKIR",
+          "runs": [
+            {
+              "index": 1,
+              "text": "CARA BERPIKIR",
+              "fontSize": 18,
+              "typeface": "Cascadia Mono",
+              "color": "#25D4E8",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/cfa9w3m9",
+      "id": "4",
+      "name": "slide-title",
+      "bbox": [
+        88,
+        110,
+        898,
+        150
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.0.1"
+      },
+      "geometry": "rect",
+      "text": "Setiap patroli adalah bukti operasional",
+      "textPreview": "Setiap patroli adalah bukti operasional",
+      "resolvedFontSize": 56,
+      "resolvedTextStyle": {
+        "fontSize": 56,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Setiap patroli adalah bukti operasional"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Setiap patroli adalah bukti operasional",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Setiap patroli adalah bukti operasional",
+              "fontSize": 56,
+              "typeface": "Aptos Display",
+              "color": "#F1FAF8",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1032lszq",
+      "id": "5",
+      "name": "title-rule",
+      "bbox": [
+        88,
+        278,
+        180,
+        5
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.0.2"
+      },
+      "geometry": "rect",
+      "fillColor": "#20C7A8",
+      "lineColor": "#20C7A8",
+      "lineWidth": 0
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/u9knih4b",
+      "id": "6",
+      "name": "slide-subtitle",
+      "bbox": [
+        88,
+        300,
+        1160,
+        32
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.0.3"
+      },
+      "geometry": "rect",
+      "text": "SmartPatrol bukan sekadar checklist. Setiap aksi menyimpan konteks shift, foto, lokasi, dan status audit waktu.",
+      "textPreview": "SmartPatrol bukan sekadar checklist. Setiap aksi menyimpan konteks shift, foto, lokasi, dan status audit waktu.",
+      "resolvedFontSize": 26,
+      "resolvedTextStyle": {
+        "fontSize": 26,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "SmartPatrol bukan sekadar checklist. Setiap aksi menyimpan konteks shift, foto, lokasi, dan status audit"
+          },
+          {
+            "index": 2,
+            "text": "waktu."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "SmartPatrol bukan sekadar checklist. Setiap aksi menyimpan konteks shift, foto, lokasi, dan status audit waktu.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "SmartPatrol bukan sekadar checklist. Setiap aksi menyimpan konteks shift, foto, lokasi, dan status audit waktu.",
+              "fontSize": 26,
+              "typeface": "Aptos",
+              "color": "#9DB4C4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/judg7ads",
+      "id": "7",
+      "name": "insight-bukti-lapangan",
+      "bbox": [
+        88,
+        373.8,
+        558.67,
+        142
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.0"
+      },
+      "geometry": "roundRect",
+      "fillColor": "rgba(255, 255, 255, 0.06)",
+      "lineColor": "rgba(255, 255, 255, 0.13)",
+      "lineWidth": 1.25
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/cj6tovah",
+      "id": "8",
+      "name": "insight-heading",
+      "bbox": [
+        116,
+        398,
+        502,
+        34
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.0.0.0"
+      },
+      "geometry": "rect",
+      "text": "Bukti lapangan",
+      "textPreview": "Bukti lapangan",
+      "resolvedFontSize": 28,
+      "resolvedTextStyle": {
+        "fontSize": 28,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Bukti lapangan"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Bukti lapangan",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Bukti lapangan",
+              "fontSize": 28,
+              "typeface": "Aptos Display",
+              "color": "#20C7A8",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/54zidony",
+      "id": "9",
+      "name": "insight-body",
+      "bbox": [
+        116,
+        442,
+        502,
+        52
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.0.0.1"
+      },
+      "geometry": "rect",
+      "text": "Checkpoint berisi status AMAN atau TEMUAN, foto, dan uraian kejadian saat diperlukan.",
+      "textPreview": "Checkpoint berisi status AMAN atau TEMUAN, foto, dan uraian kejadian saat diperlukan.",
+      "resolvedFontSize": 21,
+      "resolvedTextStyle": {
+        "fontSize": 21,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Checkpoint berisi status AMAN atau TEMUAN, foto, dan"
+          },
+          {
+            "index": 2,
+            "text": "uraian kejadian saat diperlukan."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Checkpoint berisi status AMAN atau TEMUAN, foto, dan uraian kejadian saat diperlukan.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Checkpoint berisi status AMAN atau TEMUAN, foto, dan uraian kejadian saat diperlukan.",
+              "fontSize": 21,
+              "typeface": "Aptos",
+              "color": "#9DB4C4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/t47y1kre",
+      "id": "10",
+      "name": "insight-waktu-audit",
+      "bbox": [
+        680.67,
+        373.8,
+        558.67,
+        142
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.1"
+      },
+      "geometry": "roundRect",
+      "fillColor": "rgba(255, 255, 255, 0.06)",
+      "lineColor": "rgba(255, 255, 255, 0.13)",
+      "lineWidth": 1.25
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0je9cvix",
+      "id": "11",
+      "name": "insight-heading",
+      "bbox": [
+        708,
+        398,
+        502,
+        34
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.1.0.0"
+      },
+      "geometry": "rect",
+      "text": "Waktu audit",
+      "textPreview": "Waktu audit",
+      "resolvedFontSize": 28,
+      "resolvedTextStyle": {
+        "fontSize": 28,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Waktu audit"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Waktu audit",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Waktu audit",
+              "fontSize": 28,
+              "typeface": "Aptos Display",
+              "color": "#F2C75C",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/byhgn29g",
+      "id": "12",
+      "name": "insight-body",
+      "bbox": [
+        708,
+        442,
+        502,
+        52
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.1.0.1"
+      },
+      "geometry": "rect",
+      "text": "Sistem memakai trusted time untuk mendeteksi manipulasi jam perangkat.",
+      "textPreview": "Sistem memakai trusted time untuk mendeteksi manipulasi jam perangkat.",
+      "resolvedFontSize": 21,
+      "resolvedTextStyle": {
+        "fontSize": 21,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Sistem memakai trusted time untuk mendeteksi"
+          },
+          {
+            "index": 2,
+            "text": "manipulasi jam perangkat."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Sistem memakai trusted time untuk mendeteksi manipulasi jam perangkat.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Sistem memakai trusted time untuk mendeteksi manipulasi jam perangkat.",
+              "fontSize": 21,
+              "typeface": "Aptos",
+              "color": "#9DB4C4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/idonyd0z",
+      "id": "13",
+      "name": "insight-sinkron-otomatis",
+      "bbox": [
+        1273.33,
+        373.8,
+        558.67,
+        142
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.2"
+      },
+      "geometry": "roundRect",
+      "fillColor": "rgba(255, 255, 255, 0.06)",
+      "lineColor": "rgba(255, 255, 255, 0.13)",
+      "lineWidth": 1.25
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/tcj6tova",
+      "id": "14",
+      "name": "insight-heading",
+      "bbox": [
+        1302,
+        398,
+        502,
+        34
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.2.0.0"
+      },
+      "geometry": "rect",
+      "text": "Sinkron otomatis",
+      "textPreview": "Sinkron otomatis",
+      "resolvedFontSize": 28,
+      "resolvedTextStyle": {
+        "fontSize": 28,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Sinkron otomatis"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Sinkron otomatis",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Sinkron otomatis",
+              "fontSize": 28,
+              "typeface": "Aptos Display",
+              "color": "#25D4E8",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0rqd4vmt",
+      "id": "15",
+      "name": "insight-body",
+      "bbox": [
+        1302,
+        442,
+        502,
+        52
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.2.0.1"
+      },
+      "geometry": "rect",
+      "text": "Saat offline, data masuk antrean lokal dan naik ke Supabase saat koneksi pulih.",
+      "textPreview": "Saat offline, data masuk antrean lokal dan naik ke Supabase saat koneksi pulih.",
+      "resolvedFontSize": 21,
+      "resolvedTextStyle": {
+        "fontSize": 21,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Saat offline, data masuk antrean lokal dan naik ke Supabase"
+          },
+          {
+            "index": 2,
+            "text": "saat koneksi pulih."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Saat offline, data masuk antrean lokal dan naik ke Supabase saat koneksi pulih.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Saat offline, data masuk antrean lokal dan naik ke Supabase saat koneksi pulih.",
+              "fontSize": 21,
+              "typeface": "Aptos",
+              "color": "#9DB4C4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/b6xkf6dc",
+      "id": "16",
+      "name": "footer-left",
+      "bbox": [
+        88,
+        990,
+        1100,
+        20
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.0"
+      },
+      "geometry": "rect",
+      "text": "SmartPatrol HSSE - Panduan Petugas",
+      "textPreview": "SmartPatrol HSSE - Panduan Petugas",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "fontSize": 16,
+        "typeface": "Cascadia Mono",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "SmartPatrol HSSE - Panduan Petugas"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "SmartPatrol HSSE - Panduan Petugas",
+          "runs": [
+            {
+              "index": 1,
+              "text": "SmartPatrol HSSE - Panduan Petugas",
+              "fontSize": 16,
+              "typeface": "Cascadia Mono",
+              "color": "#6D8494"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/il0rqd4v",
+      "id": "17",
+      "name": "footer-date",
+      "bbox": [
+        1652,
+        990,
+        180,
+        20
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.1"
+      },
+      "geometry": "rect",
+      "text": "Mei 2026",
+      "textPreview": "Mei 2026",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "fontSize": 16,
+        "typeface": "Cascadia Mono",
+        "alignment": "right"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Mei 2026"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Mei 2026",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Mei 2026",
+              "fontSize": 16,
+              "typeface": "Cascadia Mono",
+              "color": "#6D8494",
+              "alignment": "right"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "composeRuns": [
+    {
+      "index": 1,
+      "frame": {
+        "left": 0,
+        "top": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "baseUnit": 8,
+      "root": {
+        "path": "0",
+        "kind": "layers",
+        "name": "slide-layers",
+        "requestedSize": {
+          "width": {
+            "mode": "fill",
+            "value": 1
+          },
+          "height": {
+            "mode": "fill",
+            "value": 1
+          }
+        },
+        "intrinsicSize": {
+          "width": 0,
+          "height": 10
+        },
+        "frame": {
+          "left": 0,
+          "top": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "children": [
+          {
+            "path": "0.0",
+            "kind": "shape",
+            "name": "background",
+            "requestedSize": {
+              "width": {
+                "mode": "fill",
+                "value": 1
+              },
+              "height": {
+                "mode": "fill",
+                "value": 1
+              }
+            },
+            "intrinsicSize": {
+              "width": 0,
+              "height": 0
+            },
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            },
+            "snappedFrame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            },
+            "children": [],
+            "geometry": "rect",
+            "element": {
+              "aid": "sh/1orytsvu",
+              "id": "1",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.1",
+            "kind": "shape",
+            "name": "top-accent",
+            "requestedSize": {
+              "width": {
+                "mode": "fill",
+                "value": 1
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 10
+              }
+            },
+            "intrinsicSize": {
+              "width": 0,
+              "height": 10
+            },
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 10
+            },
+            "snappedFrame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 10
+            },
+            "children": [],
+            "geometry": "rect",
+            "element": {
+              "aid": "sh/u18jqh0f",
+              "id": "2",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.2",
+            "kind": "grid",
+            "name": "model-root",
+            "requestedSize": {
+              "width": {
+                "mode": "fill",
+                "value": 1
+              },
+              "height": {
+                "mode": "fill",
+                "value": 1
+              }
+            },
+            "intrinsicSize": {
+              "width": 176,
+              "height": 505
+            },
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            },
+            "children": [
+              {
+                "path": "0.2.0",
+                "kind": "column",
+                "name": "title-stack",
+                "requestedSize": {
+                  "width": {
+                    "mode": "fill",
+                    "value": 1
+                  },
+                  "height": {
+                    "mode": "hug"
+                  }
+                },
+                "intrinsicSize": {
+                  "width": 1160.04,
+                  "height": 261.8
+                },
+                "frame": {
+                  "left": 88,
+                  "top": 70,
+                  "width": 1744,
+                  "height": 261.8
+                },
+                "children": [
+                  {
+                    "path": "0.2.0.0",
+                    "kind": "text",
+                    "name": "label-cara-berpikir",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fixed",
+                        "value": 840
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 840,
+                      "height": 21.6
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 70,
+                      "width": 840,
+                      "height": 21.6
+                    },
+                    "snappedFrame": {
+                      "left": 88,
+                      "top": 70,
+                      "width": 840,
+                      "height": 22
+                    },
+                    "children": [],
+                    "text": "CARA BERPIKIR",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/jm1cfa9w",
+                      "id": "3",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.0.1",
+                    "kind": "text",
+                    "name": "slide-title",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "wrap",
+                        "max": 1320
+                      },
+                      "height": {
+                        "mode": "fixed",
+                        "value": 150
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 897.51,
+                      "height": 150
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 109.6,
+                      "width": 897.51,
+                      "height": 150
+                    },
+                    "snappedFrame": {
+                      "left": 88,
+                      "top": 110,
+                      "width": 898,
+                      "height": 150
+                    },
+                    "children": [],
+                    "text": "Setiap patroli adalah bukti operasional",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/cfa9w3m9",
+                      "id": "4",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.0.2",
+                    "kind": "rule",
+                    "name": "title-rule",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fixed",
+                        "value": 180
+                      },
+                      "height": {
+                        "mode": "fixed",
+                        "value": 5
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 180,
+                      "height": 5
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 277.6,
+                      "width": 180,
+                      "height": 5
+                    },
+                    "snappedFrame": {
+                      "left": 88,
+                      "top": 278,
+                      "width": 180,
+                      "height": 5
+                    },
+                    "children": [],
+                    "weight": 5,
+                    "element": {
+                      "aid": "sh/1032lszq",
+                      "id": "5",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.0.3",
+                    "kind": "text",
+                    "name": "slide-subtitle",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "wrap",
+                        "max": 1180
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 1160.04,
+                      "height": 31.2
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 300.6,
+                      "width": 1160.04,
+                      "height": 31.2
+                    },
+                    "snappedFrame": {
+                      "left": 88,
+                      "top": 300,
+                      "width": 1160,
+                      "height": 32
+                    },
+                    "children": [],
+                    "text": "SmartPatrol bukan sekadar checklist. Setiap aksi menyimpan konteks shift, foto, lokasi, dan status audit waktu.",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/u9knih4b",
+                      "id": "6",
+                      "kind": "shape"
+                    }
+                  }
+                ],
+                "padding": {
+                  "top": 0,
+                  "right": 0,
+                  "bottom": 0,
+                  "left": 0
+                },
+                "gap": 18,
+                "effectiveGap": 18,
+                "justifyOffset": 0,
+                "align": "start",
+                "justify": "start",
+                "contentFrame": {
+                  "left": 88,
+                  "top": 70,
+                  "width": 1744,
+                  "height": 261.8
+                },
+                "items": [
+                  {
+                    "path": "0.2.0.0",
+                    "frame": {
+                      "left": 88,
+                      "top": 70,
+                      "width": 840,
+                      "height": 21.6
+                    }
+                  },
+                  {
+                    "path": "0.2.0.1",
+                    "frame": {
+                      "left": 88,
+                      "top": 109.6,
+                      "width": 897.51,
+                      "height": 150
+                    }
+                  },
+                  {
+                    "path": "0.2.0.2",
+                    "frame": {
+                      "left": 88,
+                      "top": 277.6,
+                      "width": 180,
+                      "height": 5
+                    }
+                  },
+                  {
+                    "path": "0.2.0.3",
+                    "frame": {
+                      "left": 88,
+                      "top": 300.6,
+                      "width": 1160.04,
+                      "height": 31.2
+                    }
+                  }
+                ]
+              },
+              {
+                "path": "0.2.1",
+                "kind": "row",
+                "name": "three-pillars",
+                "requestedSize": {
+                  "width": {
+                    "mode": "fill",
+                    "value": 1
+                  },
+                  "height": {
+                    "mode": "hug"
+                  }
+                },
+                "intrinsicSize": {
+                  "width": 68,
+                  "height": 116.8
+                },
+                "frame": {
+                  "left": 88,
+                  "top": 373.8,
+                  "width": 1744,
+                  "height": 575
+                },
+                "children": [
+                  {
+                    "path": "0.2.1.0",
+                    "kind": "panel",
+                    "name": "insight-bukti-lapangan",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fill",
+                        "value": 1
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 56,
+                      "height": 116.8
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 373.8,
+                      "width": 558.67,
+                      "height": 142
+                    },
+                    "snappedFrame": {
+                      "left": 88,
+                      "top": 373.8,
+                      "width": 558.67,
+                      "height": 142
+                    },
+                    "children": [
+                      {
+                        "path": "0.2.1.0.0",
+                        "kind": "column",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 68.8
+                        },
+                        "frame": {
+                          "left": 116,
+                          "top": 397.8,
+                          "width": 502.67,
+                          "height": 94
+                        },
+                        "children": [
+                          {
+                            "path": "0.2.1.0.0.0",
+                            "kind": "text",
+                            "name": "insight-heading",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 33.6
+                            },
+                            "frame": {
+                              "left": 116,
+                              "top": 397.8,
+                              "width": 502.67,
+                              "height": 33.6
+                            },
+                            "snappedFrame": {
+                              "left": 116,
+                              "top": 398,
+                              "width": 502,
+                              "height": 34
+                            },
+                            "children": [],
+                            "text": "Bukti lapangan",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/cj6tovah",
+                              "id": "8",
+                              "kind": "shape"
+                            }
+                          },
+                          {
+                            "path": "0.2.1.0.0.1",
+                            "kind": "text",
+                            "name": "insight-body",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 25.2
+                            },
+                            "frame": {
+                              "left": 116,
+                              "top": 441.4,
+                              "width": 502.67,
+                              "height": 50.4
+                            },
+                            "snappedFrame": {
+                              "left": 116,
+                              "top": 442,
+                              "width": 502,
+                              "height": 52
+                            },
+                            "children": [],
+                            "text": "Checkpoint berisi status AMAN atau TEMUAN, foto, dan uraian kejadian saat diperlukan.",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/54zidony",
+                              "id": "9",
+                              "kind": "shape"
+                            }
+                          }
+                        ],
+                        "padding": {
+                          "top": 0,
+                          "right": 0,
+                          "bottom": 0,
+                          "left": 0
+                        },
+                        "gap": 10,
+                        "effectiveGap": 10,
+                        "justifyOffset": 0,
+                        "align": "start",
+                        "justify": "start",
+                        "contentFrame": {
+                          "left": 116,
+                          "top": 397.8,
+                          "width": 502.67,
+                          "height": 94
+                        },
+                        "items": [
+                          {
+                            "path": "0.2.1.0.0.0",
+                            "frame": {
+                              "left": 116,
+                              "top": 397.8,
+                              "width": 502.67,
+                              "height": 33.6
+                            }
+                          },
+                          {
+                            "path": "0.2.1.0.0.1",
+                            "frame": {
+                              "left": 116,
+                              "top": 441.4,
+                              "width": 502.67,
+                              "height": 50.4
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "padding": {
+                      "top": 24,
+                      "right": 28,
+                      "bottom": 24,
+                      "left": 28
+                    },
+                    "align": "start",
+                    "justify": "start",
+                    "contentFrame": {
+                      "left": 116,
+                      "top": 397.8,
+                      "width": 502.67,
+                      "height": 94
+                    },
+                    "element": {
+                      "aid": "sh/judg7ads",
+                      "id": "7",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.1.1",
+                    "kind": "panel",
+                    "name": "insight-waktu-audit",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fill",
+                        "value": 1
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 56,
+                      "height": 116.8
+                    },
+                    "frame": {
+                      "left": 680.67,
+                      "top": 373.8,
+                      "width": 558.67,
+                      "height": 142
+                    },
+                    "snappedFrame": {
+                      "left": 680.67,
+                      "top": 373.8,
+                      "width": 558.67,
+                      "height": 142
+                    },
+                    "children": [
+                      {
+                        "path": "0.2.1.1.0",
+                        "kind": "column",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 68.8
+                        },
+                        "frame": {
+                          "left": 708.67,
+                          "top": 397.8,
+                          "width": 502.67,
+                          "height": 94
+                        },
+                        "children": [
+                          {
+                            "path": "0.2.1.1.0.0",
+                            "kind": "text",
+                            "name": "insight-heading",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 33.6
+                            },
+                            "frame": {
+                              "left": 708.67,
+                              "top": 397.8,
+                              "width": 502.67,
+                              "height": 33.6
+                            },
+                            "snappedFrame": {
+                              "left": 708,
+                              "top": 398,
+                              "width": 502,
+                              "height": 34
+                            },
+                            "children": [],
+                            "text": "Waktu audit",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/0je9cvix",
+                              "id": "11",
+                              "kind": "shape"
+                            }
+                          },
+                          {
+                            "path": "0.2.1.1.0.1",
+                            "kind": "text",
+                            "name": "insight-body",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 25.2
+                            },
+                            "frame": {
+                              "left": 708.67,
+                              "top": 441.4,
+                              "width": 502.67,
+                              "height": 50.4
+                            },
+                            "snappedFrame": {
+                              "left": 708,
+                              "top": 442,
+                              "width": 502,
+                              "height": 52
+                            },
+                            "children": [],
+                            "text": "Sistem memakai trusted time untuk mendeteksi manipulasi jam perangkat.",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/byhgn29g",
+                              "id": "12",
+                              "kind": "shape"
+                            }
+                          }
+                        ],
+                        "padding": {
+                          "top": 0,
+                          "right": 0,
+                          "bottom": 0,
+                          "left": 0
+                        },
+                        "gap": 10,
+                        "effectiveGap": 10,
+                        "justifyOffset": 0,
+                        "align": "start",
+                        "justify": "start",
+                        "contentFrame": {
+                          "left": 708.67,
+                          "top": 397.8,
+                          "width": 502.67,
+                          "height": 94
+                        },
+                        "items": [
+                          {
+                            "path": "0.2.1.1.0.0",
+                            "frame": {
+                              "left": 708.67,
+                              "top": 397.8,
+                              "width": 502.67,
+                              "height": 33.6
+                            }
+                          },
+                          {
+                            "path": "0.2.1.1.0.1",
+                            "frame": {
+                              "left": 708.67,
+                              "top": 441.4,
+                              "width": 502.67,
+                              "height": 50.4
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "padding": {
+                      "top": 24,
+                      "right": 28,
+                      "bottom": 24,
+                      "left": 28
+                    },
+                    "align": "start",
+                    "justify": "start",
+                    "contentFrame": {
+                      "left": 708.67,
+                      "top": 397.8,
+                      "width": 502.67,
+                      "height": 94
+                    },
+                    "element": {
+                      "aid": "sh/t47y1kre",
+                      "id": "10",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.1.2",
+                    "kind": "panel",
+                    "name": "insight-sinkron-otomatis",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fill",
+                        "value": 1
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 56,
+                      "height": 116.8
+                    },
+                    "frame": {
+                      "left": 1273.33,
+                      "top": 373.8,
+                      "width": 558.67,
+                      "height": 142
+                    },
+                    "snappedFrame": {
+                      "left": 1273.33,
+                      "top": 373.8,
+                      "width": 558.67,
+                      "height": 142
+                    },
+                    "children": [
+                      {
+                        "path": "0.2.1.2.0",
+                        "kind": "column",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 68.8
+                        },
+                        "frame": {
+                          "left": 1301.33,
+                          "top": 397.8,
+                          "width": 502.67,
+                          "height": 94
+                        },
+                        "children": [
+                          {
+                            "path": "0.2.1.2.0.0",
+                            "kind": "text",
+                            "name": "insight-heading",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 33.6
+                            },
+                            "frame": {
+                              "left": 1301.33,
+                              "top": 397.8,
+                              "width": 502.67,
+                              "height": 33.6
+                            },
+                            "snappedFrame": {
+                              "left": 1302,
+                              "top": 398,
+                              "width": 502,
+                              "height": 34
+                            },
+                            "children": [],
+                            "text": "Sinkron otomatis",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/tcj6tova",
+                              "id": "14",
+                              "kind": "shape"
+                            }
+                          },
+                          {
+                            "path": "0.2.1.2.0.1",
+                            "kind": "text",
+                            "name": "insight-body",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 25.2
+                            },
+                            "frame": {
+                              "left": 1301.33,
+                              "top": 441.4,
+                              "width": 502.67,
+                              "height": 50.4
+                            },
+                            "snappedFrame": {
+                              "left": 1302,
+                              "top": 442,
+                              "width": 502,
+                              "height": 52
+                            },
+                            "children": [],
+                            "text": "Saat offline, data masuk antrean lokal dan naik ke Supabase saat koneksi pulih.",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/0rqd4vmt",
+                              "id": "15",
+                              "kind": "shape"
+                            }
+                          }
+                        ],
+                        "padding": {
+                          "top": 0,
+                          "right": 0,
+                          "bottom": 0,
+                          "left": 0
+                        },
+                        "gap": 10,
+                        "effectiveGap": 10,
+                        "justifyOffset": 0,
+                        "align": "start",
+                        "justify": "start",
+                        "contentFrame": {
+                          "left": 1301.33,
+                          "top": 397.8,
+                          "width": 502.67,
+                          "height": 94
+                        },
+                        "items": [
+                          {
+                            "path": "0.2.1.2.0.0",
+                            "frame": {
+                              "left": 1301.33,
+                              "top": 397.8,
+                              "width": 502.67,
+                              "height": 33.6
+                            }
+                          },
+                          {
+                            "path": "0.2.1.2.0.1",
+                            "frame": {
+                              "left": 1301.33,
+                              "top": 441.4,
+                              "width": 502.67,
+                              "height": 50.4
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "padding": {
+                      "top": 24,
+                      "right": 28,
+                      "bottom": 24,
+                      "left": 28
+                    },
+                    "align": "start",
+                    "justify": "start",
+                    "contentFrame": {
+                      "left": 1301.33,
+                      "top": 397.8,
+                      "width": 502.67,
+                      "height": 94
+                    },
+                    "element": {
+                      "aid": "sh/idonyd0z",
+                      "id": "13",
+                      "kind": "shape"
+                    }
+                  }
+                ],
+                "padding": {
+                  "top": 0,
+                  "right": 0,
+                  "bottom": 0,
+                  "left": 0
+                },
+                "gap": 34,
+                "effectiveGap": 34,
+                "justifyOffset": 0,
+                "align": "start",
+                "justify": "start",
+                "contentFrame": {
+                  "left": 88,
+                  "top": 373.8,
+                  "width": 1744,
+                  "height": 575
+                },
+                "items": [
+                  {
+                    "path": "0.2.1.0",
+                    "frame": {
+                      "left": 88,
+                      "top": 373.8,
+                      "width": 558.67,
+                      "height": 142
+                    }
+                  },
+                  {
+                    "path": "0.2.1.1",
+                    "frame": {
+                      "left": 680.67,
+                      "top": 373.8,
+                      "width": 558.67,
+                      "height": 142
+                    }
+                  },
+                  {
+                    "path": "0.2.1.2",
+                    "frame": {
+                      "left": 1273.33,
+                      "top": 373.8,
+                      "width": 558.67,
+                      "height": 142
+                    }
+                  }
+                ]
+              },
+              {
+                "path": "0.2.2",
+                "kind": "row",
+                "name": "footer",
+                "requestedSize": {
+                  "width": {
+                    "mode": "fill",
+                    "value": 1
+                  },
+                  "height": {
+                    "mode": "hug"
+                  }
+                },
+                "intrinsicSize": {
+                  "width": 1280,
+                  "height": 19.2
+                },
+                "frame": {
+                  "left": 88,
+                  "top": 990.8,
+                  "width": 1744,
+                  "height": 19.2
+                },
+                "children": [
+                  {
+                    "path": "0.2.2.0",
+                    "kind": "text",
+                    "name": "footer-left",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fixed",
+                        "value": 1100
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 1100,
+                      "height": 19.2
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 990,
+                      "width": 1100,
+                      "height": 20
+                    },
+                    "snappedFrame": {
+                      "left": 88,
+                      "top": 990,
+                      "width": 1100,
+                      "height": 20
+                    },
+                    "children": [],
+                    "text": "SmartPatrol HSSE - Panduan Petugas",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/b6xkf6dc",
+                      "id": "16",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.2.1",
+                    "kind": "text",
+                    "name": "footer-date",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fixed",
+                        "value": 180
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 180,
+                      "height": 19.2
+                    },
+                    "frame": {
+                      "left": 1652,
+                      "top": 990,
+                      "width": 180,
+                      "height": 20
+                    },
+                    "snappedFrame": {
+                      "left": 1652,
+                      "top": 990,
+                      "width": 180,
+                      "height": 20
+                    },
+                    "children": [],
+                    "text": "Mei 2026",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/il0rqd4v",
+                      "id": "17",
+                      "kind": "shape"
+                    }
+                  }
+                ],
+                "padding": {
+                  "top": 0,
+                  "right": 0,
+                  "bottom": 0,
+                  "left": 0
+                },
+                "gap": 0,
+                "effectiveGap": 464,
+                "justifyOffset": 0,
+                "align": "center",
+                "justify": "between",
+                "contentFrame": {
+                  "left": 88,
+                  "top": 990.8,
+                  "width": 1744,
+                  "height": 19.2
+                },
+                "items": [
+                  {
+                    "path": "0.2.2.0",
+                    "frame": {
+                      "left": 88,
+                      "top": 990,
+                      "width": 1100,
+                      "height": 20
+                    }
+                  },
+                  {
+                    "path": "0.2.2.1",
+                    "frame": {
+                      "left": 1652,
+                      "top": 990,
+                      "width": 180,
+                      "height": 20
+                    }
+                  }
+                ]
+              }
+            ],
+            "padding": {
+              "top": 70,
+              "right": 88,
+              "bottom": 70,
+              "left": 88
+            },
+            "columnGap": 0,
+            "rowGap": 42,
+            "alignItems": "stretch",
+            "justifyItems": "stretch",
+            "contentFrame": {
+              "left": 88,
+              "top": 70,
+              "width": 1744,
+              "height": 940
+            },
+            "columns": [
+              {
+                "mode": "fr",
+                "value": 1
+              }
+            ],
+            "rows": [
+              "auto",
+              {
+                "mode": "fr",
+                "value": 1
+              },
+              "auto"
+            ],
+            "autoRows": "auto",
+            "resolvedRows": [
+              "auto",
+              {
+                "mode": "fr",
+                "value": 1
+              },
+              "auto"
+            ],
+            "columnSizes": [
+              1744
+            ],
+            "rowSizes": [
+              261.8,
+              575,
+              19.2
+            ],
+            "cells": [
+              {
+                "path": "0.2.0",
+                "column": 0,
+                "row": 0,
+                "columnSpan": 1,
+                "rowSpan": 1,
+                "cellFrame": {
+                  "left": 88,
+                  "top": 70,
+                  "width": 1744,
+                  "height": 261.8
+                }
+              },
+              {
+                "path": "0.2.1",
+                "column": 0,
+                "row": 1,
+                "columnSpan": 1,
+                "rowSpan": 1,
+                "cellFrame": {
+                  "left": 88,
+                  "top": 373.8,
+                  "width": 1744,
+                  "height": 575
+                }
+              },
+              {
+                "path": "0.2.2",
+                "column": 0,
+                "row": 2,
+                "columnSpan": 1,
+                "rowSpan": 1,
+                "cellFrame": {
+                  "left": 88,
+                  "top": 990.8,
+                  "width": 1744,
+                  "height": 19.2
+                }
+              }
+            ]
+          }
+        ],
+        "padding": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        },
+        "alignItems": "stretch",
+        "justifyItems": "stretch",
+        "contentFrame": {
+          "left": 0,
+          "top": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "items": [
+          {
+            "path": "0.0",
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          {
+            "path": "0.1",
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 10
+            }
+          },
+          {
+            "path": "0.2",
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

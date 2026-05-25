@@ -1,0 +1,2862 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/99zafw",
+    "id": "99zafw",
+    "slide": 8,
+    "layoutId": "c1d5240e-19de-4d2d-b7c7-ed93ffc45fa2",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "2a9442f0-0a06-4ea0-b863-0bc5c548ba8b",
+    "masterLayoutName": "Master",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1920,
+      "height": 1080
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Aptos",
+      "Aptos Display",
+      "Cascadia Mono"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "c1d5240e-19de-4d2d-b7c7-ed93ffc45fa2",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "2a9442f0-0a06-4ea0-b863-0bc5c548ba8b",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "2a9442f0-0a06-4ea0-b863-0bc5c548ba8b",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/upwb2hwf",
+      "id": "1",
+      "name": "background",
+      "bbox": [
+        0,
+        0,
+        1920,
+        1080
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.0"
+      },
+      "geometry": "rect",
+      "fillColor": "#06111F"
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5gbq1ory",
+      "id": "2",
+      "name": "top-accent",
+      "bbox": [
+        0,
+        0,
+        1920,
+        10
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.1"
+      },
+      "geometry": "rect",
+      "fillColor": "#20C7A8"
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/cvixczed",
+      "id": "3",
+      "name": "label-saat-offline",
+      "bbox": [
+        88,
+        70,
+        840,
+        22
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.0.0"
+      },
+      "geometry": "rect",
+      "text": "SAAT OFFLINE",
+      "textPreview": "SAAT OFFLINE",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Cascadia Mono",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "SAAT OFFLINE"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "SAAT OFFLINE",
+          "runs": [
+            {
+              "index": 1,
+              "text": "SAAT OFFLINE",
+              "fontSize": 18,
+              "typeface": "Cascadia Mono",
+              "color": "#25D4E8",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/nyd0z610",
+      "id": "4",
+      "name": "slide-title",
+      "bbox": [
+        88,
+        110,
+        924,
+        150
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.0.1"
+      },
+      "geometry": "rect",
+      "text": "Terus patroli. Data masuk antrean lokal.",
+      "textPreview": "Terus patroli. Data masuk antrean lokal.",
+      "resolvedFontSize": 56,
+      "resolvedTextStyle": {
+        "fontSize": 56,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Terus patroli. Data masuk antrean"
+          },
+          {
+            "index": 2,
+            "text": "lokal."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Terus patroli. Data masuk antrean lokal.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Terus patroli. Data masuk antrean lokal.",
+              "fontSize": 56,
+              "typeface": "Aptos Display",
+              "color": "#F1FAF8",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/udg7adsj",
+      "id": "5",
+      "name": "title-rule",
+      "bbox": [
+        88,
+        278,
+        180,
+        5
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.0.2"
+      },
+      "geometry": "rect",
+      "fillColor": "#20C7A8",
+      "lineColor": "#20C7A8",
+      "lineWidth": 0
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/54zidony",
+      "id": "6",
+      "name": "slide-subtitle",
+      "bbox": [
+        88,
+        300,
+        960,
+        32
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.0.3"
+      },
+      "geometry": "rect",
+      "text": "Mode offline-first menjaga log dan foto tetap tersimpan di perangkat sampai koneksi stabil.",
+      "textPreview": "Mode offline-first menjaga log dan foto tetap tersimpan di perangkat sampai koneksi stabil.",
+      "resolvedFontSize": 26,
+      "resolvedTextStyle": {
+        "fontSize": 26,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Mode offline-first menjaga log dan foto tetap tersimpan di perangkat sampai koneksi stabil."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Mode offline-first menjaga log dan foto tetap tersimpan di perangkat sampai koneksi stabil.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Mode offline-first menjaga log dan foto tetap tersimpan di perangkat sampai koneksi stabil.",
+              "fontSize": 26,
+              "typeface": "Aptos",
+              "color": "#9DB4C4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/cj6tovah",
+      "id": "7",
+      "name": "bullet-dot",
+      "bbox": [
+        88,
+        542,
+        12,
+        12
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.0.0"
+      },
+      "geometry": "ellipse",
+      "fillColor": "#20C7A8"
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/judg7ads",
+      "id": "8",
+      "name": "bullet-text",
+      "bbox": [
+        116,
+        542,
+        938,
+        30
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.0.1"
+      },
+      "geometry": "rect",
+      "text": "Isi checkpoint seperti biasa walau sinyal hilang.",
+      "textPreview": "Isi checkpoint seperti biasa walau sinyal hilang.",
+      "resolvedFontSize": 25,
+      "resolvedTextStyle": {
+        "fontSize": 25,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Isi checkpoint seperti biasa walau sinyal hilang."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Isi checkpoint seperti biasa walau sinyal hilang.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Isi checkpoint seperti biasa walau sinyal hilang.",
+              "fontSize": 25,
+              "typeface": "Aptos",
+              "color": "#F1FAF8"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/u9knih4b",
+      "id": "9",
+      "name": "bullet-dot",
+      "bbox": [
+        88,
+        594,
+        12,
+        12
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.1.0"
+      },
+      "geometry": "ellipse",
+      "fillColor": "#F2C75C"
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/47y1kre1",
+      "id": "10",
+      "name": "bullet-text",
+      "bbox": [
+        116,
+        594,
+        938,
+        30
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.1.1"
+      },
+      "geometry": "rect",
+      "text": "Biarkan aplikasi terbuka atau jangan paksa clear storage sebelum sync selesai.",
+      "textPreview": "Biarkan aplikasi terbuka atau jangan paksa clear storage sebelum sync selesai.",
+      "resolvedFontSize": 25,
+      "resolvedTextStyle": {
+        "fontSize": 25,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Biarkan aplikasi terbuka atau jangan paksa clear storage sebelum sync selesai."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Biarkan aplikasi terbuka atau jangan paksa clear storage sebelum sync selesai.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Biarkan aplikasi terbuka atau jangan paksa clear storage sebelum sync selesai.",
+              "fontSize": 25,
+              "typeface": "Aptos",
+              "color": "#F1FAF8"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/tsvu9kni",
+      "id": "11",
+      "name": "bullet-dot",
+      "bbox": [
+        88,
+        646,
+        12,
+        12
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.2.0"
+      },
+      "geometry": "ellipse",
+      "fillColor": "#25D4E8"
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/m1cfa9w3",
+      "id": "12",
+      "name": "bullet-text",
+      "bbox": [
+        116,
+        646,
+        938,
+        30
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.2.1"
+      },
+      "geometry": "rect",
+      "text": "Foto disimpan di IndexedDB dan di-upload saat koneksi pulih.",
+      "textPreview": "Foto disimpan di IndexedDB dan di-upload saat koneksi pulih.",
+      "resolvedFontSize": 25,
+      "resolvedTextStyle": {
+        "fontSize": 25,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Foto disimpan di IndexedDB dan di-upload saat koneksi pulih."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Foto disimpan di IndexedDB dan di-upload saat koneksi pulih.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Foto disimpan di IndexedDB dan di-upload saat koneksi pulih.",
+              "fontSize": 25,
+              "typeface": "Aptos",
+              "color": "#F1FAF8"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/bm58z25k",
+      "id": "13",
+      "name": "bullet-dot",
+      "bbox": [
+        88,
+        698,
+        12,
+        12
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.3.0"
+      },
+      "geometry": "ellipse",
+      "fillColor": "#20C7A8"
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/4vmtwra5",
+      "id": "14",
+      "name": "bullet-text",
+      "bbox": [
+        116,
+        698,
+        938,
+        30
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.3.1"
+      },
+      "geometry": "rect",
+      "text": "Jika sync lama, tunggu jaringan stabil lalu refresh sekali.",
+      "textPreview": "Jika sync lama, tunggu jaringan stabil lalu refresh sekali.",
+      "resolvedFontSize": 25,
+      "resolvedTextStyle": {
+        "fontSize": 25,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Jika sync lama, tunggu jaringan stabil lalu refresh sekali."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Jika sync lama, tunggu jaringan stabil lalu refresh sekali.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Jika sync lama, tunggu jaringan stabil lalu refresh sekali.",
+              "fontSize": 25,
+              "typeface": "Aptos",
+              "color": "#F1FAF8"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/tgfmlkjm",
+      "id": "15",
+      "name": "bullet-dot",
+      "bbox": [
+        88,
+        750,
+        12,
+        12
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.4.0"
+      },
+      "geometry": "ellipse",
+      "fillColor": "#F05268"
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/mp0bi9s3",
+      "id": "16",
+      "name": "bullet-text",
+      "bbox": [
+        116,
+        750,
+        938,
+        30
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.4.1"
+      },
+      "geometry": "rect",
+      "text": "Laporkan ke PIC jika foto tetap kosong setelah online.",
+      "textPreview": "Laporkan ke PIC jika foto tetap kosong setelah online.",
+      "resolvedFontSize": 25,
+      "resolvedTextStyle": {
+        "fontSize": 25,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Laporkan ke PIC jika foto tetap kosong setelah online."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Laporkan ke PIC jika foto tetap kosong setelah online.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Laporkan ke PIC jika foto tetap kosong setelah online.",
+              "fontSize": 25,
+              "typeface": "Aptos",
+              "color": "#F1FAF8"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/bat47y1k",
+      "id": "17",
+      "name": "offline-queue",
+      "bbox": [
+        1107.71,
+        365.8,
+        724.29,
+        591
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2"
+      },
+      "geometry": "roundRect",
+      "fillColor": "rgba(255, 255, 255, 0.06)",
+      "lineColor": "rgba(185, 226, 235, 0.2)",
+      "lineWidth": 1.5
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/4nap4r65",
+      "id": "18",
+      "name": "pill-local-queue",
+      "bbox": [
+        1143.71,
+        504,
+        652.29,
+        35.2
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.0.0"
+      },
+      "geometry": "roundRect",
+      "fillColor": "rgba(6, 17, 31, 0.92)",
+      "lineColor": "#25D4E8",
+      "lineWidth": 1.5
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/t83itgfm",
+      "id": "19",
+      "name": "pill-text",
+      "bbox": [
+        1162,
+        512,
+        150,
+        20
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.0.0.0"
+      },
+      "geometry": "rect",
+      "text": "LOCAL QUEUE",
+      "textPreview": "LOCAL QUEUE",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "fontSize": 16,
+        "typeface": "Cascadia Mono",
+        "bold": true,
+        "alignment": "center"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "LOCAL QUEUE"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "LOCAL QUEUE",
+          "runs": [
+            {
+              "index": 1,
+              "text": "LOCAL QUEUE",
+              "fontSize": 16,
+              "typeface": "Cascadia Mono",
+              "color": "#25D4E8",
+              "bold": true,
+              "alignment": "center"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/xs72x4na",
+      "id": "20",
+      "name": "offline-claim",
+      "bbox": [
+        1144,
+        566,
+        652,
+        58
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.0.1"
+      },
+      "geometry": "rect",
+      "text": "Offline bukan gagal simpan.",
+      "textPreview": "Offline bukan gagal simpan.",
+      "resolvedFontSize": 48,
+      "resolvedTextStyle": {
+        "fontSize": 48,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Offline bukan gagal simpan."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Offline bukan gagal simpan.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Offline bukan gagal simpan.",
+              "fontSize": 48,
+              "typeface": "Aptos Display",
+              "color": "#F1FAF8",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/87ed8bat",
+      "id": "21",
+      "name": "offline-body",
+      "bbox": [
+        1144,
+        648,
+        652,
+        64
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.0.2"
+      },
+      "geometry": "rect",
+      "text": "Log, foto, dan status akan disinkronkan ulang. Hindari tindakan yang menghapus data lokal sebelum proses selesai.",
+      "textPreview": "Log, foto, dan status akan disinkronkan ulang. Hindari tindakan yang menghapus data lokal sebelum proses selesai.",
+      "resolvedFontSize": 26,
+      "resolvedTextStyle": {
+        "fontSize": 26,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Log, foto, dan status akan disinkronkan ulang. Hindari"
+          },
+          {
+            "index": 2,
+            "text": "tindakan yang menghapus data lokal sebelum proses selesai."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Log, foto, dan status akan disinkronkan ulang. Hindari tindakan yang menghapus data lokal sebelum proses selesai.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Log, foto, dan status akan disinkronkan ulang. Hindari tindakan yang menghapus data lokal sebelum proses selesai.",
+              "fontSize": 26,
+              "typeface": "Aptos",
+              "color": "#9DB4C4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 22,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fmlkjm1c",
+      "id": "22",
+      "name": "offline-rule",
+      "bbox": [
+        1144,
+        738,
+        220,
+        5
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.0.3"
+      },
+      "geometry": "rect",
+      "fillColor": "#25D4E8",
+      "lineColor": "#25D4E8",
+      "lineWidth": 0
+    },
+    {
+      "order": 23,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/q1orytsv",
+      "id": "23",
+      "name": "offline-risk",
+      "bbox": [
+        1144,
+        768,
+        652,
+        52
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.0.4"
+      },
+      "geometry": "rect",
+      "text": "Risiko terbesar saat offline: clear cache, uninstall, atau ganti perangkat sebelum data naik.",
+      "textPreview": "Risiko terbesar saat offline: clear cache, uninstall, atau ganti perangkat sebelum data naik.",
+      "resolvedFontSize": 21,
+      "resolvedTextStyle": {
+        "fontSize": 21,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Risiko terbesar saat offline: clear cache, uninstall, atau ganti perangkat"
+          },
+          {
+            "index": 2,
+            "text": "sebelum data naik."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Risiko terbesar saat offline: clear cache, uninstall, atau ganti perangkat sebelum data naik.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Risiko terbesar saat offline: clear cache, uninstall, atau ganti perangkat sebelum data naik.",
+              "fontSize": 21,
+              "typeface": "Aptos",
+              "color": "#F2C75C"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 24,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1gvy90je",
+      "id": "24",
+      "name": "footer-left",
+      "bbox": [
+        88,
+        990,
+        1100,
+        20
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.3.0"
+      },
+      "geometry": "rect",
+      "text": "SmartPatrol HSSE - Panduan Petugas",
+      "textPreview": "SmartPatrol HSSE - Panduan Petugas",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "fontSize": 16,
+        "typeface": "Cascadia Mono",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "SmartPatrol HSSE - Panduan Petugas"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "SmartPatrol HSSE - Panduan Petugas",
+          "runs": [
+            {
+              "index": 1,
+              "text": "SmartPatrol HSSE - Panduan Petugas",
+              "fontSize": 16,
+              "typeface": "Cascadia Mono",
+              "color": "#6D8494"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 25,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8z25kb6x",
+      "id": "25",
+      "name": "footer-date",
+      "bbox": [
+        1652,
+        990,
+        180,
+        20
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.3.1"
+      },
+      "geometry": "rect",
+      "text": "Mei 2026",
+      "textPreview": "Mei 2026",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "fontSize": 16,
+        "typeface": "Cascadia Mono",
+        "alignment": "right"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Mei 2026"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Mei 2026",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Mei 2026",
+              "fontSize": 16,
+              "typeface": "Cascadia Mono",
+              "color": "#6D8494",
+              "alignment": "right"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "composeRuns": [
+    {
+      "index": 1,
+      "frame": {
+        "left": 0,
+        "top": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "baseUnit": 8,
+      "root": {
+        "path": "0",
+        "kind": "layers",
+        "name": "slide-layers",
+        "requestedSize": {
+          "width": {
+            "mode": "fill",
+            "value": 1
+          },
+          "height": {
+            "mode": "fill",
+            "value": 1
+          }
+        },
+        "intrinsicSize": {
+          "width": 0,
+          "height": 10
+        },
+        "frame": {
+          "left": 0,
+          "top": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "children": [
+          {
+            "path": "0.0",
+            "kind": "shape",
+            "name": "background",
+            "requestedSize": {
+              "width": {
+                "mode": "fill",
+                "value": 1
+              },
+              "height": {
+                "mode": "fill",
+                "value": 1
+              }
+            },
+            "intrinsicSize": {
+              "width": 0,
+              "height": 0
+            },
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            },
+            "snappedFrame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            },
+            "children": [],
+            "geometry": "rect",
+            "element": {
+              "aid": "sh/upwb2hwf",
+              "id": "1",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.1",
+            "kind": "shape",
+            "name": "top-accent",
+            "requestedSize": {
+              "width": {
+                "mode": "fill",
+                "value": 1
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 10
+              }
+            },
+            "intrinsicSize": {
+              "width": 0,
+              "height": 10
+            },
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 10
+            },
+            "snappedFrame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 10
+            },
+            "children": [],
+            "geometry": "rect",
+            "element": {
+              "aid": "sh/5gbq1ory",
+              "id": "2",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.2",
+            "kind": "grid",
+            "name": "offline-root",
+            "requestedSize": {
+              "width": {
+                "mode": "fill",
+                "value": 1
+              },
+              "height": {
+                "mode": "fill",
+                "value": 1
+              }
+            },
+            "intrinsicSize": {
+              "width": 230,
+              "height": 489
+            },
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            },
+            "children": [
+              {
+                "path": "0.2.0",
+                "kind": "column",
+                "name": "title-stack",
+                "requestedSize": {
+                  "width": {
+                    "mode": "fill",
+                    "value": 1
+                  },
+                  "height": {
+                    "mode": "hug"
+                  }
+                },
+                "intrinsicSize": {
+                  "width": 959.46,
+                  "height": 261.8
+                },
+                "frame": {
+                  "left": 88,
+                  "top": 70,
+                  "width": 1744,
+                  "height": 261.8
+                },
+                "children": [
+                  {
+                    "path": "0.2.0.0",
+                    "kind": "text",
+                    "name": "label-saat-offline",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fixed",
+                        "value": 840
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 840,
+                      "height": 21.6
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 70,
+                      "width": 840,
+                      "height": 21.6
+                    },
+                    "snappedFrame": {
+                      "left": 88,
+                      "top": 70,
+                      "width": 840,
+                      "height": 22
+                    },
+                    "children": [],
+                    "text": "SAAT OFFLINE",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/cvixczed",
+                      "id": "3",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.0.1",
+                    "kind": "text",
+                    "name": "slide-title",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "wrap",
+                        "max": 1320
+                      },
+                      "height": {
+                        "mode": "fixed",
+                        "value": 150
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 924.68,
+                      "height": 150
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 109.6,
+                      "width": 924.68,
+                      "height": 150
+                    },
+                    "snappedFrame": {
+                      "left": 88,
+                      "top": 110,
+                      "width": 924,
+                      "height": 150
+                    },
+                    "children": [],
+                    "text": "Terus patroli. Data masuk antrean lokal.",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/nyd0z610",
+                      "id": "4",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.0.2",
+                    "kind": "rule",
+                    "name": "title-rule",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fixed",
+                        "value": 180
+                      },
+                      "height": {
+                        "mode": "fixed",
+                        "value": 5
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 180,
+                      "height": 5
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 277.6,
+                      "width": 180,
+                      "height": 5
+                    },
+                    "snappedFrame": {
+                      "left": 88,
+                      "top": 278,
+                      "width": 180,
+                      "height": 5
+                    },
+                    "children": [],
+                    "weight": 5,
+                    "element": {
+                      "aid": "sh/udg7adsj",
+                      "id": "5",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.0.3",
+                    "kind": "text",
+                    "name": "slide-subtitle",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "wrap",
+                        "max": 1180
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 959.46,
+                      "height": 31.2
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 300.6,
+                      "width": 959.46,
+                      "height": 31.2
+                    },
+                    "snappedFrame": {
+                      "left": 88,
+                      "top": 300,
+                      "width": 960,
+                      "height": 32
+                    },
+                    "children": [],
+                    "text": "Mode offline-first menjaga log dan foto tetap tersimpan di perangkat sampai koneksi stabil.",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/54zidony",
+                      "id": "6",
+                      "kind": "shape"
+                    }
+                  }
+                ],
+                "padding": {
+                  "top": 0,
+                  "right": 0,
+                  "bottom": 0,
+                  "left": 0
+                },
+                "gap": 18,
+                "effectiveGap": 18,
+                "justifyOffset": 0,
+                "align": "start",
+                "justify": "start",
+                "contentFrame": {
+                  "left": 88,
+                  "top": 70,
+                  "width": 1744,
+                  "height": 261.8
+                },
+                "items": [
+                  {
+                    "path": "0.2.0.0",
+                    "frame": {
+                      "left": 88,
+                      "top": 70,
+                      "width": 840,
+                      "height": 21.6
+                    }
+                  },
+                  {
+                    "path": "0.2.0.1",
+                    "frame": {
+                      "left": 88,
+                      "top": 109.6,
+                      "width": 924.68,
+                      "height": 150
+                    }
+                  },
+                  {
+                    "path": "0.2.0.2",
+                    "frame": {
+                      "left": 88,
+                      "top": 277.6,
+                      "width": 180,
+                      "height": 5
+                    }
+                  },
+                  {
+                    "path": "0.2.0.3",
+                    "frame": {
+                      "left": 88,
+                      "top": 300.6,
+                      "width": 959.46,
+                      "height": 31.2
+                    }
+                  }
+                ]
+              },
+              {
+                "path": "0.2.1",
+                "kind": "column",
+                "name": "offline-do",
+                "requestedSize": {
+                  "width": {
+                    "mode": "fill",
+                    "value": 1
+                  },
+                  "height": {
+                    "mode": "fill",
+                    "value": 1
+                  }
+                },
+                "intrinsicSize": {
+                  "width": 0,
+                  "height": 238
+                },
+                "frame": {
+                  "left": 88,
+                  "top": 365.8,
+                  "width": 965.71,
+                  "height": 591
+                },
+                "children": [
+                  {
+                    "path": "0.2.1.0",
+                    "kind": "row",
+                    "name": "bullet-row",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fill",
+                        "value": 1
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 28,
+                      "height": 30
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 542.3,
+                      "width": 965.71,
+                      "height": 30
+                    },
+                    "children": [
+                      {
+                        "path": "0.2.1.0.0",
+                        "kind": "shape",
+                        "name": "bullet-dot",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fixed",
+                            "value": 12
+                          },
+                          "height": {
+                            "mode": "fixed",
+                            "value": 12
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 12,
+                          "height": 12
+                        },
+                        "frame": {
+                          "left": 88,
+                          "top": 542.3,
+                          "width": 12,
+                          "height": 12
+                        },
+                        "snappedFrame": {
+                          "left": 88,
+                          "top": 542,
+                          "width": 12,
+                          "height": 12
+                        },
+                        "children": [],
+                        "geometry": "ellipse",
+                        "element": {
+                          "aid": "sh/cj6tovah",
+                          "id": "7",
+                          "kind": "shape"
+                        }
+                      },
+                      {
+                        "path": "0.2.1.0.1",
+                        "kind": "text",
+                        "name": "bullet-text",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 30
+                        },
+                        "frame": {
+                          "left": 116,
+                          "top": 542.3,
+                          "width": 937.71,
+                          "height": 30
+                        },
+                        "snappedFrame": {
+                          "left": 116,
+                          "top": 542,
+                          "width": 938,
+                          "height": 30
+                        },
+                        "children": [],
+                        "text": "Isi checkpoint seperti biasa walau sinyal hilang.",
+                        "transform": "none",
+                        "element": {
+                          "aid": "sh/judg7ads",
+                          "id": "8",
+                          "kind": "shape"
+                        }
+                      }
+                    ],
+                    "padding": {
+                      "top": 0,
+                      "right": 0,
+                      "bottom": 0,
+                      "left": 0
+                    },
+                    "gap": 16,
+                    "effectiveGap": 16,
+                    "justifyOffset": 0,
+                    "align": "start",
+                    "justify": "start",
+                    "contentFrame": {
+                      "left": 88,
+                      "top": 542.3,
+                      "width": 965.71,
+                      "height": 30
+                    },
+                    "items": [
+                      {
+                        "path": "0.2.1.0.0",
+                        "frame": {
+                          "left": 88,
+                          "top": 542.3,
+                          "width": 12,
+                          "height": 12
+                        }
+                      },
+                      {
+                        "path": "0.2.1.0.1",
+                        "frame": {
+                          "left": 116,
+                          "top": 542.3,
+                          "width": 937.71,
+                          "height": 30
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "path": "0.2.1.1",
+                    "kind": "row",
+                    "name": "bullet-row",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fill",
+                        "value": 1
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 28,
+                      "height": 30
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 594.3,
+                      "width": 965.71,
+                      "height": 30
+                    },
+                    "children": [
+                      {
+                        "path": "0.2.1.1.0",
+                        "kind": "shape",
+                        "name": "bullet-dot",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fixed",
+                            "value": 12
+                          },
+                          "height": {
+                            "mode": "fixed",
+                            "value": 12
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 12,
+                          "height": 12
+                        },
+                        "frame": {
+                          "left": 88,
+                          "top": 594.3,
+                          "width": 12,
+                          "height": 12
+                        },
+                        "snappedFrame": {
+                          "left": 88,
+                          "top": 594,
+                          "width": 12,
+                          "height": 12
+                        },
+                        "children": [],
+                        "geometry": "ellipse",
+                        "element": {
+                          "aid": "sh/u9knih4b",
+                          "id": "9",
+                          "kind": "shape"
+                        }
+                      },
+                      {
+                        "path": "0.2.1.1.1",
+                        "kind": "text",
+                        "name": "bullet-text",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 30
+                        },
+                        "frame": {
+                          "left": 116,
+                          "top": 594.3,
+                          "width": 937.71,
+                          "height": 30
+                        },
+                        "snappedFrame": {
+                          "left": 116,
+                          "top": 594,
+                          "width": 938,
+                          "height": 30
+                        },
+                        "children": [],
+                        "text": "Biarkan aplikasi terbuka atau jangan paksa clear storage sebelum sync selesai.",
+                        "transform": "none",
+                        "element": {
+                          "aid": "sh/47y1kre1",
+                          "id": "10",
+                          "kind": "shape"
+                        }
+                      }
+                    ],
+                    "padding": {
+                      "top": 0,
+                      "right": 0,
+                      "bottom": 0,
+                      "left": 0
+                    },
+                    "gap": 16,
+                    "effectiveGap": 16,
+                    "justifyOffset": 0,
+                    "align": "start",
+                    "justify": "start",
+                    "contentFrame": {
+                      "left": 88,
+                      "top": 594.3,
+                      "width": 965.71,
+                      "height": 30
+                    },
+                    "items": [
+                      {
+                        "path": "0.2.1.1.0",
+                        "frame": {
+                          "left": 88,
+                          "top": 594.3,
+                          "width": 12,
+                          "height": 12
+                        }
+                      },
+                      {
+                        "path": "0.2.1.1.1",
+                        "frame": {
+                          "left": 116,
+                          "top": 594.3,
+                          "width": 937.71,
+                          "height": 30
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "path": "0.2.1.2",
+                    "kind": "row",
+                    "name": "bullet-row",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fill",
+                        "value": 1
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 28,
+                      "height": 30
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 646.3,
+                      "width": 965.71,
+                      "height": 30
+                    },
+                    "children": [
+                      {
+                        "path": "0.2.1.2.0",
+                        "kind": "shape",
+                        "name": "bullet-dot",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fixed",
+                            "value": 12
+                          },
+                          "height": {
+                            "mode": "fixed",
+                            "value": 12
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 12,
+                          "height": 12
+                        },
+                        "frame": {
+                          "left": 88,
+                          "top": 646.3,
+                          "width": 12,
+                          "height": 12
+                        },
+                        "snappedFrame": {
+                          "left": 88,
+                          "top": 646,
+                          "width": 12,
+                          "height": 12
+                        },
+                        "children": [],
+                        "geometry": "ellipse",
+                        "element": {
+                          "aid": "sh/tsvu9kni",
+                          "id": "11",
+                          "kind": "shape"
+                        }
+                      },
+                      {
+                        "path": "0.2.1.2.1",
+                        "kind": "text",
+                        "name": "bullet-text",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 30
+                        },
+                        "frame": {
+                          "left": 116,
+                          "top": 646.3,
+                          "width": 937.71,
+                          "height": 30
+                        },
+                        "snappedFrame": {
+                          "left": 116,
+                          "top": 646,
+                          "width": 938,
+                          "height": 30
+                        },
+                        "children": [],
+                        "text": "Foto disimpan di IndexedDB dan di-upload saat koneksi pulih.",
+                        "transform": "none",
+                        "element": {
+                          "aid": "sh/m1cfa9w3",
+                          "id": "12",
+                          "kind": "shape"
+                        }
+                      }
+                    ],
+                    "padding": {
+                      "top": 0,
+                      "right": 0,
+                      "bottom": 0,
+                      "left": 0
+                    },
+                    "gap": 16,
+                    "effectiveGap": 16,
+                    "justifyOffset": 0,
+                    "align": "start",
+                    "justify": "start",
+                    "contentFrame": {
+                      "left": 88,
+                      "top": 646.3,
+                      "width": 965.71,
+                      "height": 30
+                    },
+                    "items": [
+                      {
+                        "path": "0.2.1.2.0",
+                        "frame": {
+                          "left": 88,
+                          "top": 646.3,
+                          "width": 12,
+                          "height": 12
+                        }
+                      },
+                      {
+                        "path": "0.2.1.2.1",
+                        "frame": {
+                          "left": 116,
+                          "top": 646.3,
+                          "width": 937.71,
+                          "height": 30
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "path": "0.2.1.3",
+                    "kind": "row",
+                    "name": "bullet-row",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fill",
+                        "value": 1
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 28,
+                      "height": 30
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 698.3,
+                      "width": 965.71,
+                      "height": 30
+                    },
+                    "children": [
+                      {
+                        "path": "0.2.1.3.0",
+                        "kind": "shape",
+                        "name": "bullet-dot",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fixed",
+                            "value": 12
+                          },
+                          "height": {
+                            "mode": "fixed",
+                            "value": 12
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 12,
+                          "height": 12
+                        },
+                        "frame": {
+                          "left": 88,
+                          "top": 698.3,
+                          "width": 12,
+                          "height": 12
+                        },
+                        "snappedFrame": {
+                          "left": 88,
+                          "top": 698,
+                          "width": 12,
+                          "height": 12
+                        },
+                        "children": [],
+                        "geometry": "ellipse",
+                        "element": {
+                          "aid": "sh/bm58z25k",
+                          "id": "13",
+                          "kind": "shape"
+                        }
+                      },
+                      {
+                        "path": "0.2.1.3.1",
+                        "kind": "text",
+                        "name": "bullet-text",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 30
+                        },
+                        "frame": {
+                          "left": 116,
+                          "top": 698.3,
+                          "width": 937.71,
+                          "height": 30
+                        },
+                        "snappedFrame": {
+                          "left": 116,
+                          "top": 698,
+                          "width": 938,
+                          "height": 30
+                        },
+                        "children": [],
+                        "text": "Jika sync lama, tunggu jaringan stabil lalu refresh sekali.",
+                        "transform": "none",
+                        "element": {
+                          "aid": "sh/4vmtwra5",
+                          "id": "14",
+                          "kind": "shape"
+                        }
+                      }
+                    ],
+                    "padding": {
+                      "top": 0,
+                      "right": 0,
+                      "bottom": 0,
+                      "left": 0
+                    },
+                    "gap": 16,
+                    "effectiveGap": 16,
+                    "justifyOffset": 0,
+                    "align": "start",
+                    "justify": "start",
+                    "contentFrame": {
+                      "left": 88,
+                      "top": 698.3,
+                      "width": 965.71,
+                      "height": 30
+                    },
+                    "items": [
+                      {
+                        "path": "0.2.1.3.0",
+                        "frame": {
+                          "left": 88,
+                          "top": 698.3,
+                          "width": 12,
+                          "height": 12
+                        }
+                      },
+                      {
+                        "path": "0.2.1.3.1",
+                        "frame": {
+                          "left": 116,
+                          "top": 698.3,
+                          "width": 937.71,
+                          "height": 30
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "path": "0.2.1.4",
+                    "kind": "row",
+                    "name": "bullet-row",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fill",
+                        "value": 1
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 28,
+                      "height": 30
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 750.3,
+                      "width": 965.71,
+                      "height": 30
+                    },
+                    "children": [
+                      {
+                        "path": "0.2.1.4.0",
+                        "kind": "shape",
+                        "name": "bullet-dot",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fixed",
+                            "value": 12
+                          },
+                          "height": {
+                            "mode": "fixed",
+                            "value": 12
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 12,
+                          "height": 12
+                        },
+                        "frame": {
+                          "left": 88,
+                          "top": 750.3,
+                          "width": 12,
+                          "height": 12
+                        },
+                        "snappedFrame": {
+                          "left": 88,
+                          "top": 750,
+                          "width": 12,
+                          "height": 12
+                        },
+                        "children": [],
+                        "geometry": "ellipse",
+                        "element": {
+                          "aid": "sh/tgfmlkjm",
+                          "id": "15",
+                          "kind": "shape"
+                        }
+                      },
+                      {
+                        "path": "0.2.1.4.1",
+                        "kind": "text",
+                        "name": "bullet-text",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 30
+                        },
+                        "frame": {
+                          "left": 116,
+                          "top": 750.3,
+                          "width": 937.71,
+                          "height": 30
+                        },
+                        "snappedFrame": {
+                          "left": 116,
+                          "top": 750,
+                          "width": 938,
+                          "height": 30
+                        },
+                        "children": [],
+                        "text": "Laporkan ke PIC jika foto tetap kosong setelah online.",
+                        "transform": "none",
+                        "element": {
+                          "aid": "sh/mp0bi9s3",
+                          "id": "16",
+                          "kind": "shape"
+                        }
+                      }
+                    ],
+                    "padding": {
+                      "top": 0,
+                      "right": 0,
+                      "bottom": 0,
+                      "left": 0
+                    },
+                    "gap": 16,
+                    "effectiveGap": 16,
+                    "justifyOffset": 0,
+                    "align": "start",
+                    "justify": "start",
+                    "contentFrame": {
+                      "left": 88,
+                      "top": 750.3,
+                      "width": 965.71,
+                      "height": 30
+                    },
+                    "items": [
+                      {
+                        "path": "0.2.1.4.0",
+                        "frame": {
+                          "left": 88,
+                          "top": 750.3,
+                          "width": 12,
+                          "height": 12
+                        }
+                      },
+                      {
+                        "path": "0.2.1.4.1",
+                        "frame": {
+                          "left": 116,
+                          "top": 750.3,
+                          "width": 937.71,
+                          "height": 30
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "padding": {
+                  "top": 0,
+                  "right": 0,
+                  "bottom": 0,
+                  "left": 0
+                },
+                "gap": 22,
+                "effectiveGap": 22,
+                "justifyOffset": 176.5,
+                "align": "start",
+                "justify": "center",
+                "contentFrame": {
+                  "left": 88,
+                  "top": 365.8,
+                  "width": 965.71,
+                  "height": 591
+                },
+                "items": [
+                  {
+                    "path": "0.2.1.0",
+                    "frame": {
+                      "left": 88,
+                      "top": 542.3,
+                      "width": 965.71,
+                      "height": 30
+                    }
+                  },
+                  {
+                    "path": "0.2.1.1",
+                    "frame": {
+                      "left": 88,
+                      "top": 594.3,
+                      "width": 965.71,
+                      "height": 30
+                    }
+                  },
+                  {
+                    "path": "0.2.1.2",
+                    "frame": {
+                      "left": 88,
+                      "top": 646.3,
+                      "width": 965.71,
+                      "height": 30
+                    }
+                  },
+                  {
+                    "path": "0.2.1.3",
+                    "frame": {
+                      "left": 88,
+                      "top": 698.3,
+                      "width": 965.71,
+                      "height": 30
+                    }
+                  },
+                  {
+                    "path": "0.2.1.4",
+                    "frame": {
+                      "left": 88,
+                      "top": 750.3,
+                      "width": 965.71,
+                      "height": 30
+                    }
+                  }
+                ]
+              },
+              {
+                "path": "0.2.2",
+                "kind": "panel",
+                "name": "offline-queue",
+                "requestedSize": {
+                  "width": {
+                    "mode": "fill",
+                    "value": 1
+                  },
+                  "height": {
+                    "mode": "fill",
+                    "value": 1
+                  }
+                },
+                "intrinsicSize": {
+                  "width": 72,
+                  "height": 80
+                },
+                "frame": {
+                  "left": 1107.71,
+                  "top": 365.8,
+                  "width": 724.29,
+                  "height": 591
+                },
+                "snappedFrame": {
+                  "left": 1107.71,
+                  "top": 365.8,
+                  "width": 724.29,
+                  "height": 591
+                },
+                "children": [
+                  {
+                    "path": "0.2.2.0",
+                    "kind": "column",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fill",
+                        "value": 1
+                      },
+                      "height": {
+                        "mode": "fill",
+                        "value": 1
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 220,
+                      "height": 258.2
+                    },
+                    "frame": {
+                      "left": 1143.71,
+                      "top": 405.8,
+                      "width": 652.29,
+                      "height": 511
+                    },
+                    "children": [
+                      {
+                        "path": "0.2.2.0.0",
+                        "kind": "panel",
+                        "name": "pill-local-queue",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 186,
+                          "height": 35.2
+                        },
+                        "frame": {
+                          "left": 1143.71,
+                          "top": 504,
+                          "width": 652.29,
+                          "height": 35.2
+                        },
+                        "snappedFrame": {
+                          "left": 1143.71,
+                          "top": 504,
+                          "width": 652.29,
+                          "height": 35.2
+                        },
+                        "children": [
+                          {
+                            "path": "0.2.2.0.0.0",
+                            "kind": "text",
+                            "name": "pill-text",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fixed",
+                                "value": 150
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 150,
+                              "height": 19.2
+                            },
+                            "frame": {
+                              "left": 1161.71,
+                              "top": 512,
+                              "width": 150,
+                              "height": 19.2
+                            },
+                            "snappedFrame": {
+                              "left": 1162,
+                              "top": 512,
+                              "width": 150,
+                              "height": 20
+                            },
+                            "children": [],
+                            "text": "LOCAL QUEUE",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/t83itgfm",
+                              "id": "19",
+                              "kind": "shape"
+                            }
+                          }
+                        ],
+                        "padding": {
+                          "top": 8,
+                          "right": 18,
+                          "bottom": 8,
+                          "left": 18
+                        },
+                        "align": "start",
+                        "justify": "start",
+                        "contentFrame": {
+                          "left": 1161.71,
+                          "top": 512,
+                          "width": 616.29,
+                          "height": 19.2
+                        },
+                        "element": {
+                          "aid": "sh/4nap4r65",
+                          "id": "18",
+                          "kind": "shape"
+                        }
+                      },
+                      {
+                        "path": "0.2.2.0.1",
+                        "kind": "text",
+                        "name": "offline-claim",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 57.6
+                        },
+                        "frame": {
+                          "left": 1143.71,
+                          "top": 565.2,
+                          "width": 652.29,
+                          "height": 57.6
+                        },
+                        "snappedFrame": {
+                          "left": 1144,
+                          "top": 566,
+                          "width": 652,
+                          "height": 58
+                        },
+                        "children": [],
+                        "text": "Offline bukan gagal simpan.",
+                        "transform": "none",
+                        "element": {
+                          "aid": "sh/xs72x4na",
+                          "id": "20",
+                          "kind": "shape"
+                        }
+                      },
+                      {
+                        "path": "0.2.2.0.2",
+                        "kind": "text",
+                        "name": "offline-body",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 31.2
+                        },
+                        "frame": {
+                          "left": 1143.71,
+                          "top": 648.8,
+                          "width": 652.29,
+                          "height": 62.4
+                        },
+                        "snappedFrame": {
+                          "left": 1144,
+                          "top": 648,
+                          "width": 652,
+                          "height": 64
+                        },
+                        "children": [],
+                        "text": "Log, foto, dan status akan disinkronkan ulang. Hindari tindakan yang menghapus data lokal sebelum proses selesai.",
+                        "transform": "none",
+                        "element": {
+                          "aid": "sh/87ed8bat",
+                          "id": "21",
+                          "kind": "shape"
+                        }
+                      },
+                      {
+                        "path": "0.2.2.0.3",
+                        "kind": "rule",
+                        "name": "offline-rule",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fixed",
+                            "value": 220
+                          },
+                          "height": {
+                            "mode": "fixed",
+                            "value": 5
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 220,
+                          "height": 5
+                        },
+                        "frame": {
+                          "left": 1143.71,
+                          "top": 737.2,
+                          "width": 220,
+                          "height": 5
+                        },
+                        "snappedFrame": {
+                          "left": 1144,
+                          "top": 738,
+                          "width": 220,
+                          "height": 5
+                        },
+                        "children": [],
+                        "weight": 5,
+                        "element": {
+                          "aid": "sh/fmlkjm1c",
+                          "id": "22",
+                          "kind": "shape"
+                        }
+                      },
+                      {
+                        "path": "0.2.2.0.4",
+                        "kind": "text",
+                        "name": "offline-risk",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 25.2
+                        },
+                        "frame": {
+                          "left": 1143.71,
+                          "top": 768.2,
+                          "width": 652.29,
+                          "height": 50.4
+                        },
+                        "snappedFrame": {
+                          "left": 1144,
+                          "top": 768,
+                          "width": 652,
+                          "height": 52
+                        },
+                        "children": [],
+                        "text": "Risiko terbesar saat offline: clear cache, uninstall, atau ganti perangkat sebelum data naik.",
+                        "transform": "none",
+                        "element": {
+                          "aid": "sh/q1orytsv",
+                          "id": "23",
+                          "kind": "shape"
+                        }
+                      }
+                    ],
+                    "padding": {
+                      "top": 0,
+                      "right": 0,
+                      "bottom": 0,
+                      "left": 0
+                    },
+                    "gap": 26,
+                    "effectiveGap": 26,
+                    "justifyOffset": 98.2,
+                    "align": "start",
+                    "justify": "center",
+                    "contentFrame": {
+                      "left": 1143.71,
+                      "top": 405.8,
+                      "width": 652.29,
+                      "height": 511
+                    },
+                    "items": [
+                      {
+                        "path": "0.2.2.0.0",
+                        "frame": {
+                          "left": 1143.71,
+                          "top": 504,
+                          "width": 652.29,
+                          "height": 35.2
+                        }
+                      },
+                      {
+                        "path": "0.2.2.0.1",
+                        "frame": {
+                          "left": 1143.71,
+                          "top": 565.2,
+                          "width": 652.29,
+                          "height": 57.6
+                        }
+                      },
+                      {
+                        "path": "0.2.2.0.2",
+                        "frame": {
+                          "left": 1143.71,
+                          "top": 648.8,
+                          "width": 652.29,
+                          "height": 62.4
+                        }
+                      },
+                      {
+                        "path": "0.2.2.0.3",
+                        "frame": {
+                          "left": 1143.71,
+                          "top": 737.2,
+                          "width": 220,
+                          "height": 5
+                        }
+                      },
+                      {
+                        "path": "0.2.2.0.4",
+                        "frame": {
+                          "left": 1143.71,
+                          "top": 768.2,
+                          "width": 652.29,
+                          "height": 50.4
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "padding": {
+                  "top": 40,
+                  "right": 36,
+                  "bottom": 40,
+                  "left": 36
+                },
+                "align": "start",
+                "justify": "start",
+                "contentFrame": {
+                  "left": 1143.71,
+                  "top": 405.8,
+                  "width": 652.29,
+                  "height": 511
+                },
+                "element": {
+                  "aid": "sh/bat47y1k",
+                  "id": "17",
+                  "kind": "shape"
+                }
+              },
+              {
+                "path": "0.2.3",
+                "kind": "row",
+                "name": "footer",
+                "requestedSize": {
+                  "width": {
+                    "mode": "fill",
+                    "value": 1
+                  },
+                  "height": {
+                    "mode": "hug"
+                  }
+                },
+                "intrinsicSize": {
+                  "width": 1280,
+                  "height": 19.2
+                },
+                "frame": {
+                  "left": 88,
+                  "top": 990.8,
+                  "width": 1744,
+                  "height": 19.2
+                },
+                "children": [
+                  {
+                    "path": "0.2.3.0",
+                    "kind": "text",
+                    "name": "footer-left",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fixed",
+                        "value": 1100
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 1100,
+                      "height": 19.2
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 990,
+                      "width": 1100,
+                      "height": 20
+                    },
+                    "snappedFrame": {
+                      "left": 88,
+                      "top": 990,
+                      "width": 1100,
+                      "height": 20
+                    },
+                    "children": [],
+                    "text": "SmartPatrol HSSE - Panduan Petugas",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/1gvy90je",
+                      "id": "24",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.3.1",
+                    "kind": "text",
+                    "name": "footer-date",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fixed",
+                        "value": 180
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 180,
+                      "height": 19.2
+                    },
+                    "frame": {
+                      "left": 1652,
+                      "top": 990,
+                      "width": 180,
+                      "height": 20
+                    },
+                    "snappedFrame": {
+                      "left": 1652,
+                      "top": 990,
+                      "width": 180,
+                      "height": 20
+                    },
+                    "children": [],
+                    "text": "Mei 2026",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/8z25kb6x",
+                      "id": "25",
+                      "kind": "shape"
+                    }
+                  }
+                ],
+                "padding": {
+                  "top": 0,
+                  "right": 0,
+                  "bottom": 0,
+                  "left": 0
+                },
+                "gap": 0,
+                "effectiveGap": 464,
+                "justifyOffset": 0,
+                "align": "center",
+                "justify": "between",
+                "contentFrame": {
+                  "left": 88,
+                  "top": 990.8,
+                  "width": 1744,
+                  "height": 19.2
+                },
+                "items": [
+                  {
+                    "path": "0.2.3.0",
+                    "frame": {
+                      "left": 88,
+                      "top": 990,
+                      "width": 1100,
+                      "height": 20
+                    }
+                  },
+                  {
+                    "path": "0.2.3.1",
+                    "frame": {
+                      "left": 1652,
+                      "top": 990,
+                      "width": 180,
+                      "height": 20
+                    }
+                  }
+                ]
+              }
+            ],
+            "padding": {
+              "top": 70,
+              "right": 88,
+              "bottom": 70,
+              "left": 88
+            },
+            "columnGap": 54,
+            "rowGap": 34,
+            "alignItems": "stretch",
+            "justifyItems": "stretch",
+            "contentFrame": {
+              "left": 88,
+              "top": 70,
+              "width": 1744,
+              "height": 940
+            },
+            "columns": [
+              {
+                "mode": "fr",
+                "value": 1
+              },
+              {
+                "mode": "fr",
+                "value": 0.75
+              }
+            ],
+            "rows": [
+              "auto",
+              {
+                "mode": "fr",
+                "value": 1
+              },
+              "auto"
+            ],
+            "autoRows": "auto",
+            "resolvedRows": [
+              "auto",
+              {
+                "mode": "fr",
+                "value": 1
+              },
+              "auto"
+            ],
+            "columnSizes": [
+              965.71,
+              724.29
+            ],
+            "rowSizes": [
+              261.8,
+              591,
+              19.2
+            ],
+            "cells": [
+              {
+                "path": "0.2.0",
+                "column": 0,
+                "row": 0,
+                "columnSpan": 2,
+                "rowSpan": 1,
+                "cellFrame": {
+                  "left": 88,
+                  "top": 70,
+                  "width": 1744,
+                  "height": 261.8
+                }
+              },
+              {
+                "path": "0.2.1",
+                "column": 0,
+                "row": 1,
+                "columnSpan": 1,
+                "rowSpan": 1,
+                "cellFrame": {
+                  "left": 88,
+                  "top": 365.8,
+                  "width": 965.71,
+                  "height": 591
+                }
+              },
+              {
+                "path": "0.2.2",
+                "column": 1,
+                "row": 1,
+                "columnSpan": 1,
+                "rowSpan": 1,
+                "cellFrame": {
+                  "left": 1107.71,
+                  "top": 365.8,
+                  "width": 724.29,
+                  "height": 591
+                }
+              },
+              {
+                "path": "0.2.3",
+                "column": 0,
+                "row": 2,
+                "columnSpan": 2,
+                "rowSpan": 1,
+                "cellFrame": {
+                  "left": 88,
+                  "top": 990.8,
+                  "width": 1744,
+                  "height": 19.2
+                }
+              }
+            ]
+          }
+        ],
+        "padding": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        },
+        "alignItems": "stretch",
+        "justifyItems": "stretch",
+        "contentFrame": {
+          "left": 0,
+          "top": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "items": [
+          {
+            "path": "0.0",
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          {
+            "path": "0.1",
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 10
+            }
+          },
+          {
+            "path": "0.2",
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

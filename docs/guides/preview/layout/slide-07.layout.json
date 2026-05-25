@@ -1,0 +1,3439 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/4aux3j",
+    "id": "4aux3j",
+    "slide": 7,
+    "layoutId": "c1d5240e-19de-4d2d-b7c7-ed93ffc45fa2",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "2a9442f0-0a06-4ea0-b863-0bc5c548ba8b",
+    "masterLayoutName": "Master",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1920,
+      "height": 1080
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Aptos",
+      "Aptos Display",
+      "Cascadia Mono"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "c1d5240e-19de-4d2d-b7c7-ed93ffc45fa2",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "2a9442f0-0a06-4ea0-b863-0bc5c548ba8b",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "2a9442f0-0a06-4ea0-b863-0bc5c548ba8b",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7y1kre1w",
+      "id": "1",
+      "name": "sos-bg",
+      "bbox": [
+        0,
+        0,
+        1920,
+        1080
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.0"
+      },
+      "geometry": "rect",
+      "fillColor": "#16080E"
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wjudg7ad",
+      "id": "2",
+      "name": "sos-accent",
+      "bbox": [
+        0,
+        0,
+        34,
+        1080
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.1"
+      },
+      "geometry": "rect",
+      "fillColor": "#F05268"
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/p4r65wju",
+      "id": "3",
+      "name": "label-darurat",
+      "bbox": [
+        96,
+        74,
+        840,
+        22
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.0.0"
+      },
+      "geometry": "rect",
+      "text": "DARURAT",
+      "textPreview": "DARURAT",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Cascadia Mono",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "DARURAT"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "DARURAT",
+          "runs": [
+            {
+              "index": 1,
+              "text": "DARURAT",
+              "fontSize": 18,
+              "typeface": "Cascadia Mono",
+              "color": "#25D4E8",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/i5sneloj",
+      "id": "4",
+      "name": "slide-title",
+      "bbox": [
+        96,
+        114,
+        730,
+        150
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.0.1"
+      },
+      "geometry": "rect",
+      "text": "SOS hanya untuk keadaan kritis",
+      "textPreview": "SOS hanya untuk keadaan kritis",
+      "resolvedFontSize": 56,
+      "resolvedTextStyle": {
+        "fontSize": 56,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "SOS hanya untuk keadaan kritis"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "SOS hanya untuk keadaan kritis",
+          "runs": [
+            {
+              "index": 1,
+              "text": "SOS hanya untuk keadaan kritis",
+              "fontSize": 56,
+              "typeface": "Aptos Display",
+              "color": "#F1FAF8",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7qpg3ex0",
+      "id": "5",
+      "name": "title-rule",
+      "bbox": [
+        96,
+        282,
+        180,
+        5
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.0.2"
+      },
+      "geometry": "rect",
+      "fillColor": "#20C7A8",
+      "lineColor": "#20C7A8",
+      "lineWidth": 0
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0bi9s36h",
+      "id": "6",
+      "name": "slide-subtitle",
+      "bbox": [
+        96,
+        304,
+        1120,
+        32
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.0.3"
+      },
+      "geometry": "rect",
+      "text": "Gunakan untuk perompakan, kebakaran, medis darurat, orang jatuh, atau ancaman keselamatan langsung.",
+      "textPreview": "Gunakan untuk perompakan, kebakaran, medis darurat, orang jatuh, atau ancaman keselamatan langsung.",
+      "resolvedFontSize": 26,
+      "resolvedTextStyle": {
+        "fontSize": 26,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Gunakan untuk perompakan, kebakaran, medis darurat, orang jatuh, atau ancaman keselamatan"
+          },
+          {
+            "index": 2,
+            "text": "langsung."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Gunakan untuk perompakan, kebakaran, medis darurat, orang jatuh, atau ancaman keselamatan langsung.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Gunakan untuk perompakan, kebakaran, medis darurat, orang jatuh, atau ancaman keselamatan langsung.",
+              "fontSize": 26,
+              "typeface": "Aptos",
+              "color": "#9DB4C4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/pwb2hwfy",
+      "id": "7",
+      "name": "sos-large",
+      "bbox": [
+        96,
+        526,
+        696,
+        108
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.0"
+      },
+      "geometry": "rect",
+      "text": "Tekan SOS",
+      "textPreview": "Tekan SOS",
+      "resolvedFontSize": 90,
+      "resolvedTextStyle": {
+        "fontSize": 90,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Tekan SOS"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Tekan SOS",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Tekan SOS",
+              "fontSize": 90,
+              "typeface": "Aptos Display",
+              "color": "#F05268",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/itgfmlkj",
+      "id": "8",
+      "name": "sos-large-copy",
+      "bbox": [
+        96,
+        662,
+        598,
+        70
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.1"
+      },
+      "geometry": "rect",
+      "text": "Aplikasi akan meminta konfirmasi untuk mencegah pemencetan tidak sengaja.",
+      "textPreview": "Aplikasi akan meminta konfirmasi untuk mencegah pemencetan tidak sengaja.",
+      "resolvedFontSize": 29,
+      "resolvedTextStyle": {
+        "fontSize": 29,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Aplikasi akan meminta konfirmasi untuk mencegah"
+          },
+          {
+            "index": 2,
+            "text": "pemencetan tidak sengaja."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Aplikasi akan meminta konfirmasi untuk mencegah pemencetan tidak sengaja.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Aplikasi akan meminta konfirmasi untuk mencegah pemencetan tidak sengaja.",
+              "fontSize": 29,
+              "typeface": "Aptos",
+              "color": "#F1FAF8"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7ed8bat4",
+      "id": "9",
+      "name": "pill-jangan-dipakai-untuk-test-tanpa-koordinasi",
+      "bbox": [
+        96,
+        760.5,
+        695.83,
+        35.2
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.2"
+      },
+      "geometry": "roundRect",
+      "fillColor": "rgba(6, 17, 31, 0.92)",
+      "lineColor": "#F2C75C",
+      "lineWidth": 1.5
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/r2p8nqxs",
+      "id": "10",
+      "name": "pill-text",
+      "bbox": [
+        114,
+        768,
+        522,
+        20
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.2.0"
+      },
+      "geometry": "rect",
+      "text": "JANGAN DIPAKAI UNTUK TEST TANPA KOORDINASI",
+      "textPreview": "JANGAN DIPAKAI UNTUK TEST TANPA KOORDINASI",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "fontSize": 16,
+        "typeface": "Cascadia Mono",
+        "bold": true,
+        "alignment": "center"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "JANGAN DIPAKAI UNTUK TEST TANPA KOORDINASI"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "JANGAN DIPAKAI UNTUK TEST TANPA KOORDINASI",
+          "runs": [
+            {
+              "index": 1,
+              "text": "JANGAN DIPAKAI UNTUK TEST TANPA KOORDINASI",
+              "fontSize": 16,
+              "typeface": "Cascadia Mono",
+              "color": "#F2C75C",
+              "bold": true,
+              "alignment": "center"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2hwfyxob",
+      "id": "11",
+      "name": "step-number-1",
+      "bbox": [
+        849.83,
+        487.3,
+        58,
+        58
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.0.0"
+      },
+      "geometry": "roundRect",
+      "fillColor": "#F05268"
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/94fu18jq",
+      "id": "12",
+      "name": "step-number-text-1",
+      "bbox": [
+        858,
+        500,
+        40,
+        32
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.0.0.0"
+      },
+      "geometry": "rect",
+      "text": "1",
+      "textPreview": "1",
+      "resolvedFontSize": 26,
+      "resolvedTextStyle": {
+        "fontSize": 26,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "center"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "1"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "1",
+          "runs": [
+            {
+              "index": 1,
+              "text": "1",
+              "fontSize": 26,
+              "typeface": "Aptos Display",
+              "color": "#06111F",
+              "bold": true,
+              "alignment": "center"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kjm1cfa9",
+      "id": "13",
+      "name": "step-heading-1",
+      "bbox": [
+        930,
+        488,
+        894,
+        36
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.0.1.0"
+      },
+      "geometry": "rect",
+      "text": "Konfirmasi SOS",
+      "textPreview": "Konfirmasi SOS",
+      "resolvedFontSize": 29,
+      "resolvedTextStyle": {
+        "fontSize": 29,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Konfirmasi SOS"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Konfirmasi SOS",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Konfirmasi SOS",
+              "fontSize": 29,
+              "typeface": "Aptos Display",
+              "color": "#F1FAF8",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ra5gbq1o",
+      "id": "14",
+      "name": "step-body-1",
+      "bbox": [
+        930,
+        528,
+        894,
+        26
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.0.1.1"
+      },
+      "geometry": "rect",
+      "text": "Tekan hanya setelah kondisi darurat benar-benar terjadi.",
+      "textPreview": "Tekan hanya setelah kondisi darurat benar-benar terjadi.",
+      "resolvedFontSize": 21,
+      "resolvedTextStyle": {
+        "fontSize": 21,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Tekan hanya setelah kondisi darurat benar-benar terjadi."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Tekan hanya setelah kondisi darurat benar-benar terjadi.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Tekan hanya setelah kondisi darurat benar-benar terjadi.",
+              "fontSize": 21,
+              "typeface": "Aptos",
+              "color": "#9DB4C4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2p8nqxs7",
+      "id": "15",
+      "name": "step-number-2",
+      "bbox": [
+        849.83,
+        581.3,
+        58,
+        58
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.1.0"
+      },
+      "geometry": "roundRect",
+      "fillColor": "#F05268"
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9gr2p8nq",
+      "id": "16",
+      "name": "step-number-text-2",
+      "bbox": [
+        858,
+        594,
+        40,
+        32
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.1.0.0"
+      },
+      "geometry": "rect",
+      "text": "2",
+      "textPreview": "2",
+      "resolvedFontSize": 26,
+      "resolvedTextStyle": {
+        "fontSize": 26,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "center"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "2"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "2",
+          "runs": [
+            {
+              "index": 1,
+              "text": "2",
+              "fontSize": 26,
+              "typeface": "Aptos Display",
+              "color": "#06111F",
+              "bold": true,
+              "alignment": "center"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/gvy90je9",
+      "id": "17",
+      "name": "step-heading-2",
+      "bbox": [
+        930,
+        582,
+        894,
+        36
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.1.1.0"
+      },
+      "geometry": "rect",
+      "text": "GPS dibaca",
+      "textPreview": "GPS dibaca",
+      "resolvedFontSize": 29,
+      "resolvedTextStyle": {
+        "fontSize": 29,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "GPS dibaca"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "GPS dibaca",
+          "runs": [
+            {
+              "index": 1,
+              "text": "GPS dibaca",
+              "fontSize": 29,
+              "typeface": "Aptos Display",
+              "color": "#F1FAF8",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/re1w7mp0",
+      "id": "18",
+      "name": "step-body-2",
+      "bbox": [
+        930,
+        622,
+        894,
+        26
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.1.1.1"
+      },
+      "geometry": "rect",
+      "text": "Koordinat perangkat dan nama pelapor dikirim ke penerima terkait.",
+      "textPreview": "Koordinat perangkat dan nama pelapor dikirim ke penerima terkait.",
+      "resolvedFontSize": 21,
+      "resolvedTextStyle": {
+        "fontSize": 21,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Koordinat perangkat dan nama pelapor dikirim ke penerima terkait."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Koordinat perangkat dan nama pelapor dikirim ke penerima terkait.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Koordinat perangkat dan nama pelapor dikirim ke penerima terkait.",
+              "fontSize": 21,
+              "typeface": "Aptos",
+              "color": "#9DB4C4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2t83itgf",
+      "id": "19",
+      "name": "step-number-3",
+      "bbox": [
+        849.83,
+        675.3,
+        58,
+        58
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.2.0"
+      },
+      "geometry": "roundRect",
+      "fillColor": "#F05268"
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/qpg3ex0n",
+      "id": "20",
+      "name": "step-number-text-3",
+      "bbox": [
+        858,
+        688,
+        40,
+        32
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.2.0.0"
+      },
+      "geometry": "rect",
+      "text": "3",
+      "textPreview": "3",
+      "resolvedFontSize": 26,
+      "resolvedTextStyle": {
+        "fontSize": 26,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "center"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "3"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "3",
+          "runs": [
+            {
+              "index": 1,
+              "text": "3",
+              "fontSize": 26,
+              "typeface": "Aptos Display",
+              "color": "#06111F",
+              "bold": true,
+              "alignment": "center"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fa9w3m94",
+      "id": "21",
+      "name": "step-heading-3",
+      "bbox": [
+        930,
+        676,
+        894,
+        36
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.2.1.0"
+      },
+      "geometry": "rect",
+      "text": "Alarm menyala",
+      "textPreview": "Alarm menyala",
+      "resolvedFontSize": 29,
+      "resolvedTextStyle": {
+        "fontSize": 29,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Alarm menyala"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Alarm menyala",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Alarm menyala",
+              "fontSize": 29,
+              "typeface": "Aptos Display",
+              "color": "#F1FAF8",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 22,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8v6psfil",
+      "id": "22",
+      "name": "step-body-3",
+      "bbox": [
+        930,
+        716,
+        894,
+        26
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.2.1.1"
+      },
+      "geometry": "rect",
+      "text": "Perangkat target menerima modal darurat dan bunyi alarm.",
+      "textPreview": "Perangkat target menerima modal darurat dan bunyi alarm.",
+      "resolvedFontSize": 21,
+      "resolvedTextStyle": {
+        "fontSize": 21,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Perangkat target menerima modal darurat dan bunyi alarm."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Perangkat target menerima modal darurat dan bunyi alarm.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Perangkat target menerima modal darurat dan bunyi alarm.",
+              "fontSize": 21,
+              "typeface": "Aptos",
+              "color": "#9DB4C4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 23,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/xczed8v6",
+      "id": "23",
+      "name": "step-number-4",
+      "bbox": [
+        849.83,
+        769.3,
+        58,
+        58
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.3.0"
+      },
+      "geometry": "roundRect",
+      "fillColor": "#F05268"
+    },
+    {
+      "order": 24,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/qd4vmtwr",
+      "id": "24",
+      "name": "step-number-text-4",
+      "bbox": [
+        858,
+        782,
+        40,
+        32
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.3.0.0"
+      },
+      "geometry": "rect",
+      "text": "4",
+      "textPreview": "4",
+      "resolvedFontSize": 26,
+      "resolvedTextStyle": {
+        "fontSize": 26,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "center"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "4"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "4",
+          "runs": [
+            {
+              "index": 1,
+              "text": "4",
+              "fontSize": 26,
+              "typeface": "Aptos Display",
+              "color": "#06111F",
+              "bold": true,
+              "alignment": "center"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 25,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fyxobm58",
+      "id": "25",
+      "name": "step-heading-4",
+      "bbox": [
+        930,
+        770,
+        894,
+        36
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.3.1.0"
+      },
+      "geometry": "rect",
+      "text": "Terima & Mengerti",
+      "textPreview": "Terima & Mengerti",
+      "resolvedFontSize": 29,
+      "resolvedTextStyle": {
+        "fontSize": 29,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Terima & Mengerti"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Terima & Mengerti",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Terima & Mengerti",
+              "fontSize": 29,
+              "typeface": "Aptos Display",
+              "color": "#F1FAF8",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 26,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8jqh0fep",
+      "id": "26",
+      "name": "step-body-4",
+      "bbox": [
+        930,
+        810,
+        894,
+        26
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.3.1.1"
+      },
+      "geometry": "rect",
+      "text": "Penerima menekan tombol ini untuk menghentikan alarm di perangkatnya.",
+      "textPreview": "Penerima menekan tombol ini untuk menghentikan alarm di perangkatnya.",
+      "resolvedFontSize": 21,
+      "resolvedTextStyle": {
+        "fontSize": 21,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Penerima menekan tombol ini untuk menghentikan alarm di perangkatnya."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Penerima menekan tombol ini untuk menghentikan alarm di perangkatnya.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Penerima menekan tombol ini untuk menghentikan alarm di perangkatnya.",
+              "fontSize": 21,
+              "typeface": "Aptos",
+              "color": "#9DB4C4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 27,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/x4nap4r6",
+      "id": "27",
+      "name": "footer-left",
+      "bbox": [
+        96,
+        986,
+        1100,
+        20
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.3.0"
+      },
+      "geometry": "rect",
+      "text": "Gunakan sesuai prosedur emergency response",
+      "textPreview": "Gunakan sesuai prosedur emergency response",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "fontSize": 16,
+        "typeface": "Cascadia Mono",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Gunakan sesuai prosedur emergency response"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Gunakan sesuai prosedur emergency response",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Gunakan sesuai prosedur emergency response",
+              "fontSize": 16,
+              "typeface": "Cascadia Mono",
+              "color": "#6D8494"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 28,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/q1orytsv",
+      "id": "28",
+      "name": "footer-date",
+      "bbox": [
+        1644,
+        986,
+        180,
+        20
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.3.1"
+      },
+      "geometry": "rect",
+      "text": "Mei 2026",
+      "textPreview": "Mei 2026",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "fontSize": 16,
+        "typeface": "Cascadia Mono",
+        "alignment": "right"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Mei 2026"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Mei 2026",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Mei 2026",
+              "fontSize": 16,
+              "typeface": "Cascadia Mono",
+              "color": "#6D8494",
+              "alignment": "right"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "composeRuns": [
+    {
+      "index": 1,
+      "frame": {
+        "left": 0,
+        "top": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "baseUnit": 8,
+      "root": {
+        "path": "0",
+        "kind": "layers",
+        "name": "sos-layers",
+        "requestedSize": {
+          "width": {
+            "mode": "fill",
+            "value": 1
+          },
+          "height": {
+            "mode": "fill",
+            "value": 1
+          }
+        },
+        "intrinsicSize": {
+          "width": 34,
+          "height": 0
+        },
+        "frame": {
+          "left": 0,
+          "top": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "children": [
+          {
+            "path": "0.0",
+            "kind": "shape",
+            "name": "sos-bg",
+            "requestedSize": {
+              "width": {
+                "mode": "fill",
+                "value": 1
+              },
+              "height": {
+                "mode": "fill",
+                "value": 1
+              }
+            },
+            "intrinsicSize": {
+              "width": 0,
+              "height": 0
+            },
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            },
+            "snappedFrame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            },
+            "children": [],
+            "geometry": "rect",
+            "element": {
+              "aid": "sh/7y1kre1w",
+              "id": "1",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.1",
+            "kind": "shape",
+            "name": "sos-accent",
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 34
+              },
+              "height": {
+                "mode": "fill",
+                "value": 1
+              }
+            },
+            "intrinsicSize": {
+              "width": 34,
+              "height": 0
+            },
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 34,
+              "height": 1080
+            },
+            "snappedFrame": {
+              "left": 0,
+              "top": 0,
+              "width": 34,
+              "height": 1080
+            },
+            "children": [],
+            "geometry": "rect",
+            "element": {
+              "aid": "sh/wjudg7ad",
+              "id": "2",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.2",
+            "kind": "grid",
+            "name": "sos-root",
+            "requestedSize": {
+              "width": {
+                "mode": "fill",
+                "value": 1
+              },
+              "height": {
+                "mode": "fill",
+                "value": 1
+              }
+            },
+            "intrinsicSize": {
+              "width": 250,
+              "height": 497
+            },
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            },
+            "children": [
+              {
+                "path": "0.2.0",
+                "kind": "column",
+                "name": "title-stack",
+                "requestedSize": {
+                  "width": {
+                    "mode": "fill",
+                    "value": 1
+                  },
+                  "height": {
+                    "mode": "hug"
+                  }
+                },
+                "intrinsicSize": {
+                  "width": 1120.79,
+                  "height": 261.8
+                },
+                "frame": {
+                  "left": 96,
+                  "top": 74,
+                  "width": 1728,
+                  "height": 261.8
+                },
+                "children": [
+                  {
+                    "path": "0.2.0.0",
+                    "kind": "text",
+                    "name": "label-darurat",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fixed",
+                        "value": 840
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 840,
+                      "height": 21.6
+                    },
+                    "frame": {
+                      "left": 96,
+                      "top": 74,
+                      "width": 840,
+                      "height": 21.6
+                    },
+                    "snappedFrame": {
+                      "left": 96,
+                      "top": 74,
+                      "width": 840,
+                      "height": 22
+                    },
+                    "children": [],
+                    "text": "DARURAT",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/p4r65wju",
+                      "id": "3",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.0.1",
+                    "kind": "text",
+                    "name": "slide-title",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "wrap",
+                        "max": 1320
+                      },
+                      "height": {
+                        "mode": "fixed",
+                        "value": 150
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 729.73,
+                      "height": 150
+                    },
+                    "frame": {
+                      "left": 96,
+                      "top": 113.6,
+                      "width": 729.73,
+                      "height": 150
+                    },
+                    "snappedFrame": {
+                      "left": 96,
+                      "top": 114,
+                      "width": 730,
+                      "height": 150
+                    },
+                    "children": [],
+                    "text": "SOS hanya untuk keadaan kritis",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/i5sneloj",
+                      "id": "4",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.0.2",
+                    "kind": "rule",
+                    "name": "title-rule",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fixed",
+                        "value": 180
+                      },
+                      "height": {
+                        "mode": "fixed",
+                        "value": 5
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 180,
+                      "height": 5
+                    },
+                    "frame": {
+                      "left": 96,
+                      "top": 281.6,
+                      "width": 180,
+                      "height": 5
+                    },
+                    "snappedFrame": {
+                      "left": 96,
+                      "top": 282,
+                      "width": 180,
+                      "height": 5
+                    },
+                    "children": [],
+                    "weight": 5,
+                    "element": {
+                      "aid": "sh/7qpg3ex0",
+                      "id": "5",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.0.3",
+                    "kind": "text",
+                    "name": "slide-subtitle",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "wrap",
+                        "max": 1180
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 1120.79,
+                      "height": 31.2
+                    },
+                    "frame": {
+                      "left": 96,
+                      "top": 304.6,
+                      "width": 1120.79,
+                      "height": 31.2
+                    },
+                    "snappedFrame": {
+                      "left": 96,
+                      "top": 304,
+                      "width": 1120,
+                      "height": 32
+                    },
+                    "children": [],
+                    "text": "Gunakan untuk perompakan, kebakaran, medis darurat, orang jatuh, atau ancaman keselamatan langsung.",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/0bi9s36h",
+                      "id": "6",
+                      "kind": "shape"
+                    }
+                  }
+                ],
+                "padding": {
+                  "top": 0,
+                  "right": 0,
+                  "bottom": 0,
+                  "left": 0
+                },
+                "gap": 18,
+                "effectiveGap": 18,
+                "justifyOffset": 0,
+                "align": "start",
+                "justify": "start",
+                "contentFrame": {
+                  "left": 96,
+                  "top": 74,
+                  "width": 1728,
+                  "height": 261.8
+                },
+                "items": [
+                  {
+                    "path": "0.2.0.0",
+                    "frame": {
+                      "left": 96,
+                      "top": 74,
+                      "width": 840,
+                      "height": 21.6
+                    }
+                  },
+                  {
+                    "path": "0.2.0.1",
+                    "frame": {
+                      "left": 96,
+                      "top": 113.6,
+                      "width": 729.73,
+                      "height": 150
+                    }
+                  },
+                  {
+                    "path": "0.2.0.2",
+                    "frame": {
+                      "left": 96,
+                      "top": 281.6,
+                      "width": 180,
+                      "height": 5
+                    }
+                  },
+                  {
+                    "path": "0.2.0.3",
+                    "frame": {
+                      "left": 96,
+                      "top": 304.6,
+                      "width": 1120.79,
+                      "height": 31.2
+                    }
+                  }
+                ]
+              },
+              {
+                "path": "0.2.1",
+                "kind": "column",
+                "name": "sos-warning",
+                "requestedSize": {
+                  "width": {
+                    "mode": "fill",
+                    "value": 1
+                  },
+                  "height": {
+                    "mode": "fill",
+                    "value": 1
+                  }
+                },
+                "intrinsicSize": {
+                  "width": 597.24,
+                  "height": 268.8
+                },
+                "frame": {
+                  "left": 96,
+                  "top": 369.8,
+                  "width": 695.83,
+                  "height": 583
+                },
+                "children": [
+                  {
+                    "path": "0.2.1.0",
+                    "kind": "text",
+                    "name": "sos-large",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fill",
+                        "value": 1
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 0,
+                      "height": 108
+                    },
+                    "frame": {
+                      "left": 96,
+                      "top": 526.9,
+                      "width": 695.83,
+                      "height": 108
+                    },
+                    "snappedFrame": {
+                      "left": 96,
+                      "top": 526,
+                      "width": 696,
+                      "height": 108
+                    },
+                    "children": [],
+                    "text": "Tekan SOS",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/pwb2hwfy",
+                      "id": "7",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.1.1",
+                    "kind": "text",
+                    "name": "sos-large-copy",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "wrap",
+                        "max": 620
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 597.24,
+                      "height": 69.6
+                    },
+                    "frame": {
+                      "left": 96,
+                      "top": 662.9,
+                      "width": 597.24,
+                      "height": 69.6
+                    },
+                    "snappedFrame": {
+                      "left": 96,
+                      "top": 662,
+                      "width": 598,
+                      "height": 70
+                    },
+                    "children": [],
+                    "text": "Aplikasi akan meminta konfirmasi untuk mencegah pemencetan tidak sengaja.",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/itgfmlkj",
+                      "id": "8",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.1.2",
+                    "kind": "panel",
+                    "name": "pill-jangan-dipakai-untuk-test-tanpa-koordinasi",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fill",
+                        "value": 1
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 558,
+                      "height": 35.2
+                    },
+                    "frame": {
+                      "left": 96,
+                      "top": 760.5,
+                      "width": 695.83,
+                      "height": 35.2
+                    },
+                    "snappedFrame": {
+                      "left": 96,
+                      "top": 760.5,
+                      "width": 695.83,
+                      "height": 35.2
+                    },
+                    "children": [
+                      {
+                        "path": "0.2.1.2.0",
+                        "kind": "text",
+                        "name": "pill-text",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fixed",
+                            "value": 522
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 522,
+                          "height": 19.2
+                        },
+                        "frame": {
+                          "left": 114,
+                          "top": 768.5,
+                          "width": 522,
+                          "height": 19.2
+                        },
+                        "snappedFrame": {
+                          "left": 114,
+                          "top": 768,
+                          "width": 522,
+                          "height": 20
+                        },
+                        "children": [],
+                        "text": "JANGAN DIPAKAI UNTUK TEST TANPA KOORDINASI",
+                        "transform": "none",
+                        "element": {
+                          "aid": "sh/r2p8nqxs",
+                          "id": "10",
+                          "kind": "shape"
+                        }
+                      }
+                    ],
+                    "padding": {
+                      "top": 8,
+                      "right": 18,
+                      "bottom": 8,
+                      "left": 18
+                    },
+                    "align": "start",
+                    "justify": "start",
+                    "contentFrame": {
+                      "left": 114,
+                      "top": 768.5,
+                      "width": 659.83,
+                      "height": 19.2
+                    },
+                    "element": {
+                      "aid": "sh/7ed8bat4",
+                      "id": "9",
+                      "kind": "shape"
+                    }
+                  }
+                ],
+                "padding": {
+                  "top": 0,
+                  "right": 0,
+                  "bottom": 0,
+                  "left": 0
+                },
+                "gap": 28,
+                "effectiveGap": 28,
+                "justifyOffset": 157.1,
+                "align": "start",
+                "justify": "center",
+                "contentFrame": {
+                  "left": 96,
+                  "top": 369.8,
+                  "width": 695.83,
+                  "height": 583
+                },
+                "items": [
+                  {
+                    "path": "0.2.1.0",
+                    "frame": {
+                      "left": 96,
+                      "top": 526.9,
+                      "width": 695.83,
+                      "height": 108
+                    }
+                  },
+                  {
+                    "path": "0.2.1.1",
+                    "frame": {
+                      "left": 96,
+                      "top": 662.9,
+                      "width": 597.24,
+                      "height": 69.6
+                    }
+                  },
+                  {
+                    "path": "0.2.1.2",
+                    "frame": {
+                      "left": 96,
+                      "top": 760.5,
+                      "width": 695.83,
+                      "height": 35.2
+                    }
+                  }
+                ]
+              },
+              {
+                "path": "0.2.2",
+                "kind": "column",
+                "name": "sos-steps",
+                "requestedSize": {
+                  "width": {
+                    "mode": "fill",
+                    "value": 1
+                  },
+                  "height": {
+                    "mode": "fill",
+                    "value": 1
+                  }
+                },
+                "intrinsicSize": {
+                  "width": 0,
+                  "height": 348
+                },
+                "frame": {
+                  "left": 849.83,
+                  "top": 369.8,
+                  "width": 974.17,
+                  "height": 583
+                },
+                "children": [
+                  {
+                    "path": "0.2.2.0",
+                    "kind": "row",
+                    "name": "step-1",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fill",
+                        "value": 1
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 80,
+                      "height": 66
+                    },
+                    "frame": {
+                      "left": 849.83,
+                      "top": 487.3,
+                      "width": 974.17,
+                      "height": 66
+                    },
+                    "children": [
+                      {
+                        "path": "0.2.2.0.0",
+                        "kind": "panel",
+                        "name": "step-number-1",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fixed",
+                            "value": 58
+                          },
+                          "height": {
+                            "mode": "fixed",
+                            "value": 58
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 40,
+                          "height": 31.2
+                        },
+                        "frame": {
+                          "left": 849.83,
+                          "top": 487.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "snappedFrame": {
+                          "left": 849.83,
+                          "top": 487.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "children": [
+                          {
+                            "path": "0.2.2.0.0.0",
+                            "kind": "text",
+                            "name": "step-number-text-1",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fixed",
+                                "value": 40
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 40,
+                              "height": 31.2
+                            },
+                            "frame": {
+                              "left": 858,
+                              "top": 500,
+                              "width": 40,
+                              "height": 32
+                            },
+                            "snappedFrame": {
+                              "left": 858,
+                              "top": 500,
+                              "width": 40,
+                              "height": 32
+                            },
+                            "children": [],
+                            "text": "1",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/94fu18jq",
+                              "id": "12",
+                              "kind": "shape"
+                            }
+                          }
+                        ],
+                        "padding": {
+                          "top": 0,
+                          "right": 0,
+                          "bottom": 0,
+                          "left": 0
+                        },
+                        "align": "center",
+                        "justify": "center",
+                        "contentFrame": {
+                          "left": 849.83,
+                          "top": 487.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "element": {
+                          "aid": "sh/2hwfyxob",
+                          "id": "11",
+                          "kind": "shape"
+                        }
+                      },
+                      {
+                        "path": "0.2.2.0.1",
+                        "kind": "column",
+                        "name": "step-copy-1",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 66
+                        },
+                        "frame": {
+                          "left": 929.83,
+                          "top": 487.3,
+                          "width": 894.17,
+                          "height": 66
+                        },
+                        "children": [
+                          {
+                            "path": "0.2.2.0.1.0",
+                            "kind": "text",
+                            "name": "step-heading-1",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 34.8
+                            },
+                            "frame": {
+                              "left": 929.83,
+                              "top": 487.3,
+                              "width": 894.17,
+                              "height": 34.8
+                            },
+                            "snappedFrame": {
+                              "left": 930,
+                              "top": 488,
+                              "width": 894,
+                              "height": 36
+                            },
+                            "children": [],
+                            "text": "Konfirmasi SOS",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/kjm1cfa9",
+                              "id": "13",
+                              "kind": "shape"
+                            }
+                          },
+                          {
+                            "path": "0.2.2.0.1.1",
+                            "kind": "text",
+                            "name": "step-body-1",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 25.2
+                            },
+                            "frame": {
+                              "left": 929.83,
+                              "top": 528.1,
+                              "width": 894.17,
+                              "height": 25.2
+                            },
+                            "snappedFrame": {
+                              "left": 930,
+                              "top": 528,
+                              "width": 894,
+                              "height": 26
+                            },
+                            "children": [],
+                            "text": "Tekan hanya setelah kondisi darurat benar-benar terjadi.",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/ra5gbq1o",
+                              "id": "14",
+                              "kind": "shape"
+                            }
+                          }
+                        ],
+                        "padding": {
+                          "top": 0,
+                          "right": 0,
+                          "bottom": 0,
+                          "left": 0
+                        },
+                        "gap": 6,
+                        "effectiveGap": 6,
+                        "justifyOffset": 0,
+                        "align": "start",
+                        "justify": "start",
+                        "contentFrame": {
+                          "left": 929.83,
+                          "top": 487.3,
+                          "width": 894.17,
+                          "height": 66
+                        },
+                        "items": [
+                          {
+                            "path": "0.2.2.0.1.0",
+                            "frame": {
+                              "left": 929.83,
+                              "top": 487.3,
+                              "width": 894.17,
+                              "height": 34.8
+                            }
+                          },
+                          {
+                            "path": "0.2.2.0.1.1",
+                            "frame": {
+                              "left": 929.83,
+                              "top": 528.1,
+                              "width": 894.17,
+                              "height": 25.2
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "padding": {
+                      "top": 0,
+                      "right": 0,
+                      "bottom": 0,
+                      "left": 0
+                    },
+                    "gap": 22,
+                    "effectiveGap": 22,
+                    "justifyOffset": 0,
+                    "align": "start",
+                    "justify": "start",
+                    "contentFrame": {
+                      "left": 849.83,
+                      "top": 487.3,
+                      "width": 974.17,
+                      "height": 66
+                    },
+                    "items": [
+                      {
+                        "path": "0.2.2.0.0",
+                        "frame": {
+                          "left": 849.83,
+                          "top": 487.3,
+                          "width": 58,
+                          "height": 58
+                        }
+                      },
+                      {
+                        "path": "0.2.2.0.1",
+                        "frame": {
+                          "left": 929.83,
+                          "top": 487.3,
+                          "width": 894.17,
+                          "height": 66
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "path": "0.2.2.1",
+                    "kind": "row",
+                    "name": "step-2",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fill",
+                        "value": 1
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 80,
+                      "height": 66
+                    },
+                    "frame": {
+                      "left": 849.83,
+                      "top": 581.3,
+                      "width": 974.17,
+                      "height": 66
+                    },
+                    "children": [
+                      {
+                        "path": "0.2.2.1.0",
+                        "kind": "panel",
+                        "name": "step-number-2",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fixed",
+                            "value": 58
+                          },
+                          "height": {
+                            "mode": "fixed",
+                            "value": 58
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 40,
+                          "height": 31.2
+                        },
+                        "frame": {
+                          "left": 849.83,
+                          "top": 581.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "snappedFrame": {
+                          "left": 849.83,
+                          "top": 581.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "children": [
+                          {
+                            "path": "0.2.2.1.0.0",
+                            "kind": "text",
+                            "name": "step-number-text-2",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fixed",
+                                "value": 40
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 40,
+                              "height": 31.2
+                            },
+                            "frame": {
+                              "left": 858,
+                              "top": 594,
+                              "width": 40,
+                              "height": 32
+                            },
+                            "snappedFrame": {
+                              "left": 858,
+                              "top": 594,
+                              "width": 40,
+                              "height": 32
+                            },
+                            "children": [],
+                            "text": "2",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/9gr2p8nq",
+                              "id": "16",
+                              "kind": "shape"
+                            }
+                          }
+                        ],
+                        "padding": {
+                          "top": 0,
+                          "right": 0,
+                          "bottom": 0,
+                          "left": 0
+                        },
+                        "align": "center",
+                        "justify": "center",
+                        "contentFrame": {
+                          "left": 849.83,
+                          "top": 581.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "element": {
+                          "aid": "sh/2p8nqxs7",
+                          "id": "15",
+                          "kind": "shape"
+                        }
+                      },
+                      {
+                        "path": "0.2.2.1.1",
+                        "kind": "column",
+                        "name": "step-copy-2",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 66
+                        },
+                        "frame": {
+                          "left": 929.83,
+                          "top": 581.3,
+                          "width": 894.17,
+                          "height": 66
+                        },
+                        "children": [
+                          {
+                            "path": "0.2.2.1.1.0",
+                            "kind": "text",
+                            "name": "step-heading-2",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 34.8
+                            },
+                            "frame": {
+                              "left": 929.83,
+                              "top": 581.3,
+                              "width": 894.17,
+                              "height": 34.8
+                            },
+                            "snappedFrame": {
+                              "left": 930,
+                              "top": 582,
+                              "width": 894,
+                              "height": 36
+                            },
+                            "children": [],
+                            "text": "GPS dibaca",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/gvy90je9",
+                              "id": "17",
+                              "kind": "shape"
+                            }
+                          },
+                          {
+                            "path": "0.2.2.1.1.1",
+                            "kind": "text",
+                            "name": "step-body-2",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 25.2
+                            },
+                            "frame": {
+                              "left": 929.83,
+                              "top": 622.1,
+                              "width": 894.17,
+                              "height": 25.2
+                            },
+                            "snappedFrame": {
+                              "left": 930,
+                              "top": 622,
+                              "width": 894,
+                              "height": 26
+                            },
+                            "children": [],
+                            "text": "Koordinat perangkat dan nama pelapor dikirim ke penerima terkait.",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/re1w7mp0",
+                              "id": "18",
+                              "kind": "shape"
+                            }
+                          }
+                        ],
+                        "padding": {
+                          "top": 0,
+                          "right": 0,
+                          "bottom": 0,
+                          "left": 0
+                        },
+                        "gap": 6,
+                        "effectiveGap": 6,
+                        "justifyOffset": 0,
+                        "align": "start",
+                        "justify": "start",
+                        "contentFrame": {
+                          "left": 929.83,
+                          "top": 581.3,
+                          "width": 894.17,
+                          "height": 66
+                        },
+                        "items": [
+                          {
+                            "path": "0.2.2.1.1.0",
+                            "frame": {
+                              "left": 929.83,
+                              "top": 581.3,
+                              "width": 894.17,
+                              "height": 34.8
+                            }
+                          },
+                          {
+                            "path": "0.2.2.1.1.1",
+                            "frame": {
+                              "left": 929.83,
+                              "top": 622.1,
+                              "width": 894.17,
+                              "height": 25.2
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "padding": {
+                      "top": 0,
+                      "right": 0,
+                      "bottom": 0,
+                      "left": 0
+                    },
+                    "gap": 22,
+                    "effectiveGap": 22,
+                    "justifyOffset": 0,
+                    "align": "start",
+                    "justify": "start",
+                    "contentFrame": {
+                      "left": 849.83,
+                      "top": 581.3,
+                      "width": 974.17,
+                      "height": 66
+                    },
+                    "items": [
+                      {
+                        "path": "0.2.2.1.0",
+                        "frame": {
+                          "left": 849.83,
+                          "top": 581.3,
+                          "width": 58,
+                          "height": 58
+                        }
+                      },
+                      {
+                        "path": "0.2.2.1.1",
+                        "frame": {
+                          "left": 929.83,
+                          "top": 581.3,
+                          "width": 894.17,
+                          "height": 66
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "path": "0.2.2.2",
+                    "kind": "row",
+                    "name": "step-3",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fill",
+                        "value": 1
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 80,
+                      "height": 66
+                    },
+                    "frame": {
+                      "left": 849.83,
+                      "top": 675.3,
+                      "width": 974.17,
+                      "height": 66
+                    },
+                    "children": [
+                      {
+                        "path": "0.2.2.2.0",
+                        "kind": "panel",
+                        "name": "step-number-3",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fixed",
+                            "value": 58
+                          },
+                          "height": {
+                            "mode": "fixed",
+                            "value": 58
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 40,
+                          "height": 31.2
+                        },
+                        "frame": {
+                          "left": 849.83,
+                          "top": 675.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "snappedFrame": {
+                          "left": 849.83,
+                          "top": 675.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "children": [
+                          {
+                            "path": "0.2.2.2.0.0",
+                            "kind": "text",
+                            "name": "step-number-text-3",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fixed",
+                                "value": 40
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 40,
+                              "height": 31.2
+                            },
+                            "frame": {
+                              "left": 858,
+                              "top": 688,
+                              "width": 40,
+                              "height": 32
+                            },
+                            "snappedFrame": {
+                              "left": 858,
+                              "top": 688,
+                              "width": 40,
+                              "height": 32
+                            },
+                            "children": [],
+                            "text": "3",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/qpg3ex0n",
+                              "id": "20",
+                              "kind": "shape"
+                            }
+                          }
+                        ],
+                        "padding": {
+                          "top": 0,
+                          "right": 0,
+                          "bottom": 0,
+                          "left": 0
+                        },
+                        "align": "center",
+                        "justify": "center",
+                        "contentFrame": {
+                          "left": 849.83,
+                          "top": 675.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "element": {
+                          "aid": "sh/2t83itgf",
+                          "id": "19",
+                          "kind": "shape"
+                        }
+                      },
+                      {
+                        "path": "0.2.2.2.1",
+                        "kind": "column",
+                        "name": "step-copy-3",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 66
+                        },
+                        "frame": {
+                          "left": 929.83,
+                          "top": 675.3,
+                          "width": 894.17,
+                          "height": 66
+                        },
+                        "children": [
+                          {
+                            "path": "0.2.2.2.1.0",
+                            "kind": "text",
+                            "name": "step-heading-3",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 34.8
+                            },
+                            "frame": {
+                              "left": 929.83,
+                              "top": 675.3,
+                              "width": 894.17,
+                              "height": 34.8
+                            },
+                            "snappedFrame": {
+                              "left": 930,
+                              "top": 676,
+                              "width": 894,
+                              "height": 36
+                            },
+                            "children": [],
+                            "text": "Alarm menyala",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/fa9w3m94",
+                              "id": "21",
+                              "kind": "shape"
+                            }
+                          },
+                          {
+                            "path": "0.2.2.2.1.1",
+                            "kind": "text",
+                            "name": "step-body-3",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 25.2
+                            },
+                            "frame": {
+                              "left": 929.83,
+                              "top": 716.1,
+                              "width": 894.17,
+                              "height": 25.2
+                            },
+                            "snappedFrame": {
+                              "left": 930,
+                              "top": 716,
+                              "width": 894,
+                              "height": 26
+                            },
+                            "children": [],
+                            "text": "Perangkat target menerima modal darurat dan bunyi alarm.",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/8v6psfil",
+                              "id": "22",
+                              "kind": "shape"
+                            }
+                          }
+                        ],
+                        "padding": {
+                          "top": 0,
+                          "right": 0,
+                          "bottom": 0,
+                          "left": 0
+                        },
+                        "gap": 6,
+                        "effectiveGap": 6,
+                        "justifyOffset": 0,
+                        "align": "start",
+                        "justify": "start",
+                        "contentFrame": {
+                          "left": 929.83,
+                          "top": 675.3,
+                          "width": 894.17,
+                          "height": 66
+                        },
+                        "items": [
+                          {
+                            "path": "0.2.2.2.1.0",
+                            "frame": {
+                              "left": 929.83,
+                              "top": 675.3,
+                              "width": 894.17,
+                              "height": 34.8
+                            }
+                          },
+                          {
+                            "path": "0.2.2.2.1.1",
+                            "frame": {
+                              "left": 929.83,
+                              "top": 716.1,
+                              "width": 894.17,
+                              "height": 25.2
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "padding": {
+                      "top": 0,
+                      "right": 0,
+                      "bottom": 0,
+                      "left": 0
+                    },
+                    "gap": 22,
+                    "effectiveGap": 22,
+                    "justifyOffset": 0,
+                    "align": "start",
+                    "justify": "start",
+                    "contentFrame": {
+                      "left": 849.83,
+                      "top": 675.3,
+                      "width": 974.17,
+                      "height": 66
+                    },
+                    "items": [
+                      {
+                        "path": "0.2.2.2.0",
+                        "frame": {
+                          "left": 849.83,
+                          "top": 675.3,
+                          "width": 58,
+                          "height": 58
+                        }
+                      },
+                      {
+                        "path": "0.2.2.2.1",
+                        "frame": {
+                          "left": 929.83,
+                          "top": 675.3,
+                          "width": 894.17,
+                          "height": 66
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "path": "0.2.2.3",
+                    "kind": "row",
+                    "name": "step-4",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fill",
+                        "value": 1
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 80,
+                      "height": 66
+                    },
+                    "frame": {
+                      "left": 849.83,
+                      "top": 769.3,
+                      "width": 974.17,
+                      "height": 66
+                    },
+                    "children": [
+                      {
+                        "path": "0.2.2.3.0",
+                        "kind": "panel",
+                        "name": "step-number-4",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fixed",
+                            "value": 58
+                          },
+                          "height": {
+                            "mode": "fixed",
+                            "value": 58
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 40,
+                          "height": 31.2
+                        },
+                        "frame": {
+                          "left": 849.83,
+                          "top": 769.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "snappedFrame": {
+                          "left": 849.83,
+                          "top": 769.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "children": [
+                          {
+                            "path": "0.2.2.3.0.0",
+                            "kind": "text",
+                            "name": "step-number-text-4",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fixed",
+                                "value": 40
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 40,
+                              "height": 31.2
+                            },
+                            "frame": {
+                              "left": 858,
+                              "top": 782,
+                              "width": 40,
+                              "height": 32
+                            },
+                            "snappedFrame": {
+                              "left": 858,
+                              "top": 782,
+                              "width": 40,
+                              "height": 32
+                            },
+                            "children": [],
+                            "text": "4",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/qd4vmtwr",
+                              "id": "24",
+                              "kind": "shape"
+                            }
+                          }
+                        ],
+                        "padding": {
+                          "top": 0,
+                          "right": 0,
+                          "bottom": 0,
+                          "left": 0
+                        },
+                        "align": "center",
+                        "justify": "center",
+                        "contentFrame": {
+                          "left": 849.83,
+                          "top": 769.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "element": {
+                          "aid": "sh/xczed8v6",
+                          "id": "23",
+                          "kind": "shape"
+                        }
+                      },
+                      {
+                        "path": "0.2.2.3.1",
+                        "kind": "column",
+                        "name": "step-copy-4",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 66
+                        },
+                        "frame": {
+                          "left": 929.83,
+                          "top": 769.3,
+                          "width": 894.17,
+                          "height": 66
+                        },
+                        "children": [
+                          {
+                            "path": "0.2.2.3.1.0",
+                            "kind": "text",
+                            "name": "step-heading-4",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 34.8
+                            },
+                            "frame": {
+                              "left": 929.83,
+                              "top": 769.3,
+                              "width": 894.17,
+                              "height": 34.8
+                            },
+                            "snappedFrame": {
+                              "left": 930,
+                              "top": 770,
+                              "width": 894,
+                              "height": 36
+                            },
+                            "children": [],
+                            "text": "Terima & Mengerti",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/fyxobm58",
+                              "id": "25",
+                              "kind": "shape"
+                            }
+                          },
+                          {
+                            "path": "0.2.2.3.1.1",
+                            "kind": "text",
+                            "name": "step-body-4",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 25.2
+                            },
+                            "frame": {
+                              "left": 929.83,
+                              "top": 810.1,
+                              "width": 894.17,
+                              "height": 25.2
+                            },
+                            "snappedFrame": {
+                              "left": 930,
+                              "top": 810,
+                              "width": 894,
+                              "height": 26
+                            },
+                            "children": [],
+                            "text": "Penerima menekan tombol ini untuk menghentikan alarm di perangkatnya.",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/8jqh0fep",
+                              "id": "26",
+                              "kind": "shape"
+                            }
+                          }
+                        ],
+                        "padding": {
+                          "top": 0,
+                          "right": 0,
+                          "bottom": 0,
+                          "left": 0
+                        },
+                        "gap": 6,
+                        "effectiveGap": 6,
+                        "justifyOffset": 0,
+                        "align": "start",
+                        "justify": "start",
+                        "contentFrame": {
+                          "left": 929.83,
+                          "top": 769.3,
+                          "width": 894.17,
+                          "height": 66
+                        },
+                        "items": [
+                          {
+                            "path": "0.2.2.3.1.0",
+                            "frame": {
+                              "left": 929.83,
+                              "top": 769.3,
+                              "width": 894.17,
+                              "height": 34.8
+                            }
+                          },
+                          {
+                            "path": "0.2.2.3.1.1",
+                            "frame": {
+                              "left": 929.83,
+                              "top": 810.1,
+                              "width": 894.17,
+                              "height": 25.2
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "padding": {
+                      "top": 0,
+                      "right": 0,
+                      "bottom": 0,
+                      "left": 0
+                    },
+                    "gap": 22,
+                    "effectiveGap": 22,
+                    "justifyOffset": 0,
+                    "align": "start",
+                    "justify": "start",
+                    "contentFrame": {
+                      "left": 849.83,
+                      "top": 769.3,
+                      "width": 974.17,
+                      "height": 66
+                    },
+                    "items": [
+                      {
+                        "path": "0.2.2.3.0",
+                        "frame": {
+                          "left": 849.83,
+                          "top": 769.3,
+                          "width": 58,
+                          "height": 58
+                        }
+                      },
+                      {
+                        "path": "0.2.2.3.1",
+                        "frame": {
+                          "left": 929.83,
+                          "top": 769.3,
+                          "width": 894.17,
+                          "height": 66
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "padding": {
+                  "top": 0,
+                  "right": 0,
+                  "bottom": 0,
+                  "left": 0
+                },
+                "gap": 28,
+                "effectiveGap": 28,
+                "justifyOffset": 117.5,
+                "align": "start",
+                "justify": "center",
+                "contentFrame": {
+                  "left": 849.83,
+                  "top": 369.8,
+                  "width": 974.17,
+                  "height": 583
+                },
+                "items": [
+                  {
+                    "path": "0.2.2.0",
+                    "frame": {
+                      "left": 849.83,
+                      "top": 487.3,
+                      "width": 974.17,
+                      "height": 66
+                    }
+                  },
+                  {
+                    "path": "0.2.2.1",
+                    "frame": {
+                      "left": 849.83,
+                      "top": 581.3,
+                      "width": 974.17,
+                      "height": 66
+                    }
+                  },
+                  {
+                    "path": "0.2.2.2",
+                    "frame": {
+                      "left": 849.83,
+                      "top": 675.3,
+                      "width": 974.17,
+                      "height": 66
+                    }
+                  },
+                  {
+                    "path": "0.2.2.3",
+                    "frame": {
+                      "left": 849.83,
+                      "top": 769.3,
+                      "width": 974.17,
+                      "height": 66
+                    }
+                  }
+                ]
+              },
+              {
+                "path": "0.2.3",
+                "kind": "row",
+                "name": "footer",
+                "requestedSize": {
+                  "width": {
+                    "mode": "fill",
+                    "value": 1
+                  },
+                  "height": {
+                    "mode": "hug"
+                  }
+                },
+                "intrinsicSize": {
+                  "width": 1280,
+                  "height": 19.2
+                },
+                "frame": {
+                  "left": 96,
+                  "top": 986.8,
+                  "width": 1728,
+                  "height": 19.2
+                },
+                "children": [
+                  {
+                    "path": "0.2.3.0",
+                    "kind": "text",
+                    "name": "footer-left",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fixed",
+                        "value": 1100
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 1100,
+                      "height": 19.2
+                    },
+                    "frame": {
+                      "left": 96,
+                      "top": 986,
+                      "width": 1100,
+                      "height": 20
+                    },
+                    "snappedFrame": {
+                      "left": 96,
+                      "top": 986,
+                      "width": 1100,
+                      "height": 20
+                    },
+                    "children": [],
+                    "text": "Gunakan sesuai prosedur emergency response",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/x4nap4r6",
+                      "id": "27",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.3.1",
+                    "kind": "text",
+                    "name": "footer-date",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fixed",
+                        "value": 180
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 180,
+                      "height": 19.2
+                    },
+                    "frame": {
+                      "left": 1644,
+                      "top": 986,
+                      "width": 180,
+                      "height": 20
+                    },
+                    "snappedFrame": {
+                      "left": 1644,
+                      "top": 986,
+                      "width": 180,
+                      "height": 20
+                    },
+                    "children": [],
+                    "text": "Mei 2026",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/q1orytsv",
+                      "id": "28",
+                      "kind": "shape"
+                    }
+                  }
+                ],
+                "padding": {
+                  "top": 0,
+                  "right": 0,
+                  "bottom": 0,
+                  "left": 0
+                },
+                "gap": 0,
+                "effectiveGap": 448,
+                "justifyOffset": 0,
+                "align": "center",
+                "justify": "between",
+                "contentFrame": {
+                  "left": 96,
+                  "top": 986.8,
+                  "width": 1728,
+                  "height": 19.2
+                },
+                "items": [
+                  {
+                    "path": "0.2.3.0",
+                    "frame": {
+                      "left": 96,
+                      "top": 986,
+                      "width": 1100,
+                      "height": 20
+                    }
+                  },
+                  {
+                    "path": "0.2.3.1",
+                    "frame": {
+                      "left": 1644,
+                      "top": 986,
+                      "width": 180,
+                      "height": 20
+                    }
+                  }
+                ]
+              }
+            ],
+            "padding": {
+              "top": 74,
+              "right": 96,
+              "bottom": 74,
+              "left": 96
+            },
+            "columnGap": 58,
+            "rowGap": 34,
+            "alignItems": "stretch",
+            "justifyItems": "stretch",
+            "contentFrame": {
+              "left": 96,
+              "top": 74,
+              "width": 1728,
+              "height": 932
+            },
+            "columns": [
+              {
+                "mode": "fr",
+                "value": 0.75
+              },
+              {
+                "mode": "fr",
+                "value": 1.05
+              }
+            ],
+            "rows": [
+              "auto",
+              {
+                "mode": "fr",
+                "value": 1
+              },
+              "auto"
+            ],
+            "autoRows": "auto",
+            "resolvedRows": [
+              "auto",
+              {
+                "mode": "fr",
+                "value": 1
+              },
+              "auto"
+            ],
+            "columnSizes": [
+              695.83,
+              974.17
+            ],
+            "rowSizes": [
+              261.8,
+              583,
+              19.2
+            ],
+            "cells": [
+              {
+                "path": "0.2.0",
+                "column": 0,
+                "row": 0,
+                "columnSpan": 2,
+                "rowSpan": 1,
+                "cellFrame": {
+                  "left": 96,
+                  "top": 74,
+                  "width": 1728,
+                  "height": 261.8
+                }
+              },
+              {
+                "path": "0.2.1",
+                "column": 0,
+                "row": 1,
+                "columnSpan": 1,
+                "rowSpan": 1,
+                "cellFrame": {
+                  "left": 96,
+                  "top": 369.8,
+                  "width": 695.83,
+                  "height": 583
+                }
+              },
+              {
+                "path": "0.2.2",
+                "column": 1,
+                "row": 1,
+                "columnSpan": 1,
+                "rowSpan": 1,
+                "cellFrame": {
+                  "left": 849.83,
+                  "top": 369.8,
+                  "width": 974.17,
+                  "height": 583
+                }
+              },
+              {
+                "path": "0.2.3",
+                "column": 0,
+                "row": 2,
+                "columnSpan": 2,
+                "rowSpan": 1,
+                "cellFrame": {
+                  "left": 96,
+                  "top": 986.8,
+                  "width": 1728,
+                  "height": 19.2
+                }
+              }
+            ]
+          }
+        ],
+        "padding": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        },
+        "alignItems": "stretch",
+        "justifyItems": "stretch",
+        "contentFrame": {
+          "left": 0,
+          "top": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "items": [
+          {
+            "path": "0.0",
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          {
+            "path": "0.1",
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 34,
+              "height": 1080
+            }
+          },
+          {
+            "path": "0.2",
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

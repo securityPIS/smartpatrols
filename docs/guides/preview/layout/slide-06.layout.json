@@ -1,0 +1,3509 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/3olrob",
+    "id": "3olrob",
+    "slide": 6,
+    "layoutId": "c1d5240e-19de-4d2d-b7c7-ed93ffc45fa2",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "2a9442f0-0a06-4ea0-b863-0bc5c548ba8b",
+    "masterLayoutName": "Master",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1920,
+      "height": 1080
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Aptos",
+      "Aptos Display",
+      "Cascadia Mono"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "c1d5240e-19de-4d2d-b7c7-ed93ffc45fa2",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "2a9442f0-0a06-4ea0-b863-0bc5c548ba8b",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "2a9442f0-0a06-4ea0-b863-0bc5c548ba8b",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/l87ed8ba",
+      "id": "1",
+      "name": "background",
+      "bbox": [
+        0,
+        0,
+        1920,
+        1080
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.0"
+      },
+      "geometry": "rect",
+      "fillColor": "#06111F"
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ahoza1gv",
+      "id": "2",
+      "name": "top-accent",
+      "bbox": [
+        0,
+        0,
+        1920,
+        10
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.1"
+      },
+      "geometry": "rect",
+      "fillColor": "#20C7A8"
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/32lszqtc",
+      "id": "3",
+      "name": "label-temuan-dan-insiden",
+      "bbox": [
+        88,
+        70,
+        840,
+        22
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.0.0"
+      },
+      "geometry": "rect",
+      "text": "TEMUAN DAN INSIDEN",
+      "textPreview": "TEMUAN DAN INSIDEN",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Cascadia Mono",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "TEMUAN DAN INSIDEN"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "TEMUAN DAN INSIDEN",
+          "runs": [
+            {
+              "index": 1,
+              "text": "TEMUAN DAN INSIDEN",
+              "fontSize": 18,
+              "typeface": "Cascadia Mono",
+              "color": "#25D4E8",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/szqtcj6t",
+      "id": "4",
+      "name": "slide-title",
+      "bbox": [
+        88,
+        110,
+        1150,
+        150
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.0.1"
+      },
+      "geometry": "rect",
+      "text": "Catatan 5W1H membuat tindak lanjut lebih cepat",
+      "textPreview": "Catatan 5W1H membuat tindak lanjut lebih cepat",
+      "resolvedFontSize": 56,
+      "resolvedTextStyle": {
+        "fontSize": 56,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Catatan 5W1H membuat tindak lanjut lebih"
+          },
+          {
+            "index": 2,
+            "text": "cepat"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Catatan 5W1H membuat tindak lanjut lebih cepat",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Catatan 5W1H membuat tindak lanjut lebih cepat",
+              "fontSize": 56,
+              "typeface": "Aptos Display",
+              "color": "#F1FAF8",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lkjm1cfa",
+      "id": "5",
+      "name": "title-rule",
+      "bbox": [
+        88,
+        278,
+        180,
+        5
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.0.2"
+      },
+      "geometry": "rect",
+      "fillColor": "#20C7A8",
+      "lineColor": "#20C7A8",
+      "lineWidth": 0
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/at47y1kr",
+      "id": "6",
+      "name": "slide-subtitle",
+      "bbox": [
+        88,
+        300,
+        918,
+        32
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.0.3"
+      },
+      "geometry": "rect",
+      "text": "Petugas mencatat bukti dan kondisi awal. PIC/Admin melanjutkan progress dan closing.",
+      "textPreview": "Petugas mencatat bukti dan kondisi awal. PIC/Admin melanjutkan progress dan closing.",
+      "resolvedFontSize": 26,
+      "resolvedTextStyle": {
+        "fontSize": 26,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Petugas mencatat bukti dan kondisi awal. PIC/Admin melanjutkan progress dan closing."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Petugas mencatat bukti dan kondisi awal. PIC/Admin melanjutkan progress dan closing.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Petugas mencatat bukti dan kondisi awal. PIC/Admin melanjutkan progress dan closing.",
+              "fontSize": 26,
+              "typeface": "Aptos",
+              "color": "#9DB4C4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/3ex0nuxc",
+      "id": "7",
+      "name": "incident-5w1h",
+      "bbox": [
+        88,
+        365.8,
+        751.11,
+        591
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1"
+      },
+      "geometry": "roundRect",
+      "fillColor": "rgba(255, 255, 255, 0.06)",
+      "lineColor": "rgba(185, 226, 235, 0.2)",
+      "lineWidth": 1.5
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/w3m94fu1",
+      "id": "8",
+      "name": "fivew-title",
+      "bbox": [
+        130,
+        524,
+        668,
+        92
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.0.0"
+      },
+      "geometry": "rect",
+      "text": "5W1H",
+      "textPreview": "5W1H",
+      "resolvedFontSize": 76,
+      "resolvedTextStyle": {
+        "fontSize": 76,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "5W1H"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "5W1H",
+          "runs": [
+            {
+              "index": 1,
+              "text": "5W1H",
+              "fontSize": 76,
+              "typeface": "Aptos Display",
+              "color": "#F2C75C",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/loj2t83i",
+      "id": "9",
+      "name": "fivew-body",
+      "bbox": [
+        130,
+        634,
+        668,
+        68
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.0.1"
+      },
+      "geometry": "rect",
+      "text": "Apa terjadi, dimana, kapan, siapa melapor, mengapa diduga terjadi, dan bagaimana tindak awalnya.",
+      "textPreview": "Apa terjadi, dimana, kapan, siapa melapor, mengapa diduga terjadi, dan bagaimana tindak awalnya.",
+      "resolvedFontSize": 28,
+      "resolvedTextStyle": {
+        "fontSize": 28,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Apa terjadi, dimana, kapan, siapa melapor, mengapa"
+          },
+          {
+            "index": 2,
+            "text": "diduga terjadi, dan bagaimana tindak awalnya."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Apa terjadi, dimana, kapan, siapa melapor, mengapa diduga terjadi, dan bagaimana tindak awalnya.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Apa terjadi, dimana, kapan, siapa melapor, mengapa diduga terjadi, dan bagaimana tindak awalnya.",
+              "fontSize": 28,
+              "typeface": "Aptos",
+              "color": "#F1FAF8"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9knih4by",
+      "id": "10",
+      "name": "fivew-rule",
+      "bbox": [
+        130,
+        722,
+        210,
+        5
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.0.2"
+      },
+      "geometry": "rect",
+      "fillColor": "#F2C75C",
+      "lineColor": "#F2C75C",
+      "lineWidth": 0
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kzupwb2h",
+      "id": "11",
+      "name": "fivew-note",
+      "bbox": [
+        130,
+        746,
+        668,
+        54
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.0.3"
+      },
+      "geometry": "rect",
+      "text": "Foto + keterangan singkat lebih berguna daripada narasi panjang tanpa bukti.",
+      "textPreview": "Foto + keterangan singkat lebih berguna daripada narasi panjang tanpa bukti.",
+      "resolvedFontSize": 22,
+      "resolvedTextStyle": {
+        "fontSize": 22,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Foto + keterangan singkat lebih berguna daripada narasi panjang tanpa"
+          },
+          {
+            "index": 2,
+            "text": "bukti."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Foto + keterangan singkat lebih berguna daripada narasi panjang tanpa bukti.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Foto + keterangan singkat lebih berguna daripada narasi panjang tanpa bukti.",
+              "fontSize": 22,
+              "typeface": "Aptos",
+              "color": "#9DB4C4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/re1w7mp0",
+      "id": "12",
+      "name": "step-number-1",
+      "bbox": [
+        893.11,
+        490.3,
+        58,
+        58
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.0.0"
+      },
+      "geometry": "roundRect",
+      "fillColor": "#F2C75C"
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2t83itgf",
+      "id": "13",
+      "name": "step-number-text-1",
+      "bbox": [
+        902,
+        504,
+        40,
+        32
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.0.0.0"
+      },
+      "geometry": "rect",
+      "text": "1",
+      "textPreview": "1",
+      "resolvedFontSize": 26,
+      "resolvedTextStyle": {
+        "fontSize": 26,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "center"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "1"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "1",
+          "runs": [
+            {
+              "index": 1,
+              "text": "1",
+              "fontSize": 26,
+              "typeface": "Aptos Display",
+              "color": "#06111F",
+              "bold": true,
+              "alignment": "center"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9w3m94fu",
+      "id": "14",
+      "name": "step-heading-1",
+      "bbox": [
+        974,
+        490,
+        858,
+        36
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.0.1.0"
+      },
+      "geometry": "rect",
+      "text": "Checkpoint TEMUAN atau Lapor Baru",
+      "textPreview": "Checkpoint TEMUAN atau Lapor Baru",
+      "resolvedFontSize": 29,
+      "resolvedTextStyle": {
+        "fontSize": 29,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Checkpoint TEMUAN atau Lapor Baru"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Checkpoint TEMUAN atau Lapor Baru",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Checkpoint TEMUAN atau Lapor Baru",
+              "fontSize": 29,
+              "typeface": "Aptos Display",
+              "color": "#F1FAF8",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kb6xkf6d",
+      "id": "15",
+      "name": "step-body-1",
+      "bbox": [
+        974,
+        532,
+        858,
+        26
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.0.1.1"
+      },
+      "geometry": "rect",
+      "text": "Gunakan Lapor Baru jika insiden tidak berasal dari titik checkpoint.",
+      "textPreview": "Gunakan Lapor Baru jika insiden tidak berasal dari titik checkpoint.",
+      "resolvedFontSize": 21,
+      "resolvedTextStyle": {
+        "fontSize": 21,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Gunakan Lapor Baru jika insiden tidak berasal dari titik checkpoint."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Gunakan Lapor Baru jika insiden tidak berasal dari titik checkpoint.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Gunakan Lapor Baru jika insiden tidak berasal dari titik checkpoint.",
+              "fontSize": 21,
+              "typeface": "Aptos",
+              "color": "#9DB4C4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/rqd4vmtw",
+      "id": "16",
+      "name": "step-number-2",
+      "bbox": [
+        893.11,
+        582.3,
+        58,
+        58
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.1.0"
+      },
+      "geometry": "roundRect",
+      "fillColor": "#F2C75C"
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/25kb6xkf",
+      "id": "17",
+      "name": "step-number-text-2",
+      "bbox": [
+        902,
+        596,
+        40,
+        32
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.1.0.0"
+      },
+      "geometry": "rect",
+      "text": "2",
+      "textPreview": "2",
+      "resolvedFontSize": 26,
+      "resolvedTextStyle": {
+        "fontSize": 26,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "center"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "2"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "2",
+          "runs": [
+            {
+              "index": 1,
+              "text": "2",
+              "fontSize": 26,
+              "typeface": "Aptos Display",
+              "color": "#06111F",
+              "bold": true,
+              "alignment": "center"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/94fu18jq",
+      "id": "18",
+      "name": "step-heading-2",
+      "bbox": [
+        974,
+        582,
+        858,
+        36
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.1.1.0"
+      },
+      "geometry": "rect",
+      "text": "Lengkapi bukti awal",
+      "textPreview": "Lengkapi bukti awal",
+      "resolvedFontSize": 29,
+      "resolvedTextStyle": {
+        "fontSize": 29,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Lengkapi bukti awal"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Lengkapi bukti awal",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Lengkapi bukti awal",
+              "fontSize": 29,
+              "typeface": "Aptos Display",
+              "color": "#F1FAF8",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kjm1cfa9",
+      "id": "19",
+      "name": "step-body-2",
+      "bbox": [
+        974,
+        624,
+        858,
+        26
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.1.1.1"
+      },
+      "geometry": "rect",
+      "text": "Deskripsi, penyebab, tindak lanjut awal, foto, dan lokasi checkpoint wajib jelas.",
+      "textPreview": "Deskripsi, penyebab, tindak lanjut awal, foto, dan lokasi checkpoint wajib jelas.",
+      "resolvedFontSize": 21,
+      "resolvedTextStyle": {
+        "fontSize": 21,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Deskripsi, penyebab, tindak lanjut awal, foto, dan lokasi checkpoint wajib jelas."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Deskripsi, penyebab, tindak lanjut awal, foto, dan lokasi checkpoint wajib jelas.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Deskripsi, penyebab, tindak lanjut awal, foto, dan lokasi checkpoint wajib jelas.",
+              "fontSize": 21,
+              "typeface": "Aptos",
+              "color": "#9DB4C4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wfyxobm5",
+      "id": "20",
+      "name": "step-number-3",
+      "bbox": [
+        893.11,
+        674.3,
+        58,
+        58
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.2.0"
+      },
+      "geometry": "roundRect",
+      "fillColor": "#25D4E8"
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/l0rqd4vm",
+      "id": "21",
+      "name": "step-number-text-3",
+      "bbox": [
+        902,
+        688,
+        40,
+        32
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.2.0.0"
+      },
+      "geometry": "rect",
+      "text": "3",
+      "textPreview": "3",
+      "resolvedFontSize": 26,
+      "resolvedTextStyle": {
+        "fontSize": 26,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "center"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "3"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "3",
+          "runs": [
+            {
+              "index": 1,
+              "text": "3",
+              "fontSize": 26,
+              "typeface": "Aptos Display",
+              "color": "#06111F",
+              "bold": true,
+              "alignment": "center"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 22,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ed8bat47",
+      "id": "22",
+      "name": "step-heading-3",
+      "bbox": [
+        974,
+        674,
+        858,
+        36
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.2.1.0"
+      },
+      "geometry": "rect",
+      "text": "Pantau status",
+      "textPreview": "Pantau status",
+      "resolvedFontSize": 29,
+      "resolvedTextStyle": {
+        "fontSize": 29,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Pantau status"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Pantau status",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Pantau status",
+              "fontSize": 29,
+              "typeface": "Aptos Display",
+              "color": "#F1FAF8",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 23,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7u54zido",
+      "id": "23",
+      "name": "step-body-3",
+      "bbox": [
+        974,
+        716,
+        858,
+        26
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.2.1.1"
+      },
+      "geometry": "rect",
+      "text": "Temuan terbuka sampai PIC/Admin menambahkan progress dan menutup laporan.",
+      "textPreview": "Temuan terbuka sampai PIC/Admin menambahkan progress dan menutup laporan.",
+      "resolvedFontSize": 21,
+      "resolvedTextStyle": {
+        "fontSize": 21,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Temuan terbuka sampai PIC/Admin menambahkan progress dan menutup laporan."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Temuan terbuka sampai PIC/Admin menambahkan progress dan menutup laporan.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Temuan terbuka sampai PIC/Admin menambahkan progress dan menutup laporan.",
+              "fontSize": 21,
+              "typeface": "Aptos",
+              "color": "#9DB4C4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 24,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wra5gbq1",
+      "id": "24",
+      "name": "step-number-4",
+      "bbox": [
+        893.11,
+        766.3,
+        58,
+        58
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.3.0"
+      },
+      "geometry": "roundRect",
+      "fillColor": "#F05268"
+    },
+    {
+      "order": 25,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lc7u54zi",
+      "id": "25",
+      "name": "step-number-text-4",
+      "bbox": [
+        902,
+        780,
+        40,
+        32
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.3.0.0"
+      },
+      "geometry": "rect",
+      "text": "4",
+      "textPreview": "4",
+      "resolvedFontSize": 26,
+      "resolvedTextStyle": {
+        "fontSize": 26,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "center"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "4"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "4",
+          "runs": [
+            {
+              "index": 1,
+              "text": "4",
+              "fontSize": 26,
+              "typeface": "Aptos Display",
+              "color": "#06111F",
+              "bold": true,
+              "alignment": "center"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 26,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/eloj2t83",
+      "id": "26",
+      "name": "step-heading-4",
+      "bbox": [
+        974,
+        766,
+        858,
+        36
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.3.1.0"
+      },
+      "geometry": "rect",
+      "text": "Jangan hapus bukti lokal",
+      "textPreview": "Jangan hapus bukti lokal",
+      "resolvedFontSize": 29,
+      "resolvedTextStyle": {
+        "fontSize": 29,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Jangan hapus bukti lokal"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Jangan hapus bukti lokal",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Jangan hapus bukti lokal",
+              "fontSize": 29,
+              "typeface": "Aptos Display",
+              "color": "#F1FAF8",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 27,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/36hcrmhk",
+      "id": "27",
+      "name": "step-body-4",
+      "bbox": [
+        974,
+        808,
+        858,
+        26
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.3.1.1"
+      },
+      "geometry": "rect",
+      "text": "Saat offline, foto masih bisa tertahan di perangkat sampai upload selesai.",
+      "textPreview": "Saat offline, foto masih bisa tertahan di perangkat sampai upload selesai.",
+      "resolvedFontSize": 21,
+      "resolvedTextStyle": {
+        "fontSize": 21,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Saat offline, foto masih bisa tertahan di perangkat sampai upload selesai."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Saat offline, foto masih bisa tertahan di perangkat sampai upload selesai.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Saat offline, foto masih bisa tertahan di perangkat sampai upload selesai.",
+              "fontSize": 21,
+              "typeface": "Aptos",
+              "color": "#9DB4C4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 28,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wval87ed",
+      "id": "28",
+      "name": "footer-left",
+      "bbox": [
+        88,
+        990,
+        1100,
+        20
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.3.0"
+      },
+      "geometry": "rect",
+      "text": "SmartPatrol HSSE - Panduan Petugas",
+      "textPreview": "SmartPatrol HSSE - Panduan Petugas",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "fontSize": 16,
+        "typeface": "Cascadia Mono",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "SmartPatrol HSSE - Panduan Petugas"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "SmartPatrol HSSE - Panduan Petugas",
+          "runs": [
+            {
+              "index": 1,
+              "text": "SmartPatrol HSSE - Panduan Petugas",
+              "fontSize": 16,
+              "typeface": "Cascadia Mono",
+              "color": "#6D8494"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 29,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/pg3ex0nu",
+      "id": "29",
+      "name": "footer-date",
+      "bbox": [
+        1652,
+        990,
+        180,
+        20
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.3.1"
+      },
+      "geometry": "rect",
+      "text": "Mei 2026",
+      "textPreview": "Mei 2026",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "fontSize": 16,
+        "typeface": "Cascadia Mono",
+        "alignment": "right"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Mei 2026"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Mei 2026",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Mei 2026",
+              "fontSize": 16,
+              "typeface": "Cascadia Mono",
+              "color": "#6D8494",
+              "alignment": "right"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "composeRuns": [
+    {
+      "index": 1,
+      "frame": {
+        "left": 0,
+        "top": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "baseUnit": 8,
+      "root": {
+        "path": "0",
+        "kind": "layers",
+        "name": "slide-layers",
+        "requestedSize": {
+          "width": {
+            "mode": "fill",
+            "value": 1
+          },
+          "height": {
+            "mode": "fill",
+            "value": 1
+          }
+        },
+        "intrinsicSize": {
+          "width": 0,
+          "height": 10
+        },
+        "frame": {
+          "left": 0,
+          "top": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "children": [
+          {
+            "path": "0.0",
+            "kind": "shape",
+            "name": "background",
+            "requestedSize": {
+              "width": {
+                "mode": "fill",
+                "value": 1
+              },
+              "height": {
+                "mode": "fill",
+                "value": 1
+              }
+            },
+            "intrinsicSize": {
+              "width": 0,
+              "height": 0
+            },
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            },
+            "snappedFrame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            },
+            "children": [],
+            "geometry": "rect",
+            "element": {
+              "aid": "sh/l87ed8ba",
+              "id": "1",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.1",
+            "kind": "shape",
+            "name": "top-accent",
+            "requestedSize": {
+              "width": {
+                "mode": "fill",
+                "value": 1
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 10
+              }
+            },
+            "intrinsicSize": {
+              "width": 0,
+              "height": 10
+            },
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 10
+            },
+            "snappedFrame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 10
+            },
+            "children": [],
+            "geometry": "rect",
+            "element": {
+              "aid": "sh/ahoza1gv",
+              "id": "2",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.2",
+            "kind": "grid",
+            "name": "incident-root",
+            "requestedSize": {
+              "width": {
+                "mode": "fill",
+                "value": 1
+              },
+              "height": {
+                "mode": "fill",
+                "value": 1
+              }
+            },
+            "intrinsicSize": {
+              "width": 230,
+              "height": 489
+            },
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            },
+            "children": [
+              {
+                "path": "0.2.0",
+                "kind": "column",
+                "name": "title-stack",
+                "requestedSize": {
+                  "width": {
+                    "mode": "fill",
+                    "value": 1
+                  },
+                  "height": {
+                    "mode": "hug"
+                  }
+                },
+                "intrinsicSize": {
+                  "width": 1150.79,
+                  "height": 261.8
+                },
+                "frame": {
+                  "left": 88,
+                  "top": 70,
+                  "width": 1744,
+                  "height": 261.8
+                },
+                "children": [
+                  {
+                    "path": "0.2.0.0",
+                    "kind": "text",
+                    "name": "label-temuan-dan-insiden",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fixed",
+                        "value": 840
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 840,
+                      "height": 21.6
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 70,
+                      "width": 840,
+                      "height": 21.6
+                    },
+                    "snappedFrame": {
+                      "left": 88,
+                      "top": 70,
+                      "width": 840,
+                      "height": 22
+                    },
+                    "children": [],
+                    "text": "TEMUAN DAN INSIDEN",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/32lszqtc",
+                      "id": "3",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.0.1",
+                    "kind": "text",
+                    "name": "slide-title",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "wrap",
+                        "max": 1320
+                      },
+                      "height": {
+                        "mode": "fixed",
+                        "value": 150
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 1150.79,
+                      "height": 150
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 109.6,
+                      "width": 1150.79,
+                      "height": 150
+                    },
+                    "snappedFrame": {
+                      "left": 88,
+                      "top": 110,
+                      "width": 1150,
+                      "height": 150
+                    },
+                    "children": [],
+                    "text": "Catatan 5W1H membuat tindak lanjut lebih cepat",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/szqtcj6t",
+                      "id": "4",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.0.2",
+                    "kind": "rule",
+                    "name": "title-rule",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fixed",
+                        "value": 180
+                      },
+                      "height": {
+                        "mode": "fixed",
+                        "value": 5
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 180,
+                      "height": 5
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 277.6,
+                      "width": 180,
+                      "height": 5
+                    },
+                    "snappedFrame": {
+                      "left": 88,
+                      "top": 278,
+                      "width": 180,
+                      "height": 5
+                    },
+                    "children": [],
+                    "weight": 5,
+                    "element": {
+                      "aid": "sh/lkjm1cfa",
+                      "id": "5",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.0.3",
+                    "kind": "text",
+                    "name": "slide-subtitle",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "wrap",
+                        "max": 1180
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 917.1,
+                      "height": 31.2
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 300.6,
+                      "width": 917.1,
+                      "height": 31.2
+                    },
+                    "snappedFrame": {
+                      "left": 88,
+                      "top": 300,
+                      "width": 918,
+                      "height": 32
+                    },
+                    "children": [],
+                    "text": "Petugas mencatat bukti dan kondisi awal. PIC/Admin melanjutkan progress dan closing.",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/at47y1kr",
+                      "id": "6",
+                      "kind": "shape"
+                    }
+                  }
+                ],
+                "padding": {
+                  "top": 0,
+                  "right": 0,
+                  "bottom": 0,
+                  "left": 0
+                },
+                "gap": 18,
+                "effectiveGap": 18,
+                "justifyOffset": 0,
+                "align": "start",
+                "justify": "start",
+                "contentFrame": {
+                  "left": 88,
+                  "top": 70,
+                  "width": 1744,
+                  "height": 261.8
+                },
+                "items": [
+                  {
+                    "path": "0.2.0.0",
+                    "frame": {
+                      "left": 88,
+                      "top": 70,
+                      "width": 840,
+                      "height": 21.6
+                    }
+                  },
+                  {
+                    "path": "0.2.0.1",
+                    "frame": {
+                      "left": 88,
+                      "top": 109.6,
+                      "width": 1150.79,
+                      "height": 150
+                    }
+                  },
+                  {
+                    "path": "0.2.0.2",
+                    "frame": {
+                      "left": 88,
+                      "top": 277.6,
+                      "width": 180,
+                      "height": 5
+                    }
+                  },
+                  {
+                    "path": "0.2.0.3",
+                    "frame": {
+                      "left": 88,
+                      "top": 300.6,
+                      "width": 917.1,
+                      "height": 31.2
+                    }
+                  }
+                ]
+              },
+              {
+                "path": "0.2.1",
+                "kind": "panel",
+                "name": "incident-5w1h",
+                "requestedSize": {
+                  "width": {
+                    "mode": "fill",
+                    "value": 1
+                  },
+                  "height": {
+                    "mode": "fill",
+                    "value": 1
+                  }
+                },
+                "intrinsicSize": {
+                  "width": 84,
+                  "height": 84
+                },
+                "frame": {
+                  "left": 88,
+                  "top": 365.8,
+                  "width": 751.11,
+                  "height": 591
+                },
+                "snappedFrame": {
+                  "left": 88,
+                  "top": 365.8,
+                  "width": 751.11,
+                  "height": 591
+                },
+                "children": [
+                  {
+                    "path": "0.2.1.0",
+                    "kind": "column",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fill",
+                        "value": 1
+                      },
+                      "height": {
+                        "mode": "fill",
+                        "value": 1
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 210,
+                      "height": 216.2
+                    },
+                    "frame": {
+                      "left": 130,
+                      "top": 407.8,
+                      "width": 667.11,
+                      "height": 507
+                    },
+                    "children": [
+                      {
+                        "path": "0.2.1.0.0",
+                        "kind": "text",
+                        "name": "fivew-title",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 91.2
+                        },
+                        "frame": {
+                          "left": 130,
+                          "top": 523.2,
+                          "width": 667.11,
+                          "height": 91.2
+                        },
+                        "snappedFrame": {
+                          "left": 130,
+                          "top": 524,
+                          "width": 668,
+                          "height": 92
+                        },
+                        "children": [],
+                        "text": "5W1H",
+                        "transform": "none",
+                        "element": {
+                          "aid": "sh/w3m94fu1",
+                          "id": "8",
+                          "kind": "shape"
+                        }
+                      },
+                      {
+                        "path": "0.2.1.0.1",
+                        "kind": "text",
+                        "name": "fivew-body",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 33.6
+                        },
+                        "frame": {
+                          "left": 130,
+                          "top": 634.4,
+                          "width": 667.11,
+                          "height": 67.2
+                        },
+                        "snappedFrame": {
+                          "left": 130,
+                          "top": 634,
+                          "width": 668,
+                          "height": 68
+                        },
+                        "children": [],
+                        "text": "Apa terjadi, dimana, kapan, siapa melapor, mengapa diduga terjadi, dan bagaimana tindak awalnya.",
+                        "transform": "none",
+                        "element": {
+                          "aid": "sh/loj2t83i",
+                          "id": "9",
+                          "kind": "shape"
+                        }
+                      },
+                      {
+                        "path": "0.2.1.0.2",
+                        "kind": "rule",
+                        "name": "fivew-rule",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fixed",
+                            "value": 210
+                          },
+                          "height": {
+                            "mode": "fixed",
+                            "value": 5
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 210,
+                          "height": 5
+                        },
+                        "frame": {
+                          "left": 130,
+                          "top": 721.6,
+                          "width": 210,
+                          "height": 5
+                        },
+                        "snappedFrame": {
+                          "left": 130,
+                          "top": 722,
+                          "width": 210,
+                          "height": 5
+                        },
+                        "children": [],
+                        "weight": 5,
+                        "element": {
+                          "aid": "sh/9knih4by",
+                          "id": "10",
+                          "kind": "shape"
+                        }
+                      },
+                      {
+                        "path": "0.2.1.0.3",
+                        "kind": "text",
+                        "name": "fivew-note",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 26.4
+                        },
+                        "frame": {
+                          "left": 130,
+                          "top": 746.6,
+                          "width": 667.11,
+                          "height": 52.8
+                        },
+                        "snappedFrame": {
+                          "left": 130,
+                          "top": 746,
+                          "width": 668,
+                          "height": 54
+                        },
+                        "children": [],
+                        "text": "Foto + keterangan singkat lebih berguna daripada narasi panjang tanpa bukti.",
+                        "transform": "none",
+                        "element": {
+                          "aid": "sh/kzupwb2h",
+                          "id": "11",
+                          "kind": "shape"
+                        }
+                      }
+                    ],
+                    "padding": {
+                      "top": 0,
+                      "right": 0,
+                      "bottom": 0,
+                      "left": 0
+                    },
+                    "gap": 20,
+                    "effectiveGap": 20,
+                    "justifyOffset": 115.4,
+                    "align": "start",
+                    "justify": "center",
+                    "contentFrame": {
+                      "left": 130,
+                      "top": 407.8,
+                      "width": 667.11,
+                      "height": 507
+                    },
+                    "items": [
+                      {
+                        "path": "0.2.1.0.0",
+                        "frame": {
+                          "left": 130,
+                          "top": 523.2,
+                          "width": 667.11,
+                          "height": 91.2
+                        }
+                      },
+                      {
+                        "path": "0.2.1.0.1",
+                        "frame": {
+                          "left": 130,
+                          "top": 634.4,
+                          "width": 667.11,
+                          "height": 67.2
+                        }
+                      },
+                      {
+                        "path": "0.2.1.0.2",
+                        "frame": {
+                          "left": 130,
+                          "top": 721.6,
+                          "width": 210,
+                          "height": 5
+                        }
+                      },
+                      {
+                        "path": "0.2.1.0.3",
+                        "frame": {
+                          "left": 130,
+                          "top": 746.6,
+                          "width": 667.11,
+                          "height": 52.8
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "padding": {
+                  "top": 42,
+                  "right": 42,
+                  "bottom": 42,
+                  "left": 42
+                },
+                "align": "start",
+                "justify": "start",
+                "contentFrame": {
+                  "left": 130,
+                  "top": 407.8,
+                  "width": 667.11,
+                  "height": 507
+                },
+                "element": {
+                  "aid": "sh/3ex0nuxc",
+                  "id": "7",
+                  "kind": "shape"
+                }
+              },
+              {
+                "path": "0.2.2",
+                "kind": "column",
+                "name": "incident-flow",
+                "requestedSize": {
+                  "width": {
+                    "mode": "fill",
+                    "value": 1
+                  },
+                  "height": {
+                    "mode": "fill",
+                    "value": 1
+                  }
+                },
+                "intrinsicSize": {
+                  "width": 0,
+                  "height": 342
+                },
+                "frame": {
+                  "left": 893.11,
+                  "top": 365.8,
+                  "width": 938.89,
+                  "height": 591
+                },
+                "children": [
+                  {
+                    "path": "0.2.2.0",
+                    "kind": "row",
+                    "name": "step-1",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fill",
+                        "value": 1
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 80,
+                      "height": 66
+                    },
+                    "frame": {
+                      "left": 893.11,
+                      "top": 490.3,
+                      "width": 938.89,
+                      "height": 66
+                    },
+                    "children": [
+                      {
+                        "path": "0.2.2.0.0",
+                        "kind": "panel",
+                        "name": "step-number-1",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fixed",
+                            "value": 58
+                          },
+                          "height": {
+                            "mode": "fixed",
+                            "value": 58
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 40,
+                          "height": 31.2
+                        },
+                        "frame": {
+                          "left": 893.11,
+                          "top": 490.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "snappedFrame": {
+                          "left": 893.11,
+                          "top": 490.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "children": [
+                          {
+                            "path": "0.2.2.0.0.0",
+                            "kind": "text",
+                            "name": "step-number-text-1",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fixed",
+                                "value": 40
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 40,
+                              "height": 31.2
+                            },
+                            "frame": {
+                              "left": 902,
+                              "top": 504,
+                              "width": 40,
+                              "height": 32
+                            },
+                            "snappedFrame": {
+                              "left": 902,
+                              "top": 504,
+                              "width": 40,
+                              "height": 32
+                            },
+                            "children": [],
+                            "text": "1",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/2t83itgf",
+                              "id": "13",
+                              "kind": "shape"
+                            }
+                          }
+                        ],
+                        "padding": {
+                          "top": 0,
+                          "right": 0,
+                          "bottom": 0,
+                          "left": 0
+                        },
+                        "align": "center",
+                        "justify": "center",
+                        "contentFrame": {
+                          "left": 893.11,
+                          "top": 490.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "element": {
+                          "aid": "sh/re1w7mp0",
+                          "id": "12",
+                          "kind": "shape"
+                        }
+                      },
+                      {
+                        "path": "0.2.2.0.1",
+                        "kind": "column",
+                        "name": "step-copy-1",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 66
+                        },
+                        "frame": {
+                          "left": 973.11,
+                          "top": 490.3,
+                          "width": 858.89,
+                          "height": 66
+                        },
+                        "children": [
+                          {
+                            "path": "0.2.2.0.1.0",
+                            "kind": "text",
+                            "name": "step-heading-1",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 34.8
+                            },
+                            "frame": {
+                              "left": 973.11,
+                              "top": 490.3,
+                              "width": 858.89,
+                              "height": 34.8
+                            },
+                            "snappedFrame": {
+                              "left": 974,
+                              "top": 490,
+                              "width": 858,
+                              "height": 36
+                            },
+                            "children": [],
+                            "text": "Checkpoint TEMUAN atau Lapor Baru",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/9w3m94fu",
+                              "id": "14",
+                              "kind": "shape"
+                            }
+                          },
+                          {
+                            "path": "0.2.2.0.1.1",
+                            "kind": "text",
+                            "name": "step-body-1",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 25.2
+                            },
+                            "frame": {
+                              "left": 973.11,
+                              "top": 531.1,
+                              "width": 858.89,
+                              "height": 25.2
+                            },
+                            "snappedFrame": {
+                              "left": 974,
+                              "top": 532,
+                              "width": 858,
+                              "height": 26
+                            },
+                            "children": [],
+                            "text": "Gunakan Lapor Baru jika insiden tidak berasal dari titik checkpoint.",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/kb6xkf6d",
+                              "id": "15",
+                              "kind": "shape"
+                            }
+                          }
+                        ],
+                        "padding": {
+                          "top": 0,
+                          "right": 0,
+                          "bottom": 0,
+                          "left": 0
+                        },
+                        "gap": 6,
+                        "effectiveGap": 6,
+                        "justifyOffset": 0,
+                        "align": "start",
+                        "justify": "start",
+                        "contentFrame": {
+                          "left": 973.11,
+                          "top": 490.3,
+                          "width": 858.89,
+                          "height": 66
+                        },
+                        "items": [
+                          {
+                            "path": "0.2.2.0.1.0",
+                            "frame": {
+                              "left": 973.11,
+                              "top": 490.3,
+                              "width": 858.89,
+                              "height": 34.8
+                            }
+                          },
+                          {
+                            "path": "0.2.2.0.1.1",
+                            "frame": {
+                              "left": 973.11,
+                              "top": 531.1,
+                              "width": 858.89,
+                              "height": 25.2
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "padding": {
+                      "top": 0,
+                      "right": 0,
+                      "bottom": 0,
+                      "left": 0
+                    },
+                    "gap": 22,
+                    "effectiveGap": 22,
+                    "justifyOffset": 0,
+                    "align": "start",
+                    "justify": "start",
+                    "contentFrame": {
+                      "left": 893.11,
+                      "top": 490.3,
+                      "width": 938.89,
+                      "height": 66
+                    },
+                    "items": [
+                      {
+                        "path": "0.2.2.0.0",
+                        "frame": {
+                          "left": 893.11,
+                          "top": 490.3,
+                          "width": 58,
+                          "height": 58
+                        }
+                      },
+                      {
+                        "path": "0.2.2.0.1",
+                        "frame": {
+                          "left": 973.11,
+                          "top": 490.3,
+                          "width": 858.89,
+                          "height": 66
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "path": "0.2.2.1",
+                    "kind": "row",
+                    "name": "step-2",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fill",
+                        "value": 1
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 80,
+                      "height": 66
+                    },
+                    "frame": {
+                      "left": 893.11,
+                      "top": 582.3,
+                      "width": 938.89,
+                      "height": 66
+                    },
+                    "children": [
+                      {
+                        "path": "0.2.2.1.0",
+                        "kind": "panel",
+                        "name": "step-number-2",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fixed",
+                            "value": 58
+                          },
+                          "height": {
+                            "mode": "fixed",
+                            "value": 58
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 40,
+                          "height": 31.2
+                        },
+                        "frame": {
+                          "left": 893.11,
+                          "top": 582.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "snappedFrame": {
+                          "left": 893.11,
+                          "top": 582.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "children": [
+                          {
+                            "path": "0.2.2.1.0.0",
+                            "kind": "text",
+                            "name": "step-number-text-2",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fixed",
+                                "value": 40
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 40,
+                              "height": 31.2
+                            },
+                            "frame": {
+                              "left": 902,
+                              "top": 596,
+                              "width": 40,
+                              "height": 32
+                            },
+                            "snappedFrame": {
+                              "left": 902,
+                              "top": 596,
+                              "width": 40,
+                              "height": 32
+                            },
+                            "children": [],
+                            "text": "2",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/25kb6xkf",
+                              "id": "17",
+                              "kind": "shape"
+                            }
+                          }
+                        ],
+                        "padding": {
+                          "top": 0,
+                          "right": 0,
+                          "bottom": 0,
+                          "left": 0
+                        },
+                        "align": "center",
+                        "justify": "center",
+                        "contentFrame": {
+                          "left": 893.11,
+                          "top": 582.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "element": {
+                          "aid": "sh/rqd4vmtw",
+                          "id": "16",
+                          "kind": "shape"
+                        }
+                      },
+                      {
+                        "path": "0.2.2.1.1",
+                        "kind": "column",
+                        "name": "step-copy-2",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 66
+                        },
+                        "frame": {
+                          "left": 973.11,
+                          "top": 582.3,
+                          "width": 858.89,
+                          "height": 66
+                        },
+                        "children": [
+                          {
+                            "path": "0.2.2.1.1.0",
+                            "kind": "text",
+                            "name": "step-heading-2",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 34.8
+                            },
+                            "frame": {
+                              "left": 973.11,
+                              "top": 582.3,
+                              "width": 858.89,
+                              "height": 34.8
+                            },
+                            "snappedFrame": {
+                              "left": 974,
+                              "top": 582,
+                              "width": 858,
+                              "height": 36
+                            },
+                            "children": [],
+                            "text": "Lengkapi bukti awal",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/94fu18jq",
+                              "id": "18",
+                              "kind": "shape"
+                            }
+                          },
+                          {
+                            "path": "0.2.2.1.1.1",
+                            "kind": "text",
+                            "name": "step-body-2",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 25.2
+                            },
+                            "frame": {
+                              "left": 973.11,
+                              "top": 623.1,
+                              "width": 858.89,
+                              "height": 25.2
+                            },
+                            "snappedFrame": {
+                              "left": 974,
+                              "top": 624,
+                              "width": 858,
+                              "height": 26
+                            },
+                            "children": [],
+                            "text": "Deskripsi, penyebab, tindak lanjut awal, foto, dan lokasi checkpoint wajib jelas.",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/kjm1cfa9",
+                              "id": "19",
+                              "kind": "shape"
+                            }
+                          }
+                        ],
+                        "padding": {
+                          "top": 0,
+                          "right": 0,
+                          "bottom": 0,
+                          "left": 0
+                        },
+                        "gap": 6,
+                        "effectiveGap": 6,
+                        "justifyOffset": 0,
+                        "align": "start",
+                        "justify": "start",
+                        "contentFrame": {
+                          "left": 973.11,
+                          "top": 582.3,
+                          "width": 858.89,
+                          "height": 66
+                        },
+                        "items": [
+                          {
+                            "path": "0.2.2.1.1.0",
+                            "frame": {
+                              "left": 973.11,
+                              "top": 582.3,
+                              "width": 858.89,
+                              "height": 34.8
+                            }
+                          },
+                          {
+                            "path": "0.2.2.1.1.1",
+                            "frame": {
+                              "left": 973.11,
+                              "top": 623.1,
+                              "width": 858.89,
+                              "height": 25.2
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "padding": {
+                      "top": 0,
+                      "right": 0,
+                      "bottom": 0,
+                      "left": 0
+                    },
+                    "gap": 22,
+                    "effectiveGap": 22,
+                    "justifyOffset": 0,
+                    "align": "start",
+                    "justify": "start",
+                    "contentFrame": {
+                      "left": 893.11,
+                      "top": 582.3,
+                      "width": 938.89,
+                      "height": 66
+                    },
+                    "items": [
+                      {
+                        "path": "0.2.2.1.0",
+                        "frame": {
+                          "left": 893.11,
+                          "top": 582.3,
+                          "width": 58,
+                          "height": 58
+                        }
+                      },
+                      {
+                        "path": "0.2.2.1.1",
+                        "frame": {
+                          "left": 973.11,
+                          "top": 582.3,
+                          "width": 858.89,
+                          "height": 66
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "path": "0.2.2.2",
+                    "kind": "row",
+                    "name": "step-3",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fill",
+                        "value": 1
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 80,
+                      "height": 66
+                    },
+                    "frame": {
+                      "left": 893.11,
+                      "top": 674.3,
+                      "width": 938.89,
+                      "height": 66
+                    },
+                    "children": [
+                      {
+                        "path": "0.2.2.2.0",
+                        "kind": "panel",
+                        "name": "step-number-3",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fixed",
+                            "value": 58
+                          },
+                          "height": {
+                            "mode": "fixed",
+                            "value": 58
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 40,
+                          "height": 31.2
+                        },
+                        "frame": {
+                          "left": 893.11,
+                          "top": 674.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "snappedFrame": {
+                          "left": 893.11,
+                          "top": 674.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "children": [
+                          {
+                            "path": "0.2.2.2.0.0",
+                            "kind": "text",
+                            "name": "step-number-text-3",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fixed",
+                                "value": 40
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 40,
+                              "height": 31.2
+                            },
+                            "frame": {
+                              "left": 902,
+                              "top": 688,
+                              "width": 40,
+                              "height": 32
+                            },
+                            "snappedFrame": {
+                              "left": 902,
+                              "top": 688,
+                              "width": 40,
+                              "height": 32
+                            },
+                            "children": [],
+                            "text": "3",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/l0rqd4vm",
+                              "id": "21",
+                              "kind": "shape"
+                            }
+                          }
+                        ],
+                        "padding": {
+                          "top": 0,
+                          "right": 0,
+                          "bottom": 0,
+                          "left": 0
+                        },
+                        "align": "center",
+                        "justify": "center",
+                        "contentFrame": {
+                          "left": 893.11,
+                          "top": 674.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "element": {
+                          "aid": "sh/wfyxobm5",
+                          "id": "20",
+                          "kind": "shape"
+                        }
+                      },
+                      {
+                        "path": "0.2.2.2.1",
+                        "kind": "column",
+                        "name": "step-copy-3",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 66
+                        },
+                        "frame": {
+                          "left": 973.11,
+                          "top": 674.3,
+                          "width": 858.89,
+                          "height": 66
+                        },
+                        "children": [
+                          {
+                            "path": "0.2.2.2.1.0",
+                            "kind": "text",
+                            "name": "step-heading-3",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 34.8
+                            },
+                            "frame": {
+                              "left": 973.11,
+                              "top": 674.3,
+                              "width": 858.89,
+                              "height": 34.8
+                            },
+                            "snappedFrame": {
+                              "left": 974,
+                              "top": 674,
+                              "width": 858,
+                              "height": 36
+                            },
+                            "children": [],
+                            "text": "Pantau status",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/ed8bat47",
+                              "id": "22",
+                              "kind": "shape"
+                            }
+                          },
+                          {
+                            "path": "0.2.2.2.1.1",
+                            "kind": "text",
+                            "name": "step-body-3",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 25.2
+                            },
+                            "frame": {
+                              "left": 973.11,
+                              "top": 715.1,
+                              "width": 858.89,
+                              "height": 25.2
+                            },
+                            "snappedFrame": {
+                              "left": 974,
+                              "top": 716,
+                              "width": 858,
+                              "height": 26
+                            },
+                            "children": [],
+                            "text": "Temuan terbuka sampai PIC/Admin menambahkan progress dan menutup laporan.",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/7u54zido",
+                              "id": "23",
+                              "kind": "shape"
+                            }
+                          }
+                        ],
+                        "padding": {
+                          "top": 0,
+                          "right": 0,
+                          "bottom": 0,
+                          "left": 0
+                        },
+                        "gap": 6,
+                        "effectiveGap": 6,
+                        "justifyOffset": 0,
+                        "align": "start",
+                        "justify": "start",
+                        "contentFrame": {
+                          "left": 973.11,
+                          "top": 674.3,
+                          "width": 858.89,
+                          "height": 66
+                        },
+                        "items": [
+                          {
+                            "path": "0.2.2.2.1.0",
+                            "frame": {
+                              "left": 973.11,
+                              "top": 674.3,
+                              "width": 858.89,
+                              "height": 34.8
+                            }
+                          },
+                          {
+                            "path": "0.2.2.2.1.1",
+                            "frame": {
+                              "left": 973.11,
+                              "top": 715.1,
+                              "width": 858.89,
+                              "height": 25.2
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "padding": {
+                      "top": 0,
+                      "right": 0,
+                      "bottom": 0,
+                      "left": 0
+                    },
+                    "gap": 22,
+                    "effectiveGap": 22,
+                    "justifyOffset": 0,
+                    "align": "start",
+                    "justify": "start",
+                    "contentFrame": {
+                      "left": 893.11,
+                      "top": 674.3,
+                      "width": 938.89,
+                      "height": 66
+                    },
+                    "items": [
+                      {
+                        "path": "0.2.2.2.0",
+                        "frame": {
+                          "left": 893.11,
+                          "top": 674.3,
+                          "width": 58,
+                          "height": 58
+                        }
+                      },
+                      {
+                        "path": "0.2.2.2.1",
+                        "frame": {
+                          "left": 973.11,
+                          "top": 674.3,
+                          "width": 858.89,
+                          "height": 66
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "path": "0.2.2.3",
+                    "kind": "row",
+                    "name": "step-4",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fill",
+                        "value": 1
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 80,
+                      "height": 66
+                    },
+                    "frame": {
+                      "left": 893.11,
+                      "top": 766.3,
+                      "width": 938.89,
+                      "height": 66
+                    },
+                    "children": [
+                      {
+                        "path": "0.2.2.3.0",
+                        "kind": "panel",
+                        "name": "step-number-4",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fixed",
+                            "value": 58
+                          },
+                          "height": {
+                            "mode": "fixed",
+                            "value": 58
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 40,
+                          "height": 31.2
+                        },
+                        "frame": {
+                          "left": 893.11,
+                          "top": 766.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "snappedFrame": {
+                          "left": 893.11,
+                          "top": 766.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "children": [
+                          {
+                            "path": "0.2.2.3.0.0",
+                            "kind": "text",
+                            "name": "step-number-text-4",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fixed",
+                                "value": 40
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 40,
+                              "height": 31.2
+                            },
+                            "frame": {
+                              "left": 902,
+                              "top": 780,
+                              "width": 40,
+                              "height": 32
+                            },
+                            "snappedFrame": {
+                              "left": 902,
+                              "top": 780,
+                              "width": 40,
+                              "height": 32
+                            },
+                            "children": [],
+                            "text": "4",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/lc7u54zi",
+                              "id": "25",
+                              "kind": "shape"
+                            }
+                          }
+                        ],
+                        "padding": {
+                          "top": 0,
+                          "right": 0,
+                          "bottom": 0,
+                          "left": 0
+                        },
+                        "align": "center",
+                        "justify": "center",
+                        "contentFrame": {
+                          "left": 893.11,
+                          "top": 766.3,
+                          "width": 58,
+                          "height": 58
+                        },
+                        "element": {
+                          "aid": "sh/wra5gbq1",
+                          "id": "24",
+                          "kind": "shape"
+                        }
+                      },
+                      {
+                        "path": "0.2.2.3.1",
+                        "kind": "column",
+                        "name": "step-copy-4",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 66
+                        },
+                        "frame": {
+                          "left": 973.11,
+                          "top": 766.3,
+                          "width": 858.89,
+                          "height": 66
+                        },
+                        "children": [
+                          {
+                            "path": "0.2.2.3.1.0",
+                            "kind": "text",
+                            "name": "step-heading-4",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 34.8
+                            },
+                            "frame": {
+                              "left": 973.11,
+                              "top": 766.3,
+                              "width": 858.89,
+                              "height": 34.8
+                            },
+                            "snappedFrame": {
+                              "left": 974,
+                              "top": 766,
+                              "width": 858,
+                              "height": 36
+                            },
+                            "children": [],
+                            "text": "Jangan hapus bukti lokal",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/eloj2t83",
+                              "id": "26",
+                              "kind": "shape"
+                            }
+                          },
+                          {
+                            "path": "0.2.2.3.1.1",
+                            "kind": "text",
+                            "name": "step-body-4",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 25.2
+                            },
+                            "frame": {
+                              "left": 973.11,
+                              "top": 807.1,
+                              "width": 858.89,
+                              "height": 25.2
+                            },
+                            "snappedFrame": {
+                              "left": 974,
+                              "top": 808,
+                              "width": 858,
+                              "height": 26
+                            },
+                            "children": [],
+                            "text": "Saat offline, foto masih bisa tertahan di perangkat sampai upload selesai.",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/36hcrmhk",
+                              "id": "27",
+                              "kind": "shape"
+                            }
+                          }
+                        ],
+                        "padding": {
+                          "top": 0,
+                          "right": 0,
+                          "bottom": 0,
+                          "left": 0
+                        },
+                        "gap": 6,
+                        "effectiveGap": 6,
+                        "justifyOffset": 0,
+                        "align": "start",
+                        "justify": "start",
+                        "contentFrame": {
+                          "left": 973.11,
+                          "top": 766.3,
+                          "width": 858.89,
+                          "height": 66
+                        },
+                        "items": [
+                          {
+                            "path": "0.2.2.3.1.0",
+                            "frame": {
+                              "left": 973.11,
+                              "top": 766.3,
+                              "width": 858.89,
+                              "height": 34.8
+                            }
+                          },
+                          {
+                            "path": "0.2.2.3.1.1",
+                            "frame": {
+                              "left": 973.11,
+                              "top": 807.1,
+                              "width": 858.89,
+                              "height": 25.2
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "padding": {
+                      "top": 0,
+                      "right": 0,
+                      "bottom": 0,
+                      "left": 0
+                    },
+                    "gap": 22,
+                    "effectiveGap": 22,
+                    "justifyOffset": 0,
+                    "align": "start",
+                    "justify": "start",
+                    "contentFrame": {
+                      "left": 893.11,
+                      "top": 766.3,
+                      "width": 938.89,
+                      "height": 66
+                    },
+                    "items": [
+                      {
+                        "path": "0.2.2.3.0",
+                        "frame": {
+                          "left": 893.11,
+                          "top": 766.3,
+                          "width": 58,
+                          "height": 58
+                        }
+                      },
+                      {
+                        "path": "0.2.2.3.1",
+                        "frame": {
+                          "left": 973.11,
+                          "top": 766.3,
+                          "width": 858.89,
+                          "height": 66
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "padding": {
+                  "top": 0,
+                  "right": 0,
+                  "bottom": 0,
+                  "left": 0
+                },
+                "gap": 26,
+                "effectiveGap": 26,
+                "justifyOffset": 124.5,
+                "align": "start",
+                "justify": "center",
+                "contentFrame": {
+                  "left": 893.11,
+                  "top": 365.8,
+                  "width": 938.89,
+                  "height": 591
+                },
+                "items": [
+                  {
+                    "path": "0.2.2.0",
+                    "frame": {
+                      "left": 893.11,
+                      "top": 490.3,
+                      "width": 938.89,
+                      "height": 66
+                    }
+                  },
+                  {
+                    "path": "0.2.2.1",
+                    "frame": {
+                      "left": 893.11,
+                      "top": 582.3,
+                      "width": 938.89,
+                      "height": 66
+                    }
+                  },
+                  {
+                    "path": "0.2.2.2",
+                    "frame": {
+                      "left": 893.11,
+                      "top": 674.3,
+                      "width": 938.89,
+                      "height": 66
+                    }
+                  },
+                  {
+                    "path": "0.2.2.3",
+                    "frame": {
+                      "left": 893.11,
+                      "top": 766.3,
+                      "width": 938.89,
+                      "height": 66
+                    }
+                  }
+                ]
+              },
+              {
+                "path": "0.2.3",
+                "kind": "row",
+                "name": "footer",
+                "requestedSize": {
+                  "width": {
+                    "mode": "fill",
+                    "value": 1
+                  },
+                  "height": {
+                    "mode": "hug"
+                  }
+                },
+                "intrinsicSize": {
+                  "width": 1280,
+                  "height": 19.2
+                },
+                "frame": {
+                  "left": 88,
+                  "top": 990.8,
+                  "width": 1744,
+                  "height": 19.2
+                },
+                "children": [
+                  {
+                    "path": "0.2.3.0",
+                    "kind": "text",
+                    "name": "footer-left",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fixed",
+                        "value": 1100
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 1100,
+                      "height": 19.2
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 990,
+                      "width": 1100,
+                      "height": 20
+                    },
+                    "snappedFrame": {
+                      "left": 88,
+                      "top": 990,
+                      "width": 1100,
+                      "height": 20
+                    },
+                    "children": [],
+                    "text": "SmartPatrol HSSE - Panduan Petugas",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/wval87ed",
+                      "id": "28",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.3.1",
+                    "kind": "text",
+                    "name": "footer-date",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fixed",
+                        "value": 180
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 180,
+                      "height": 19.2
+                    },
+                    "frame": {
+                      "left": 1652,
+                      "top": 990,
+                      "width": 180,
+                      "height": 20
+                    },
+                    "snappedFrame": {
+                      "left": 1652,
+                      "top": 990,
+                      "width": 180,
+                      "height": 20
+                    },
+                    "children": [],
+                    "text": "Mei 2026",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/pg3ex0nu",
+                      "id": "29",
+                      "kind": "shape"
+                    }
+                  }
+                ],
+                "padding": {
+                  "top": 0,
+                  "right": 0,
+                  "bottom": 0,
+                  "left": 0
+                },
+                "gap": 0,
+                "effectiveGap": 464,
+                "justifyOffset": 0,
+                "align": "center",
+                "justify": "between",
+                "contentFrame": {
+                  "left": 88,
+                  "top": 990.8,
+                  "width": 1744,
+                  "height": 19.2
+                },
+                "items": [
+                  {
+                    "path": "0.2.3.0",
+                    "frame": {
+                      "left": 88,
+                      "top": 990,
+                      "width": 1100,
+                      "height": 20
+                    }
+                  },
+                  {
+                    "path": "0.2.3.1",
+                    "frame": {
+                      "left": 1652,
+                      "top": 990,
+                      "width": 180,
+                      "height": 20
+                    }
+                  }
+                ]
+              }
+            ],
+            "padding": {
+              "top": 70,
+              "right": 88,
+              "bottom": 70,
+              "left": 88
+            },
+            "columnGap": 54,
+            "rowGap": 34,
+            "alignItems": "stretch",
+            "justifyItems": "stretch",
+            "contentFrame": {
+              "left": 88,
+              "top": 70,
+              "width": 1744,
+              "height": 940
+            },
+            "columns": [
+              {
+                "mode": "fr",
+                "value": 0.8
+              },
+              {
+                "mode": "fr",
+                "value": 1
+              }
+            ],
+            "rows": [
+              "auto",
+              {
+                "mode": "fr",
+                "value": 1
+              },
+              "auto"
+            ],
+            "autoRows": "auto",
+            "resolvedRows": [
+              "auto",
+              {
+                "mode": "fr",
+                "value": 1
+              },
+              "auto"
+            ],
+            "columnSizes": [
+              751.11,
+              938.89
+            ],
+            "rowSizes": [
+              261.8,
+              591,
+              19.2
+            ],
+            "cells": [
+              {
+                "path": "0.2.0",
+                "column": 0,
+                "row": 0,
+                "columnSpan": 2,
+                "rowSpan": 1,
+                "cellFrame": {
+                  "left": 88,
+                  "top": 70,
+                  "width": 1744,
+                  "height": 261.8
+                }
+              },
+              {
+                "path": "0.2.1",
+                "column": 0,
+                "row": 1,
+                "columnSpan": 1,
+                "rowSpan": 1,
+                "cellFrame": {
+                  "left": 88,
+                  "top": 365.8,
+                  "width": 751.11,
+                  "height": 591
+                }
+              },
+              {
+                "path": "0.2.2",
+                "column": 1,
+                "row": 1,
+                "columnSpan": 1,
+                "rowSpan": 1,
+                "cellFrame": {
+                  "left": 893.11,
+                  "top": 365.8,
+                  "width": 938.89,
+                  "height": 591
+                }
+              },
+              {
+                "path": "0.2.3",
+                "column": 0,
+                "row": 2,
+                "columnSpan": 2,
+                "rowSpan": 1,
+                "cellFrame": {
+                  "left": 88,
+                  "top": 990.8,
+                  "width": 1744,
+                  "height": 19.2
+                }
+              }
+            ]
+          }
+        ],
+        "padding": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        },
+        "alignItems": "stretch",
+        "justifyItems": "stretch",
+        "contentFrame": {
+          "left": 0,
+          "top": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "items": [
+          {
+            "path": "0.0",
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          {
+            "path": "0.1",
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 10
+            }
+          },
+          {
+            "path": "0.2",
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

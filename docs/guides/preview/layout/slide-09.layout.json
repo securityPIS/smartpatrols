@@ -1,0 +1,2107 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/tezwo3",
+    "id": "tezwo3",
+    "slide": 9,
+    "layoutId": "c1d5240e-19de-4d2d-b7c7-ed93ffc45fa2",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "2a9442f0-0a06-4ea0-b863-0bc5c548ba8b",
+    "masterLayoutName": "Master",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1920,
+      "height": 1080
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Aptos",
+      "Aptos Display",
+      "Cascadia Mono"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "c1d5240e-19de-4d2d-b7c7-ed93ffc45fa2",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "2a9442f0-0a06-4ea0-b863-0bc5c548ba8b",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "2a9442f0-0a06-4ea0-b863-0bc5c548ba8b",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/sfil0rqd",
+      "id": "1",
+      "name": "background",
+      "bbox": [
+        0,
+        0,
+        1920,
+        1080
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.0"
+      },
+      "geometry": "rect",
+      "fillColor": "#06111F"
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/zupwb2hw",
+      "id": "2",
+      "name": "top-accent",
+      "bbox": [
+        0,
+        0,
+        1920,
+        10
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.1"
+      },
+      "geometry": "rect",
+      "fillColor": "#20C7A8"
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/a9w3m94f",
+      "id": "3",
+      "name": "label-audit-waktu",
+      "bbox": [
+        88,
+        70,
+        840,
+        22
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.0.0"
+      },
+      "geometry": "rect",
+      "text": "AUDIT WAKTU",
+      "textPreview": "AUDIT WAKTU",
+      "resolvedFontSize": 18,
+      "resolvedTextStyle": {
+        "fontSize": 18,
+        "typeface": "Cascadia Mono",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "AUDIT WAKTU"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "AUDIT WAKTU",
+          "runs": [
+            {
+              "index": 1,
+              "text": "AUDIT WAKTU",
+              "fontSize": 18,
+              "typeface": "Cascadia Mono",
+              "color": "#25D4E8",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/hcrmhk3q",
+      "id": "4",
+      "name": "slide-title",
+      "bbox": [
+        88,
+        110,
+        1184,
+        150
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.0.1"
+      },
+      "geometry": "rect",
+      "text": "Jangan ubah jam perangkat untuk mengejar jadwal",
+      "textPreview": "Jangan ubah jam perangkat untuk mengejar jadwal",
+      "resolvedFontSize": 56,
+      "resolvedTextStyle": {
+        "fontSize": 56,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Jangan ubah jam perangkat untuk mengejar"
+          },
+          {
+            "index": 2,
+            "text": "jadwal"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Jangan ubah jam perangkat untuk mengejar jadwal",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Jangan ubah jam perangkat untuk mengejar jadwal",
+              "fontSize": 56,
+              "typeface": "Aptos Display",
+              "color": "#F1FAF8",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/orytsvu9",
+      "id": "5",
+      "name": "title-rule",
+      "bbox": [
+        88,
+        278,
+        180,
+        5
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.0.2"
+      },
+      "geometry": "rect",
+      "fillColor": "#20C7A8",
+      "lineColor": "#20C7A8",
+      "lineWidth": 0
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/z61032ls",
+      "id": "6",
+      "name": "slide-subtitle",
+      "bbox": [
+        88,
+        300,
+        1126,
+        64
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.0.3"
+      },
+      "geometry": "rect",
+      "text": "SmartPatrol membandingkan waktu server, monotonic clock, dan drift perangkat untuk menandai rekaman yang mencurigakan.",
+      "textPreview": "SmartPatrol membandingkan waktu server, monotonic clock, dan drift perangkat untuk menandai rekaman yang mencurigakan.",
+      "resolvedFontSize": 26,
+      "resolvedTextStyle": {
+        "fontSize": 26,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "SmartPatrol membandingkan waktu server, monotonic clock, dan drift perangkat untuk menandai"
+          },
+          {
+            "index": 2,
+            "text": "rekaman yang mencurigakan."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "SmartPatrol membandingkan waktu server, monotonic clock, dan drift perangkat untuk menandai rekaman yang mencurigakan.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "SmartPatrol membandingkan waktu server, monotonic clock, dan drift perangkat untuk menandai rekaman yang mencurigakan.",
+              "fontSize": 26,
+              "typeface": "Aptos",
+              "color": "#9DB4C4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/al87ed8b",
+      "id": "7",
+      "name": "insight-verified",
+      "bbox": [
+        88,
+        397,
+        562.67,
+        142
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.0"
+      },
+      "geometry": "roundRect",
+      "fillColor": "rgba(255, 255, 255, 0.06)",
+      "lineColor": "rgba(255, 255, 255, 0.13)",
+      "lineWidth": 1.25
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/hk3q5o7q",
+      "id": "8",
+      "name": "insight-heading",
+      "bbox": [
+        116,
+        422,
+        506,
+        34
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.0.0.0"
+      },
+      "geometry": "rect",
+      "text": "Verified",
+      "textPreview": "Verified",
+      "resolvedFontSize": 28,
+      "resolvedTextStyle": {
+        "fontSize": 28,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Verified"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Verified",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Verified",
+              "fontSize": 28,
+              "typeface": "Aptos Display",
+              "color": "#4ADE80",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/oza1gvy9",
+      "id": "9",
+      "name": "insight-body",
+      "bbox": [
+        116,
+        464,
+        506,
+        52
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.0.0.1"
+      },
+      "geometry": "rect",
+      "text": "Laporan online dengan trusted time yang valid. Ini status audit paling kuat.",
+      "textPreview": "Laporan online dengan trusted time yang valid. Ini status audit paling kuat.",
+      "resolvedFontSize": 21,
+      "resolvedTextStyle": {
+        "fontSize": 21,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Laporan online dengan trusted time yang valid. Ini status"
+          },
+          {
+            "index": 2,
+            "text": "audit paling kuat."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Laporan online dengan trusted time yang valid. Ini status audit paling kuat.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Laporan online dengan trusted time yang valid. Ini status audit paling kuat.",
+              "fontSize": 21,
+              "typeface": "Aptos",
+              "color": "#9DB4C4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/29gr2p8n",
+      "id": "10",
+      "name": "insight-pending-sync",
+      "bbox": [
+        678.67,
+        397,
+        562.67,
+        142
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.1"
+      },
+      "geometry": "roundRect",
+      "fillColor": "rgba(255, 255, 255, 0.06)",
+      "lineColor": "rgba(255, 255, 255, 0.13)",
+      "lineWidth": 1.25
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/vu9knih4",
+      "id": "11",
+      "name": "insight-heading",
+      "bbox": [
+        706,
+        422,
+        506,
+        34
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.1.0.0"
+      },
+      "geometry": "rect",
+      "text": "Pending-sync",
+      "textPreview": "Pending-sync",
+      "resolvedFontSize": 28,
+      "resolvedTextStyle": {
+        "fontSize": 28,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Pending-sync"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Pending-sync",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Pending-sync",
+              "fontSize": 28,
+              "typeface": "Aptos Display",
+              "color": "#F2C75C",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kf6dcbul",
+      "id": "12",
+      "name": "insight-body",
+      "bbox": [
+        706,
+        464,
+        506,
+        52
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.1.0.1"
+      },
+      "geometry": "rect",
+      "text": "Laporan dibuat saat offline dan menunggu verifikasi ketika koneksi kembali.",
+      "textPreview": "Laporan dibuat saat offline dan menunggu verifikasi ketika koneksi kembali.",
+      "resolvedFontSize": 21,
+      "resolvedTextStyle": {
+        "fontSize": 21,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Laporan dibuat saat offline dan menunggu verifikasi ketika"
+          },
+          {
+            "index": 2,
+            "text": "koneksi kembali."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Laporan dibuat saat offline dan menunggu verifikasi ketika koneksi kembali.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Laporan dibuat saat offline dan menunggu verifikasi ketika koneksi kembali.",
+              "fontSize": 21,
+              "typeface": "Aptos",
+              "color": "#9DB4C4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/d0z61032",
+      "id": "13",
+      "name": "insight-suspicious",
+      "bbox": [
+        1269.33,
+        397,
+        562.67,
+        142
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.2"
+      },
+      "geometry": "roundRect",
+      "fillColor": "rgba(255, 255, 255, 0.06)",
+      "lineColor": "rgba(255, 255, 255, 0.13)",
+      "lineWidth": 1.25
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2lszqtcj",
+      "id": "14",
+      "name": "insight-heading",
+      "bbox": [
+        1298,
+        422,
+        506,
+        34
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.2.0.0"
+      },
+      "geometry": "rect",
+      "text": "Suspicious",
+      "textPreview": "Suspicious",
+      "resolvedFontSize": 28,
+      "resolvedTextStyle": {
+        "fontSize": 28,
+        "typeface": "Aptos Display",
+        "bold": true,
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Suspicious"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Suspicious",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Suspicious",
+              "fontSize": 28,
+              "typeface": "Aptos Display",
+              "color": "#F05268",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/v6psfil0",
+      "id": "15",
+      "name": "insight-body",
+      "bbox": [
+        1298,
+        464,
+        506,
+        52
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.1.2.0.1"
+      },
+      "geometry": "rect",
+      "text": "Ada indikasi jam perangkat berubah atau sinyal waktu tidak konsisten.",
+      "textPreview": "Ada indikasi jam perangkat berubah atau sinyal waktu tidak konsisten.",
+      "resolvedFontSize": 21,
+      "resolvedTextStyle": {
+        "fontSize": 21,
+        "typeface": "Aptos",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Ada indikasi jam perangkat berubah atau sinyal waktu tidak"
+          },
+          {
+            "index": 2,
+            "text": "konsisten."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Ada indikasi jam perangkat berubah atau sinyal waktu tidak konsisten.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Ada indikasi jam perangkat berubah atau sinyal waktu tidak konsisten.",
+              "fontSize": 21,
+              "typeface": "Aptos",
+              "color": "#9DB4C4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/knih4byh",
+      "id": "16",
+      "name": "footer-left",
+      "bbox": [
+        88,
+        990,
+        1100,
+        20
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.0"
+      },
+      "geometry": "rect",
+      "text": "Audit waktu menjaga integritas laporan dan disiplin patroli",
+      "textPreview": "Audit waktu menjaga integritas laporan dan disiplin patroli",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "fontSize": 16,
+        "typeface": "Cascadia Mono",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Audit waktu menjaga integritas laporan dan disiplin patroli"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Audit waktu menjaga integritas laporan dan disiplin patroli",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Audit waktu menjaga integritas laporan dan disiplin patroli",
+              "fontSize": 16,
+              "typeface": "Cascadia Mono",
+              "color": "#6D8494"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/d8bat47y",
+      "id": "17",
+      "name": "footer-date",
+      "bbox": [
+        1652,
+        990,
+        180,
+        20
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2.2.1"
+      },
+      "geometry": "rect",
+      "text": "Mei 2026",
+      "textPreview": "Mei 2026",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "fontSize": 16,
+        "typeface": "Cascadia Mono",
+        "alignment": "right"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Mei 2026"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Mei 2026",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Mei 2026",
+              "fontSize": 16,
+              "typeface": "Cascadia Mono",
+              "color": "#6D8494",
+              "alignment": "right"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "composeRuns": [
+    {
+      "index": 1,
+      "frame": {
+        "left": 0,
+        "top": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "baseUnit": 8,
+      "root": {
+        "path": "0",
+        "kind": "layers",
+        "name": "slide-layers",
+        "requestedSize": {
+          "width": {
+            "mode": "fill",
+            "value": 1
+          },
+          "height": {
+            "mode": "fill",
+            "value": 1
+          }
+        },
+        "intrinsicSize": {
+          "width": 0,
+          "height": 10
+        },
+        "frame": {
+          "left": 0,
+          "top": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "children": [
+          {
+            "path": "0.0",
+            "kind": "shape",
+            "name": "background",
+            "requestedSize": {
+              "width": {
+                "mode": "fill",
+                "value": 1
+              },
+              "height": {
+                "mode": "fill",
+                "value": 1
+              }
+            },
+            "intrinsicSize": {
+              "width": 0,
+              "height": 0
+            },
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            },
+            "snappedFrame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            },
+            "children": [],
+            "geometry": "rect",
+            "element": {
+              "aid": "sh/sfil0rqd",
+              "id": "1",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.1",
+            "kind": "shape",
+            "name": "top-accent",
+            "requestedSize": {
+              "width": {
+                "mode": "fill",
+                "value": 1
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 10
+              }
+            },
+            "intrinsicSize": {
+              "width": 0,
+              "height": 10
+            },
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 10
+            },
+            "snappedFrame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 10
+            },
+            "children": [],
+            "geometry": "rect",
+            "element": {
+              "aid": "sh/zupwb2hw",
+              "id": "2",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.2",
+            "kind": "grid",
+            "name": "audit-root",
+            "requestedSize": {
+              "width": {
+                "mode": "fill",
+                "value": 1
+              },
+              "height": {
+                "mode": "fill",
+                "value": 1
+              }
+            },
+            "intrinsicSize": {
+              "width": 176,
+              "height": 520.2
+            },
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            },
+            "children": [
+              {
+                "path": "0.2.0",
+                "kind": "column",
+                "name": "title-stack",
+                "requestedSize": {
+                  "width": {
+                    "mode": "fill",
+                    "value": 1
+                  },
+                  "height": {
+                    "mode": "hug"
+                  }
+                },
+                "intrinsicSize": {
+                  "width": 1184.99,
+                  "height": 293
+                },
+                "frame": {
+                  "left": 88,
+                  "top": 70,
+                  "width": 1744,
+                  "height": 293
+                },
+                "children": [
+                  {
+                    "path": "0.2.0.0",
+                    "kind": "text",
+                    "name": "label-audit-waktu",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fixed",
+                        "value": 840
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 840,
+                      "height": 21.6
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 70,
+                      "width": 840,
+                      "height": 21.6
+                    },
+                    "snappedFrame": {
+                      "left": 88,
+                      "top": 70,
+                      "width": 840,
+                      "height": 22
+                    },
+                    "children": [],
+                    "text": "AUDIT WAKTU",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/a9w3m94f",
+                      "id": "3",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.0.1",
+                    "kind": "text",
+                    "name": "slide-title",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "wrap",
+                        "max": 1320
+                      },
+                      "height": {
+                        "mode": "fixed",
+                        "value": 150
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 1184.99,
+                      "height": 150
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 109.6,
+                      "width": 1184.99,
+                      "height": 150
+                    },
+                    "snappedFrame": {
+                      "left": 88,
+                      "top": 110,
+                      "width": 1184,
+                      "height": 150
+                    },
+                    "children": [],
+                    "text": "Jangan ubah jam perangkat untuk mengejar jadwal",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/hcrmhk3q",
+                      "id": "4",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.0.2",
+                    "kind": "rule",
+                    "name": "title-rule",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fixed",
+                        "value": 180
+                      },
+                      "height": {
+                        "mode": "fixed",
+                        "value": 5
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 180,
+                      "height": 5
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 277.6,
+                      "width": 180,
+                      "height": 5
+                    },
+                    "snappedFrame": {
+                      "left": 88,
+                      "top": 278,
+                      "width": 180,
+                      "height": 5
+                    },
+                    "children": [],
+                    "weight": 5,
+                    "element": {
+                      "aid": "sh/orytsvu9",
+                      "id": "5",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.0.3",
+                    "kind": "text",
+                    "name": "slide-subtitle",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "wrap",
+                        "max": 1180
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 1126.08,
+                      "height": 62.4
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 300.6,
+                      "width": 1126.08,
+                      "height": 62.4
+                    },
+                    "snappedFrame": {
+                      "left": 88,
+                      "top": 300,
+                      "width": 1126,
+                      "height": 64
+                    },
+                    "children": [],
+                    "text": "SmartPatrol membandingkan waktu server, monotonic clock, dan drift perangkat untuk menandai rekaman yang mencurigakan.",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/z61032ls",
+                      "id": "6",
+                      "kind": "shape"
+                    }
+                  }
+                ],
+                "padding": {
+                  "top": 0,
+                  "right": 0,
+                  "bottom": 0,
+                  "left": 0
+                },
+                "gap": 18,
+                "effectiveGap": 18,
+                "justifyOffset": 0,
+                "align": "start",
+                "justify": "start",
+                "contentFrame": {
+                  "left": 88,
+                  "top": 70,
+                  "width": 1744,
+                  "height": 293
+                },
+                "items": [
+                  {
+                    "path": "0.2.0.0",
+                    "frame": {
+                      "left": 88,
+                      "top": 70,
+                      "width": 840,
+                      "height": 21.6
+                    }
+                  },
+                  {
+                    "path": "0.2.0.1",
+                    "frame": {
+                      "left": 88,
+                      "top": 109.6,
+                      "width": 1184.99,
+                      "height": 150
+                    }
+                  },
+                  {
+                    "path": "0.2.0.2",
+                    "frame": {
+                      "left": 88,
+                      "top": 277.6,
+                      "width": 180,
+                      "height": 5
+                    }
+                  },
+                  {
+                    "path": "0.2.0.3",
+                    "frame": {
+                      "left": 88,
+                      "top": 300.6,
+                      "width": 1126.08,
+                      "height": 62.4
+                    }
+                  }
+                ]
+              },
+              {
+                "path": "0.2.1",
+                "kind": "grid",
+                "name": "audit-grid",
+                "requestedSize": {
+                  "width": {
+                    "mode": "fill",
+                    "value": 1
+                  },
+                  "height": {
+                    "mode": "hug"
+                  }
+                },
+                "intrinsicSize": {
+                  "width": 56,
+                  "height": 116.8
+                },
+                "frame": {
+                  "left": 88,
+                  "top": 397,
+                  "width": 1744,
+                  "height": 559.8
+                },
+                "children": [
+                  {
+                    "path": "0.2.1.0",
+                    "kind": "panel",
+                    "name": "insight-verified",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fill",
+                        "value": 1
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 56,
+                      "height": 116.8
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 397,
+                      "width": 562.67,
+                      "height": 142
+                    },
+                    "snappedFrame": {
+                      "left": 88,
+                      "top": 397,
+                      "width": 562.67,
+                      "height": 142
+                    },
+                    "children": [
+                      {
+                        "path": "0.2.1.0.0",
+                        "kind": "column",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 68.8
+                        },
+                        "frame": {
+                          "left": 116,
+                          "top": 421,
+                          "width": 506.67,
+                          "height": 94
+                        },
+                        "children": [
+                          {
+                            "path": "0.2.1.0.0.0",
+                            "kind": "text",
+                            "name": "insight-heading",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 33.6
+                            },
+                            "frame": {
+                              "left": 116,
+                              "top": 421,
+                              "width": 506.67,
+                              "height": 33.6
+                            },
+                            "snappedFrame": {
+                              "left": 116,
+                              "top": 422,
+                              "width": 506,
+                              "height": 34
+                            },
+                            "children": [],
+                            "text": "Verified",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/hk3q5o7q",
+                              "id": "8",
+                              "kind": "shape"
+                            }
+                          },
+                          {
+                            "path": "0.2.1.0.0.1",
+                            "kind": "text",
+                            "name": "insight-body",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 25.2
+                            },
+                            "frame": {
+                              "left": 116,
+                              "top": 464.6,
+                              "width": 506.67,
+                              "height": 50.4
+                            },
+                            "snappedFrame": {
+                              "left": 116,
+                              "top": 464,
+                              "width": 506,
+                              "height": 52
+                            },
+                            "children": [],
+                            "text": "Laporan online dengan trusted time yang valid. Ini status audit paling kuat.",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/oza1gvy9",
+                              "id": "9",
+                              "kind": "shape"
+                            }
+                          }
+                        ],
+                        "padding": {
+                          "top": 0,
+                          "right": 0,
+                          "bottom": 0,
+                          "left": 0
+                        },
+                        "gap": 10,
+                        "effectiveGap": 10,
+                        "justifyOffset": 0,
+                        "align": "start",
+                        "justify": "start",
+                        "contentFrame": {
+                          "left": 116,
+                          "top": 421,
+                          "width": 506.67,
+                          "height": 94
+                        },
+                        "items": [
+                          {
+                            "path": "0.2.1.0.0.0",
+                            "frame": {
+                              "left": 116,
+                              "top": 421,
+                              "width": 506.67,
+                              "height": 33.6
+                            }
+                          },
+                          {
+                            "path": "0.2.1.0.0.1",
+                            "frame": {
+                              "left": 116,
+                              "top": 464.6,
+                              "width": 506.67,
+                              "height": 50.4
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "padding": {
+                      "top": 24,
+                      "right": 28,
+                      "bottom": 24,
+                      "left": 28
+                    },
+                    "align": "start",
+                    "justify": "start",
+                    "contentFrame": {
+                      "left": 116,
+                      "top": 421,
+                      "width": 506.67,
+                      "height": 94
+                    },
+                    "element": {
+                      "aid": "sh/al87ed8b",
+                      "id": "7",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.1.1",
+                    "kind": "panel",
+                    "name": "insight-pending-sync",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fill",
+                        "value": 1
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 56,
+                      "height": 116.8
+                    },
+                    "frame": {
+                      "left": 678.67,
+                      "top": 397,
+                      "width": 562.67,
+                      "height": 142
+                    },
+                    "snappedFrame": {
+                      "left": 678.67,
+                      "top": 397,
+                      "width": 562.67,
+                      "height": 142
+                    },
+                    "children": [
+                      {
+                        "path": "0.2.1.1.0",
+                        "kind": "column",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 68.8
+                        },
+                        "frame": {
+                          "left": 706.67,
+                          "top": 421,
+                          "width": 506.67,
+                          "height": 94
+                        },
+                        "children": [
+                          {
+                            "path": "0.2.1.1.0.0",
+                            "kind": "text",
+                            "name": "insight-heading",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 33.6
+                            },
+                            "frame": {
+                              "left": 706.67,
+                              "top": 421,
+                              "width": 506.67,
+                              "height": 33.6
+                            },
+                            "snappedFrame": {
+                              "left": 706,
+                              "top": 422,
+                              "width": 506,
+                              "height": 34
+                            },
+                            "children": [],
+                            "text": "Pending-sync",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/vu9knih4",
+                              "id": "11",
+                              "kind": "shape"
+                            }
+                          },
+                          {
+                            "path": "0.2.1.1.0.1",
+                            "kind": "text",
+                            "name": "insight-body",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 25.2
+                            },
+                            "frame": {
+                              "left": 706.67,
+                              "top": 464.6,
+                              "width": 506.67,
+                              "height": 50.4
+                            },
+                            "snappedFrame": {
+                              "left": 706,
+                              "top": 464,
+                              "width": 506,
+                              "height": 52
+                            },
+                            "children": [],
+                            "text": "Laporan dibuat saat offline dan menunggu verifikasi ketika koneksi kembali.",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/kf6dcbul",
+                              "id": "12",
+                              "kind": "shape"
+                            }
+                          }
+                        ],
+                        "padding": {
+                          "top": 0,
+                          "right": 0,
+                          "bottom": 0,
+                          "left": 0
+                        },
+                        "gap": 10,
+                        "effectiveGap": 10,
+                        "justifyOffset": 0,
+                        "align": "start",
+                        "justify": "start",
+                        "contentFrame": {
+                          "left": 706.67,
+                          "top": 421,
+                          "width": 506.67,
+                          "height": 94
+                        },
+                        "items": [
+                          {
+                            "path": "0.2.1.1.0.0",
+                            "frame": {
+                              "left": 706.67,
+                              "top": 421,
+                              "width": 506.67,
+                              "height": 33.6
+                            }
+                          },
+                          {
+                            "path": "0.2.1.1.0.1",
+                            "frame": {
+                              "left": 706.67,
+                              "top": 464.6,
+                              "width": 506.67,
+                              "height": 50.4
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "padding": {
+                      "top": 24,
+                      "right": 28,
+                      "bottom": 24,
+                      "left": 28
+                    },
+                    "align": "start",
+                    "justify": "start",
+                    "contentFrame": {
+                      "left": 706.67,
+                      "top": 421,
+                      "width": 506.67,
+                      "height": 94
+                    },
+                    "element": {
+                      "aid": "sh/29gr2p8n",
+                      "id": "10",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.1.2",
+                    "kind": "panel",
+                    "name": "insight-suspicious",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fill",
+                        "value": 1
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 56,
+                      "height": 116.8
+                    },
+                    "frame": {
+                      "left": 1269.33,
+                      "top": 397,
+                      "width": 562.67,
+                      "height": 142
+                    },
+                    "snappedFrame": {
+                      "left": 1269.33,
+                      "top": 397,
+                      "width": 562.67,
+                      "height": 142
+                    },
+                    "children": [
+                      {
+                        "path": "0.2.1.2.0",
+                        "kind": "column",
+                        "requestedSize": {
+                          "width": {
+                            "mode": "fill",
+                            "value": 1
+                          },
+                          "height": {
+                            "mode": "hug"
+                          }
+                        },
+                        "intrinsicSize": {
+                          "width": 0,
+                          "height": 68.8
+                        },
+                        "frame": {
+                          "left": 1297.33,
+                          "top": 421,
+                          "width": 506.67,
+                          "height": 94
+                        },
+                        "children": [
+                          {
+                            "path": "0.2.1.2.0.0",
+                            "kind": "text",
+                            "name": "insight-heading",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 33.6
+                            },
+                            "frame": {
+                              "left": 1297.33,
+                              "top": 421,
+                              "width": 506.67,
+                              "height": 33.6
+                            },
+                            "snappedFrame": {
+                              "left": 1298,
+                              "top": 422,
+                              "width": 506,
+                              "height": 34
+                            },
+                            "children": [],
+                            "text": "Suspicious",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/2lszqtcj",
+                              "id": "14",
+                              "kind": "shape"
+                            }
+                          },
+                          {
+                            "path": "0.2.1.2.0.1",
+                            "kind": "text",
+                            "name": "insight-body",
+                            "requestedSize": {
+                              "width": {
+                                "mode": "fill",
+                                "value": 1
+                              },
+                              "height": {
+                                "mode": "hug"
+                              }
+                            },
+                            "intrinsicSize": {
+                              "width": 0,
+                              "height": 25.2
+                            },
+                            "frame": {
+                              "left": 1297.33,
+                              "top": 464.6,
+                              "width": 506.67,
+                              "height": 50.4
+                            },
+                            "snappedFrame": {
+                              "left": 1298,
+                              "top": 464,
+                              "width": 506,
+                              "height": 52
+                            },
+                            "children": [],
+                            "text": "Ada indikasi jam perangkat berubah atau sinyal waktu tidak konsisten.",
+                            "transform": "none",
+                            "element": {
+                              "aid": "sh/v6psfil0",
+                              "id": "15",
+                              "kind": "shape"
+                            }
+                          }
+                        ],
+                        "padding": {
+                          "top": 0,
+                          "right": 0,
+                          "bottom": 0,
+                          "left": 0
+                        },
+                        "gap": 10,
+                        "effectiveGap": 10,
+                        "justifyOffset": 0,
+                        "align": "start",
+                        "justify": "start",
+                        "contentFrame": {
+                          "left": 1297.33,
+                          "top": 421,
+                          "width": 506.67,
+                          "height": 94
+                        },
+                        "items": [
+                          {
+                            "path": "0.2.1.2.0.0",
+                            "frame": {
+                              "left": 1297.33,
+                              "top": 421,
+                              "width": 506.67,
+                              "height": 33.6
+                            }
+                          },
+                          {
+                            "path": "0.2.1.2.0.1",
+                            "frame": {
+                              "left": 1297.33,
+                              "top": 464.6,
+                              "width": 506.67,
+                              "height": 50.4
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "padding": {
+                      "top": 24,
+                      "right": 28,
+                      "bottom": 24,
+                      "left": 28
+                    },
+                    "align": "start",
+                    "justify": "start",
+                    "contentFrame": {
+                      "left": 1297.33,
+                      "top": 421,
+                      "width": 506.67,
+                      "height": 94
+                    },
+                    "element": {
+                      "aid": "sh/d0z61032",
+                      "id": "13",
+                      "kind": "shape"
+                    }
+                  }
+                ],
+                "padding": {
+                  "top": 0,
+                  "right": 0,
+                  "bottom": 0,
+                  "left": 0
+                },
+                "columnGap": 28,
+                "rowGap": 0,
+                "alignItems": "start",
+                "justifyItems": "stretch",
+                "contentFrame": {
+                  "left": 88,
+                  "top": 397,
+                  "width": 1744,
+                  "height": 559.8
+                },
+                "columns": [
+                  {
+                    "mode": "fr",
+                    "value": 1
+                  },
+                  {
+                    "mode": "fr",
+                    "value": 1
+                  },
+                  {
+                    "mode": "fr",
+                    "value": 1
+                  }
+                ],
+                "autoRows": "auto",
+                "resolvedRows": [
+                  "auto"
+                ],
+                "columnSizes": [
+                  562.67,
+                  562.67,
+                  562.67
+                ],
+                "rowSizes": [
+                  559.8
+                ],
+                "cells": [
+                  {
+                    "path": "0.2.1.0",
+                    "column": 0,
+                    "row": 0,
+                    "columnSpan": 1,
+                    "rowSpan": 1,
+                    "cellFrame": {
+                      "left": 88,
+                      "top": 397,
+                      "width": 562.67,
+                      "height": 559.8
+                    }
+                  },
+                  {
+                    "path": "0.2.1.1",
+                    "column": 1,
+                    "row": 0,
+                    "columnSpan": 1,
+                    "rowSpan": 1,
+                    "cellFrame": {
+                      "left": 678.67,
+                      "top": 397,
+                      "width": 562.67,
+                      "height": 559.8
+                    }
+                  },
+                  {
+                    "path": "0.2.1.2",
+                    "column": 2,
+                    "row": 0,
+                    "columnSpan": 1,
+                    "rowSpan": 1,
+                    "cellFrame": {
+                      "left": 1269.33,
+                      "top": 397,
+                      "width": 562.67,
+                      "height": 559.8
+                    }
+                  }
+                ]
+              },
+              {
+                "path": "0.2.2",
+                "kind": "row",
+                "name": "footer",
+                "requestedSize": {
+                  "width": {
+                    "mode": "fill",
+                    "value": 1
+                  },
+                  "height": {
+                    "mode": "hug"
+                  }
+                },
+                "intrinsicSize": {
+                  "width": 1280,
+                  "height": 19.2
+                },
+                "frame": {
+                  "left": 88,
+                  "top": 990.8,
+                  "width": 1744,
+                  "height": 19.2
+                },
+                "children": [
+                  {
+                    "path": "0.2.2.0",
+                    "kind": "text",
+                    "name": "footer-left",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fixed",
+                        "value": 1100
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 1100,
+                      "height": 19.2
+                    },
+                    "frame": {
+                      "left": 88,
+                      "top": 990,
+                      "width": 1100,
+                      "height": 20
+                    },
+                    "snappedFrame": {
+                      "left": 88,
+                      "top": 990,
+                      "width": 1100,
+                      "height": 20
+                    },
+                    "children": [],
+                    "text": "Audit waktu menjaga integritas laporan dan disiplin patroli",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/knih4byh",
+                      "id": "16",
+                      "kind": "shape"
+                    }
+                  },
+                  {
+                    "path": "0.2.2.1",
+                    "kind": "text",
+                    "name": "footer-date",
+                    "requestedSize": {
+                      "width": {
+                        "mode": "fixed",
+                        "value": 180
+                      },
+                      "height": {
+                        "mode": "hug"
+                      }
+                    },
+                    "intrinsicSize": {
+                      "width": 180,
+                      "height": 19.2
+                    },
+                    "frame": {
+                      "left": 1652,
+                      "top": 990,
+                      "width": 180,
+                      "height": 20
+                    },
+                    "snappedFrame": {
+                      "left": 1652,
+                      "top": 990,
+                      "width": 180,
+                      "height": 20
+                    },
+                    "children": [],
+                    "text": "Mei 2026",
+                    "transform": "none",
+                    "element": {
+                      "aid": "sh/d8bat47y",
+                      "id": "17",
+                      "kind": "shape"
+                    }
+                  }
+                ],
+                "padding": {
+                  "top": 0,
+                  "right": 0,
+                  "bottom": 0,
+                  "left": 0
+                },
+                "gap": 0,
+                "effectiveGap": 464,
+                "justifyOffset": 0,
+                "align": "center",
+                "justify": "between",
+                "contentFrame": {
+                  "left": 88,
+                  "top": 990.8,
+                  "width": 1744,
+                  "height": 19.2
+                },
+                "items": [
+                  {
+                    "path": "0.2.2.0",
+                    "frame": {
+                      "left": 88,
+                      "top": 990,
+                      "width": 1100,
+                      "height": 20
+                    }
+                  },
+                  {
+                    "path": "0.2.2.1",
+                    "frame": {
+                      "left": 1652,
+                      "top": 990,
+                      "width": 180,
+                      "height": 20
+                    }
+                  }
+                ]
+              }
+            ],
+            "padding": {
+              "top": 70,
+              "right": 88,
+              "bottom": 70,
+              "left": 88
+            },
+            "columnGap": 0,
+            "rowGap": 34,
+            "alignItems": "stretch",
+            "justifyItems": "stretch",
+            "contentFrame": {
+              "left": 88,
+              "top": 70,
+              "width": 1744,
+              "height": 940
+            },
+            "columns": [
+              {
+                "mode": "fr",
+                "value": 1
+              }
+            ],
+            "rows": [
+              "auto",
+              {
+                "mode": "fr",
+                "value": 1
+              },
+              "auto"
+            ],
+            "autoRows": "auto",
+            "resolvedRows": [
+              "auto",
+              {
+                "mode": "fr",
+                "value": 1
+              },
+              "auto"
+            ],
+            "columnSizes": [
+              1744
+            ],
+            "rowSizes": [
+              293,
+              559.8,
+              19.2
+            ],
+            "cells": [
+              {
+                "path": "0.2.0",
+                "column": 0,
+                "row": 0,
+                "columnSpan": 1,
+                "rowSpan": 1,
+                "cellFrame": {
+                  "left": 88,
+                  "top": 70,
+                  "width": 1744,
+                  "height": 293
+                }
+              },
+              {
+                "path": "0.2.1",
+                "column": 0,
+                "row": 1,
+                "columnSpan": 1,
+                "rowSpan": 1,
+                "cellFrame": {
+                  "left": 88,
+                  "top": 397,
+                  "width": 1744,
+                  "height": 559.8
+                }
+              },
+              {
+                "path": "0.2.2",
+                "column": 0,
+                "row": 2,
+                "columnSpan": 1,
+                "rowSpan": 1,
+                "cellFrame": {
+                  "left": 88,
+                  "top": 990.8,
+                  "width": 1744,
+                  "height": 19.2
+                }
+              }
+            ]
+          }
+        ],
+        "padding": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        },
+        "alignItems": "stretch",
+        "justifyItems": "stretch",
+        "contentFrame": {
+          "left": 0,
+          "top": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "items": [
+          {
+            "path": "0.0",
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            }
+          },
+          {
+            "path": "0.1",
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 10
+            }
+          },
+          {
+            "path": "0.2",
+            "frame": {
+              "left": 0,
+              "top": 0,
+              "width": 1920,
+              "height": 1080
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,661 @@
+/*
+Tujuan: Menyediakan gaya global SmartPatrol, termasuk dark default dan light mode Flip7-adapted.
+Caller: Entry React melalui src/main.jsx dan komponen Tailwind di seluruh SPA.
+Dependensi: TailwindCSS v4, class theme pertamina-light dari AppContextRuntime, dan token warna UI SmartPatrol.
+Main Functions: Mengatur background, typography, scrollbar, surface, form, card, badge, modal, dan animasi global.
+Side Effects: Mengubah tampilan global berdasarkan class theme tanpa menyentuh state, sync, atau data Supabase.
+*/
+
+@import "tailwindcss";
+
+:root {
+  color: #e2f5ff;
+  background-color: #020617;
+  font-family: "Chakra Petch", "Segoe UI", sans-serif;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(circle at top, rgba(34, 211, 238, 0.2), transparent 32%),
+    linear-gradient(180deg, #020617 0%, #071224 48%, #020617 100%);
+  color: #e2f5ff;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.app-shell {
+  background:
+    linear-gradient(180deg, rgba(8, 15, 28, 0.96), rgba(3, 10, 18, 0.98)),
+    radial-gradient(circle at top right, rgba(34, 211, 238, 0.14), transparent 28%);
+}
+
+.glass-card {
+  background: rgba(5, 14, 24, 0.78);
+  backdrop-filter: blur(18px);
+}
+
+.soft-outline {
+  box-shadow:
+    0 20px 60px rgba(2, 6, 23, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.content-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 360px;
+}
+
+/* Modern Minimal Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(34, 211, 238, 0.1);
+  border-radius: 10px;
+  transition: background 0.3s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(34, 211, 238, 0.3);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(34, 211, 238, 0.1) transparent;
+}
+
+/* FLIP7-ADAPTED LIGHT THEME OVERRIDES
+   Nama selector dipertahankan agar kompatibel dengan state theme existing. */
+.pertamina-light {
+  color-scheme: light;
+  --sp-primary: #2ba8a2;
+  --sp-primary-light: #3cc4bd;
+  --sp-primary-dark: #1e8c86;
+  --sp-primary-bg: #e8f6f5;
+  --sp-accent: #ffd23f;
+  --sp-accent-light: #ffe47a;
+  --sp-accent-dark: #e6b800;
+  --sp-coral: #ef6c4a;
+  --sp-coral-light: #ff8a6a;
+  --sp-coral-dark: #d45233;
+  --sp-cream: #fff8e7;
+  --sp-sky: #5dade2;
+  --sp-bg: #eff8f7;
+  --sp-card: #ffffff;
+  --sp-text: #123332;
+  --sp-muted: #354f4c;
+  --sp-border: #7fcfc8;
+  --sp-border-strong: #2ba8a2;
+  --sp-success: #27ae60;
+  --sp-error: #e74c3c;
+  --sp-shadow-card: 0 4px 20px rgba(43, 168, 162, 0.1);
+  --sp-shadow-teal: 0 4px 20px rgba(43, 168, 162, 0.3);
+  --sp-shadow-gold: 0 4px 20px rgba(255, 210, 63, 0.4);
+  --sp-shadow-coral: 0 4px 20px rgba(239, 108, 74, 0.32);
+}
+
+.pertamina-light body {
+  background:
+    radial-gradient(circle at top left, rgba(255, 210, 63, 0.2), transparent 28%),
+    radial-gradient(circle at top right, rgba(43, 168, 162, 0.18), transparent 34%),
+    linear-gradient(180deg, var(--sp-bg) 0%, #f8fffe 48%, #e8f6f5 100%);
+  color: var(--sp-text);
+}
+
+.pertamina-light ::selection {
+  background: rgba(255, 210, 63, 0.55);
+  color: var(--sp-text);
+}
+
+.pertamina-light ::-webkit-scrollbar-thumb {
+  background: rgba(43, 168, 162, 0.35);
+}
+
+.pertamina-light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(30, 140, 134, 0.58);
+}
+
+.pertamina-light * {
+  scrollbar-color: rgba(43, 168, 162, 0.35) transparent;
+}
+
+/* Base shell and surface overrides */
+.pertamina-light.bg-\[\#070b19\],
+.pertamina-light .bg-\[\#070b19\],
+.pertamina-light .bg-\[\#070b19\]\/50,
+.pertamina-light .bg-\[\#070b19\]\/60,
+.pertamina-light .bg-\[\#070b19\]\/90,
+.pertamina-light .bg-\[\#070b19\]\/95,
+.pertamina-light .bg-\[\#091022\] {
+  background:
+    radial-gradient(circle at top left, rgba(255, 210, 63, 0.14), transparent 30%),
+    linear-gradient(180deg, var(--sp-bg) 0%, #f8fffe 100%) !important;
+}
+
+.pertamina-light .bg-\[\#0b1229\],
+.pertamina-light .bg-\[\#0b1229\]\/90,
+.pertamina-light .bg-slate-950,
+.pertamina-light .bg-slate-950\/95,
+.pertamina-light .bg-slate-900\/70,
+.pertamina-light .bg-slate-900\/65,
+.pertamina-light .bg-slate-900,
+.pertamina-light .bg-slate-800 {
+  background-color: var(--sp-card) !important;
+}
+
+.pertamina-light .bg-\[\#0f1734\] {
+  background-color: var(--sp-primary-bg) !important;
+}
+
+.pertamina-light .app-shell {
+  background:
+    linear-gradient(180deg, rgba(248, 255, 254, 0.96), rgba(232, 246, 245, 0.98)),
+    radial-gradient(circle at top right, rgba(255, 210, 63, 0.16), transparent 28%);
+}
+
+.pertamina-light .glass-card {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(43, 168, 162, 0.22) !important;
+  box-shadow: var(--sp-shadow-card) !important;
+}
+
+.pertamina-light .soft-outline {
+  box-shadow:
+    var(--sp-shadow-card),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78) !important;
+}
+
+.pertamina-light .bg-gradient-to-b.from-\[\#070b19\]\/80.to-\[\#070b19\],
+.pertamina-light .from-\[\#070b19\]\/80,
+.pertamina-light .to-\[\#070b19\] {
+  display: none !important;
+}
+
+/* Text colors */
+.pertamina-light,
+.pertamina-light .text-cyan-50,
+.pertamina-light .text-white,
+.pertamina-light .text-slate-50,
+.pertamina-light .text-slate-100 {
+  color: var(--sp-text) !important;
+}
+
+.pertamina-light .text-cyan-100,
+.pertamina-light .text-cyan-200,
+.pertamina-light .text-slate-200,
+.pertamina-light .text-slate-300 {
+  color: #193f3c !important;
+  opacity: 1 !important;
+}
+
+.pertamina-light .text-slate-400,
+.pertamina-light .text-slate-500,
+.pertamina-light .text-cyan-100\/70,
+.pertamina-light .text-cyan-100\/80,
+.pertamina-light .text-cyan-200\/60,
+.pertamina-light .text-cyan-300\/80,
+.pertamina-light .text-cyan-400\/70,
+.pertamina-light .text-cyan-400\/80,
+.pertamina-light .text-cyan-500\/80,
+.pertamina-light .text-yellow-200\/80,
+.pertamina-light .text-rose-200\/80,
+.pertamina-light .text-xs.text-white\/90,
+.pertamina-light .text-\[10px\].text-cyan-500,
+.pertamina-light .text-\[10px\].text-yellow-100\/70 {
+  color: var(--sp-muted) !important;
+  opacity: 1 !important;
+}
+
+.pertamina-light .text-cyan-300,
+.pertamina-light .text-cyan-400,
+.pertamina-light .text-cyan-500,
+.pertamina-light .text-cyan-600,
+.pertamina-light .text-cyan-700,
+.pertamina-light .text-cyan-800,
+.pertamina-light .text-cyan-900 {
+  color: #126f6a !important;
+  opacity: 1 !important;
+}
+
+.pertamina-light .text-yellow-100,
+.pertamina-light .text-yellow-100\/70,
+.pertamina-light .text-yellow-200,
+.pertamina-light .text-yellow-300,
+.pertamina-light .text-yellow-400,
+.pertamina-light .text-yellow-500,
+.pertamina-light .text-yellow-600,
+.pertamina-light .text-amber-200,
+.pertamina-light .text-amber-300,
+.pertamina-light .text-amber-400,
+.pertamina-light .text-amber-500 {
+  color: #765a00 !important;
+  opacity: 1 !important;
+}
+
+.pertamina-light .font-bold.text-yellow-400,
+.pertamina-light .font-black.text-yellow-400 {
+  color: var(--sp-accent-dark) !important;
+}
+
+.pertamina-light .text-emerald-50\/90,
+.pertamina-light .text-emerald-100,
+.pertamina-light .text-emerald-100\/70,
+.pertamina-light .text-emerald-200,
+.pertamina-light .text-emerald-200\/80,
+.pertamina-light .text-emerald-300,
+.pertamina-light .text-emerald-300\/75,
+.pertamina-light .text-emerald-400,
+.pertamina-light .text-emerald-500,
+.pertamina-light .text-emerald-600 {
+  color: #176b3f !important;
+  opacity: 1 !important;
+}
+
+.pertamina-light .text-rose-100,
+.pertamina-light .text-rose-100\/70,
+.pertamina-light .text-rose-200,
+.pertamina-light .text-rose-200\/80,
+.pertamina-light .text-rose-300,
+.pertamina-light .text-rose-400,
+.pertamina-light .text-rose-500,
+.pertamina-light .text-rose-600,
+.pertamina-light .text-red-400,
+.pertamina-light .text-red-500 {
+  color: #a93d25 !important;
+  opacity: 1 !important;
+}
+
+.pertamina-light .text-fuchsia-100,
+.pertamina-light .text-fuchsia-100\/75,
+.pertamina-light .text-fuchsia-200,
+.pertamina-light .text-fuchsia-300,
+.pertamina-light .text-fuchsia-400,
+.pertamina-light .text-fuchsia-500,
+.pertamina-light .text-fuchsia-600 {
+  color: #7e3a86 !important;
+  opacity: 1 !important;
+}
+
+/* Borders and dividers */
+.pertamina-light .border-cyan-500\/10,
+.pertamina-light .border-cyan-500\/14,
+.pertamina-light .border-cyan-500\/20,
+.pertamina-light .border-cyan-500\/30,
+.pertamina-light .border-cyan-700,
+.pertamina-light .border-cyan-800,
+.pertamina-light .border-cyan-800\/50,
+.pertamina-light .border-cyan-900,
+.pertamina-light .border-cyan-900\/30,
+.pertamina-light .border-cyan-900\/50,
+.pertamina-light .border-slate-700,
+.pertamina-light .border-slate-800,
+.pertamina-light .border-white\/10 {
+  border-color: var(--sp-border) !important;
+}
+
+.pertamina-light .border,
+.pertamina-light .border-t,
+.pertamina-light .border-b,
+.pertamina-light .border-l,
+.pertamina-light .border-r {
+  border-color: var(--sp-border) !important;
+}
+
+.pertamina-light .border-yellow-500\/20,
+.pertamina-light .border-yellow-500\/30,
+.pertamina-light .border-yellow-900\/50,
+.pertamina-light .border-amber-400\/25,
+.pertamina-light .border-amber-400\/30,
+.pertamina-light .border-amber-500\/30 {
+  border-color: rgba(255, 210, 63, 0.72) !important;
+}
+
+.pertamina-light .border-rose-400\/30,
+.pertamina-light .border-rose-500\/20,
+.pertamina-light .border-rose-500\/30 {
+  border-color: rgba(239, 108, 74, 0.5) !important;
+}
+
+.pertamina-light .border-emerald-400\/25,
+.pertamina-light .border-emerald-400\/30,
+.pertamina-light .border-emerald-500\/30 {
+  border-color: rgba(39, 174, 96, 0.42) !important;
+}
+
+/* Cards, rows, and repeated operational panels */
+.pertamina-light .content-auto.rounded-\[26px\],
+.pertamina-light .content-auto.rounded-\[28px\],
+.pertamina-light .rounded-\[1\.8rem\],
+.pertamina-light .rounded-\[2rem\],
+.pertamina-light .rounded-3xl,
+.pertamina-light .rounded-2xl {
+  box-shadow: var(--sp-shadow-card);
+}
+
+.pertamina-light .content-auto {
+  background-color: var(--sp-card) !important;
+  border-color: var(--sp-border-strong) !important;
+}
+
+.pertamina-light .content-auto.border-cyan-500\/14,
+.pertamina-light .content-auto.border-cyan-500\/20,
+.pertamina-light .content-auto.border-cyan-800\/50 {
+  border-left: 6px solid var(--sp-primary-light) !important;
+}
+
+.pertamina-light .content-auto.border-amber-400\/25,
+.pertamina-light .content-auto.border-amber-400\/30 {
+  border-left: 6px solid var(--sp-accent) !important;
+  background:
+    linear-gradient(90deg, rgba(255, 210, 63, 0.18), rgba(255, 255, 255, 0.96) 28%),
+    var(--sp-card) !important;
+}
+
+.pertamina-light .content-auto.border-emerald-400\/25,
+.pertamina-light .content-auto.border-emerald-400\/30 {
+  border-left: 6px solid var(--sp-success) !important;
+  background:
+    linear-gradient(90deg, rgba(39, 174, 96, 0.13), rgba(255, 255, 255, 0.96) 28%),
+    var(--sp-card) !important;
+}
+
+/* Semantic tinted surfaces */
+.pertamina-light .bg-cyan-950\/10,
+.pertamina-light .bg-cyan-950\/20,
+.pertamina-light .bg-cyan-950\/50,
+.pertamina-light .bg-cyan-900\/20,
+.pertamina-light .bg-cyan-900\/30,
+.pertamina-light .bg-cyan-900\/40,
+.pertamina-light .bg-cyan-900\/50,
+.pertamina-light .bg-cyan-800\/50,
+.pertamina-light .bg-cyan-600\/20,
+.pertamina-light .bg-cyan-500\/10,
+.pertamina-light .bg-cyan-500\/15 {
+  background-color: var(--sp-primary-bg) !important;
+  border-color: rgba(30, 140, 134, 0.62) !important;
+}
+
+.pertamina-light .bg-yellow-500\/10,
+.pertamina-light .bg-yellow-950\/20,
+.pertamina-light .bg-yellow-950\/10,
+.pertamina-light .bg-amber-400\/8,
+.pertamina-light .bg-amber-400\/10,
+.pertamina-light .bg-amber-500\/10 {
+  background-color: rgba(255, 210, 63, 0.18) !important;
+  border-color: rgba(204, 159, 0, 0.72) !important;
+}
+
+.pertamina-light .bg-emerald-400\/8,
+.pertamina-light .bg-emerald-400\/10,
+.pertamina-light .bg-emerald-500\/10,
+.pertamina-light .bg-emerald-950\/20 {
+  background-color: rgba(39, 174, 96, 0.12) !important;
+  border-color: rgba(23, 107, 63, 0.55) !important;
+}
+
+.pertamina-light .bg-rose-400\/10,
+.pertamina-light .bg-rose-500\/10,
+.pertamina-light .bg-red-900\/30 {
+  background-color: rgba(239, 108, 74, 0.12) !important;
+  border-color: rgba(169, 61, 37, 0.58) !important;
+}
+
+/* Navigation and dropdowns */
+.pertamina-light .sticky.top-0 {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-bottom-color: var(--sp-border) !important;
+  box-shadow: 0 4px 20px rgba(43, 168, 162, 0.12) !important;
+}
+
+.pertamina-light .hidden.lg\:flex.flex-col.w-\[100px\],
+.pertamina-light .fixed.bottom-0 {
+  background: rgba(255, 248, 231, 0.96) !important;
+  border-color: var(--sp-border) !important;
+  box-shadow: 0 -4px 20px rgba(43, 168, 162, 0.12) !important;
+}
+
+.pertamina-light .absolute.right-0.top-10 {
+  background: var(--sp-card) !important;
+  border-color: var(--sp-border) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(30, 140, 134, 0.16) !important;
+}
+
+.pertamina-light .hover\:bg-cyan-900\/40:hover,
+.pertamina-light .hover\:bg-cyan-900\/50:hover,
+.pertamina-light .hover\:bg-cyan-500\/20:hover {
+  background-color: rgba(43, 168, 162, 0.13) !important;
+}
+
+/* Buttons and touch targets */
+.pertamina-light button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pertamina-light button.rounded-lg,
+.pertamina-light button.rounded-xl,
+.pertamina-light button.rounded-2xl {
+  border-radius: 999px !important;
+}
+
+.pertamina-light .notification-list-item.rounded-2xl {
+  border-radius: 1rem !important;
+}
+
+.pertamina-light .bg-cyan-600,
+.pertamina-light .hover\:bg-cyan-500:hover {
+  background: linear-gradient(180deg, var(--sp-accent-light), var(--sp-accent)) !important;
+  color: var(--sp-text) !important;
+  border-color: rgba(230, 184, 0, 0.72) !important;
+  box-shadow: var(--sp-shadow-gold) !important;
+}
+
+.pertamina-light .bg-cyan-600\/20 {
+  background-color: rgba(43, 168, 162, 0.16) !important;
+  border-color: rgba(43, 168, 162, 0.36) !important;
+}
+
+.pertamina-light .bg-rose-500,
+.pertamina-light .bg-rose-500\/90,
+.pertamina-light .hover\:bg-rose-600:hover {
+  background: linear-gradient(180deg, var(--sp-coral-light), var(--sp-coral)) !important;
+  color: #ffffff !important;
+  box-shadow: var(--sp-shadow-coral) !important;
+}
+
+.pertamina-light .bg-emerald-500,
+.pertamina-light .bg-\[\#39B54A\] {
+  background-color: var(--sp-success) !important;
+}
+
+.pertamina-light .bg-opacity-10.bg-emerald-500 {
+  background-color: var(--sp-success) !important;
+}
+
+.pertamina-light .bg-opacity-10.bg-rose-500 {
+  background-color: var(--sp-coral) !important;
+}
+
+.pertamina-light .bg-opacity-10.bg-yellow-500 {
+  background-color: var(--sp-accent-dark) !important;
+}
+
+.pertamina-light .bg-opacity-10.bg-emerald-500 .text-emerald-200,
+.pertamina-light .bg-opacity-10.bg-emerald-500 .text-emerald-300,
+.pertamina-light .bg-opacity-10.bg-rose-500 .text-rose-100,
+.pertamina-light .bg-opacity-10.bg-rose-500 .text-rose-200,
+.pertamina-light .bg-opacity-10.bg-yellow-500 .text-yellow-100,
+.pertamina-light .bg-opacity-10.bg-yellow-500 .text-yellow-200 {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* Forms */
+.pertamina-light input,
+.pertamina-light textarea,
+.pertamina-light select {
+  background-color: var(--sp-cream) !important;
+  color: var(--sp-text) !important;
+  border-color: rgba(30, 140, 134, 0.68) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.pertamina-light input:focus,
+.pertamina-light textarea:focus,
+.pertamina-light select:focus {
+  border-color: var(--sp-primary) !important;
+  box-shadow: 0 0 0 4px rgba(43, 168, 162, 0.15) !important;
+}
+
+.pertamina-light input::placeholder,
+.pertamina-light textarea::placeholder {
+  color: #607a77 !important;
+}
+
+/* Light-specific named hooks already used by dashboards/details */
+.pertamina-light .bg-black\/70 {
+  background-color: rgba(18, 51, 50, 0.86) !important;
+  border-color: rgba(255, 210, 63, 0.58) !important;
+}
+
+.pertamina-light .bg-black\/70 .text-cyan-400,
+.pertamina-light .bg-black\/70 .text-cyan-100\/70,
+.pertamina-light .bg-black\/70 .text-white\/90,
+.pertamina-light .bg-black\/70 .text-yellow-400,
+.pertamina-light .bg-black\/70 .text-rose-300 {
+  color: #fff8e7 !important;
+  opacity: 1 !important;
+}
+
+.pertamina-light .incident-desc {
+  color: var(--sp-text) !important;
+  font-weight: 700 !important;
+  font-style: italic !important;
+}
+
+.pertamina-light .light-vignette-bl {
+  opacity: 1 !important;
+}
+
+.pertamina-light .incident-info-value {
+  color: var(--sp-text) !important;
+  font-weight: 700 !important;
+  font-style: italic !important;
+}
+
+.pertamina-light .audit-card-title {
+  color: var(--sp-primary-dark) !important;
+}
+
+.pertamina-light .audit-record-box {
+  background-color: var(--sp-primary-bg) !important;
+  border-color: var(--sp-primary) !important;
+}
+
+.pertamina-light .dashboard-header-card {
+  background:
+    linear-gradient(135deg, rgba(232, 246, 245, 0.96), rgba(255, 248, 231, 0.96)) !important;
+  box-shadow: var(--sp-shadow-teal) !important;
+}
+
+.pertamina-light .metric-subtitle,
+.pertamina-light .latest-guard-subtext,
+.pertamina-light .incident-card-subtext,
+.pertamina-light .sos-card-date,
+.pertamina-light .chart-axis-text,
+.pertamina-light .user-detail-subtext {
+  color: var(--sp-primary-dark) !important;
+  fill: var(--sp-primary-dark) !important;
+  opacity: 1 !important;
+}
+
+.pertamina-light .dashboard-header-desc {
+  color: var(--sp-primary-dark) !important;
+  opacity: 1 !important;
+}
+
+.pertamina-light .dashboard-secondary-box {
+  background-color: var(--sp-primary-bg) !important;
+  border-color: var(--sp-primary-light) !important;
+}
+
+.pertamina-light .dashboard-info-badge {
+  color: var(--sp-primary-dark) !important;
+  opacity: 1 !important;
+}
+
+.pertamina-light .dashboard-filter-btn.bg-cyan-500\/15 {
+  background-color: rgba(255, 210, 63, 0.22) !important;
+  border-color: var(--sp-accent) !important;
+  color: var(--sp-primary-dark) !important;
+}
+
+.pertamina-light .off-duty-badge {
+  background-color: #526b68 !important;
+  color: #ffffff !important;
+  border-color: #405653 !important;
+}
+
+.pertamina-light .user-detail-footer {
+  background: var(--sp-card) !important;
+  border-top-color: var(--sp-border) !important;
+}
+
+.pertamina-light .shadow-2xl,
+.pertamina-light .shadow-xl,
+.pertamina-light .shadow-lg {
+  box-shadow: 0 8px 32px rgba(43, 168, 162, 0.16) !important;
+}
+
+.pertamina-light .flex-1.min-w-\[80px\] span {
+  font-weight: 900 !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pertamina-light .transition,
+  .pertamina-light .transition-all,
+  .pertamina-light .transition-colors {
+    transition-duration: 180ms;
+  }
+}
+
+/* SOS Animations */
+@keyframes sosFlash {
+  0%, 100% { background-color: rgba(69, 10, 10, 0.9); }
+  50% { background-color: rgba(127, 29, 29, 0.95); }
+}
+
+.animate-sos-flash {
+  animation: sosFlash 1s ease-in-out infinite;
+}
+
+@keyframes scaleUpCenter {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.scale-up-center {
+  animation: scaleUpCenter 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
