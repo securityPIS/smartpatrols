@@ -45,9 +45,15 @@ async function loginWithFirebaseEmail(email, password) {
   };
 }
 
-async function registerWithFirebaseEmail(email, password) {
+async function registerWithFirebaseEmail(email, password, metadata = {}) {
   const supabase = ensureSupabaseClient();
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: Object.keys(metadata || {}).length > 0
+      ? { data: metadata }
+      : undefined,
+  });
   if (error) throw error;
   return {
     ...data,

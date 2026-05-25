@@ -8977,13 +8977,21 @@ export function AppProvider({ children }) {
     setAuthNotice('');
 
     try {
-      const credential = await registerWithFirebaseEmail(safeEmail, passwordInput);
+      const credential = await registerWithFirebaseEmail(safeEmail, passwordInput, {
+        display_name: safeName,
+        name: safeName,
+        phone: safePhone,
+        type: safeType,
+        worker_number: safeWorkerNumber,
+        smartpatrol_registration_flow: 'public',
+      });
+      const hasRegistrationSession = Boolean(credential?.session?.access_token);
       let uploadedPhoto = {
         photoUrl: '',
         photoPath: '',
       };
 
-      if (authForm.photoUrl) {
+      if (authForm.photoUrl && hasRegistrationSession) {
         try {
           uploadedPhoto = await uploadRegistrationPhotoAsset({
             uid: credential.user.uid,
@@ -8994,16 +9002,18 @@ export function AppProvider({ children }) {
         }
       }
 
-      await createPendingRegistration({
-        uid: credential.user.uid,
-        email: safeEmail,
-        name: safeName,
-        phone: safePhone,
-        photoUrl: uploadedPhoto.photoUrl,
-        photoPath: uploadedPhoto.photoPath,
-        type: safeType,
-        workerNumber: safeWorkerNumber,
-      });
+      if (hasRegistrationSession) {
+        await createPendingRegistration({
+          uid: credential.user.uid,
+          email: safeEmail,
+          name: safeName,
+          phone: safePhone,
+          photoUrl: uploadedPhoto.photoUrl,
+          photoPath: uploadedPhoto.photoPath,
+          type: safeType,
+          workerNumber: safeWorkerNumber,
+        });
+      }
 
       await logoutFirebaseUser();
       setSessionUserId(null);

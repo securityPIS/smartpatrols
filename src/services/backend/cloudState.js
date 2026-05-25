@@ -119,6 +119,60 @@ function userToProfileRow(user = {}) {
   };
 }
 
+function isUuidLike(value) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ''));
+}
+
+async function reconcileProfileRowIds(supabase, profileRows = []) {
+  const rowsWithAuthUid = profileRows.filter(row => row?.auth_uid && isUuidLike(row.auth_uid));
+  const emailValues = Array.from(new Set(profileRows.map(row => row?.email).filter(Boolean)));
+  const authUidValues = Array.from(new Set(rowsWithAuthUid.map(row => row.auth_uid)));
+  if (authUidValues.length === 0 && emailValues.length === 0) return profileRows;
+
+  try {
+    const existingRows = [];
+    if (authUidValues.length > 0) {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id,auth_uid,email')
+        .in('auth_uid', authUidValues);
+      if (error) throw error;
+      existingRows.push(...(data || []));
+    }
+    if (emailValues.length > 0) {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id,auth_uid,email')
+        .in('email', emailValues);
+      if (error) throw error;
+      existingRows.push(...(data || []));
+    }
+
+    const existingByAuthUid = new Map();
+    const existingByEmail = new Map();
+    existingRows.forEach((row) => {
+      if (row?.auth_uid) existingByAuthUid.set(String(row.auth_uid), row);
+      if (row?.email) existingByEmail.set(sanitizeEmail(row.email), row);
+    });
+
+    return profileRows.map((row) => {
+      const existing = (
+        (row.auth_uid && existingByAuthUid.get(String(row.auth_uid)))
+        || (row.email && existingByEmail.get(sanitizeEmail(row.email)))
+      );
+      if (!existing?.id || existing.id === row.id) return row;
+      // Pertahankan primary key profile cloud agar auth_uid unik tidak bentrok saat state lokal lama masih memakai id legacy.
+      return {
+        ...row,
+        id: existing.id,
+      };
+    });
+  } catch (error) {
+    console.warn('Gagal rekonsiliasi id profile cloud, lanjutkan payload lokal', error);
+    return profileRows;
+  }
+}
+
 function shipToRow(ship = {}) {
   return {
     id: String(ship.id || ''),
@@ -276,7 +330,8 @@ async function writeStateToSql(state, options = {}) {
     : [];
 
   if (profileRows.length > 0) {
-    const { error } = await supabase.from('profiles').upsert(profileRows, { onConflict: 'id' });
+    const reconciledProfileRows = await reconcileProfileRowIds(supabase, profileRows);
+    const { error } = await supabase.from('profiles').upsert(reconciledProfileRows, { onConflict: 'id' });
     if (error && !String(error.message || '').toLowerCase().includes('row-level security')) throw error;
   }
   if (shipRows.length > 0) {

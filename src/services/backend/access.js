@@ -14,6 +14,12 @@ import { enqueueOutboxMutation, registerOutboxHandler } from './outbox';
 const PENDING_REGISTRATIONS_TABLE = 'pending_registrations';
 const USER_ACCESS_TABLE = 'profiles';
 
+function isDuplicateKeyError(error) {
+  const code = String(error?.code || '');
+  const message = String(error?.message || '').toLowerCase();
+  return code === '23505' || message.includes('duplicate key');
+}
+
 function mapPendingRegistration(row = {}) {
   return {
     id: sanitizeText(row.id || row.uid || '', 160) || '',
@@ -78,7 +84,13 @@ export async function createPendingRegistration(registration) {
   try {
     const { error } = await supabase
       .from(PENDING_REGISTRATIONS_TABLE)
-      .upsert(payload, { onConflict: 'uid' });
+      .insert(payload);
+    if (isDuplicateKeyError(error)) {
+      return {
+        ...registration,
+        status: 'pending',
+      };
+    }
     if (error) throw error;
   } catch (error) {
     await enqueueOutboxMutation({
@@ -98,7 +110,8 @@ registerOutboxHandler('pending_registration.upsert', async (payload) => {
   const supabase = ensureSupabaseClient();
   const { error } = await supabase
     .from(PENDING_REGISTRATIONS_TABLE)
-    .upsert(payload, { onConflict: 'uid' });
+    .insert(payload);
+  if (isDuplicateKeyError(error)) return;
   if (error) throw error;
 });
 

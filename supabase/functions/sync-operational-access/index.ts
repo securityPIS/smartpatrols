@@ -16,6 +16,26 @@ import {
   readJsonBody,
 } from '../_shared/smartpatrol.ts';
 
+async function findExistingProfile(supabase: ReturnType<typeof getServiceClient>, row: Record<string, unknown>) {
+  const candidates = [
+    { column: 'auth_uid', value: row.auth_uid },
+    { column: 'email', value: row.email },
+    { column: 'id', value: row.id },
+  ].filter((candidate) => candidate.value);
+
+  for (const candidate of candidates) {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq(candidate.column, candidate.value)
+      .maybeSingle();
+    if (error) throw error;
+    if (data) return data;
+  }
+
+  return null;
+}
+
 Deno.serve(async (request) => {
   const options = handleOptions(request);
   if (options) return options;
@@ -23,8 +43,16 @@ Deno.serve(async (request) => {
   try {
     const { profile: actor } = await assertAdmin(request);
     const payload = await readJsonBody(request);
-    const row = buildProfileRow(payload);
     const supabase = getServiceClient();
+    const proposedRow = buildProfileRow(payload);
+    const existingProfile = await findExistingProfile(supabase, proposedRow);
+    const row = existingProfile
+      ? buildProfileRow({
+        ...payload,
+        id: existingProfile.id,
+        legacyUserId: existingProfile.id,
+      }, existingProfile)
+      : proposedRow;
 
     const { data, error } = await supabase
       .from('profiles')

@@ -29,9 +29,10 @@ LoginPage -> AppContextRuntime.handleLogin
   -> saveAuthSession(localStorage) -> render AppShell
 
 Register
-  -> Supabase Auth signUp
+  -> Supabase Auth signUp + metadata onboarding publik
+  -> trigger auth.users -> pending_registrations bila sesi email-confirmation belum tersedia
   -> uploadRegistrationPhotoAsset (Supabase Storage registration-assets)
-  -> pending_registrations insert
+  -> pending_registrations insert idempotent bila sesi registrasi tersedia
   -> Admin approval via approve-pending-registration
   -> profiles upsert role/status/ship assignment
 ```
