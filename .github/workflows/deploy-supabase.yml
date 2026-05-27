@@ -75,8 +75,20 @@ jobs:
           echo "HTTP $http_code"
           cat /tmp/resp.json
           case "$http_code" in
-            2*) echo "Konfigurasi database berhasil." ;;
-            *)  echo "::error::Gagal konfigurasi database settings (HTTP $http_code)."; exit 1 ;;
+            2*)
+              echo "Konfigurasi database berhasil."
+              ;;
+            *)
+              # Supabase menolak ALTER DATABASE SET parameter custom (app.*) via Management API
+              # (permission denied 42501). Ini HANYA dipakai cron resign-expiring-assets (refresh
+              # signed URL foto) — bukan finalize_shift/history patroli. Jangan gagalkan deploy;
+              # parameter ini memang setup manual sekali oleh admin (lihat header migration
+              # 202605290001_add_asset_resign_cron.sql). Jalankan di Supabase SQL Editor:
+              #   ALTER DATABASE postgres SET "app.supabase_functions_url" = '<functions_url>';
+              #   ALTER DATABASE postgres SET "app.cron_secret" = '<CRON_SECRET>';
+              #   SELECT pg_reload_conf();
+              echo "::warning::Lewati konfigurasi GUC cron asset-resign (HTTP $http_code). Set manual di SQL Editor bila fitur re-sign foto dipakai. Tidak memengaruhi sinkronisasi patroli / finalize_shift."
+              ;;
           esac
 
       - name: Selesai
