@@ -1,8 +1,9 @@
 import React from 'react';
 import { usePatrol } from '../../context/AppContextRuntime';
 import { getTrustedTimeSnapshot, subscribeTrustedTime } from '../../services/time/trustedTime';
-import { X, Camera, Send, Lock } from 'lucide-react';
+import { X, Camera, Send, Lock, AlertCircle } from 'lucide-react';
 import AsyncImage from '../AsyncImage';
+import { isReportFieldValid, REPORT_FIELD_MIN_LENGTH } from '../../utils/sanitize';
 
 function formatPatrolFormTimestamp(value = new Date()) {
   const safeDate = value instanceof Date ? value : new Date(value);
@@ -53,6 +54,11 @@ export default function PatrolFormView({ isInline = false }) {
     getTrustedTimeSnapshot,
   );
 
+  // Tandai field sudah "disentuh" (touched) agar error hanya muncul setelah user mulai mengisi
+  // Harus dideklarasikan sebelum conditional return agar tidak melanggar Rules of Hooks
+  const [touched, setTouched] = React.useState({ kejadian: false, penyebab: false, tindakLanjut: false });
+  const touch = (field) => setTouched(prev => ({ ...prev, [field]: true }));
+
   if (!activePatrolItem || !activePatrolState) {
     if (isInline) return (
       <div className="h-full flex flex-col items-center justify-center text-cyan-800 p-8 text-center border-2 border-dashed border-cyan-900/30 rounded-3xl m-4">
@@ -69,6 +75,13 @@ export default function PatrolFormView({ isInline = false }) {
   const formTimestamp = formatPatrolFormTimestamp(trustedTime.nowMs);
   const isSubmitting = submittingPatrolId === activePatrolItem.id;
   const trustMessage = getTrustMessage(trustedTime);
+
+  // Validasi field untuk tipe temuan
+  const isTemuan = activePatrolState.type === 'temuan';
+  const kejadianValid = isTemuan ? isReportFieldValid(activePatrolState.kejadian) : true;
+  const penyebabValid = isTemuan ? isReportFieldValid(activePatrolState.penyebab) : true;
+  const tindakLanjutValid = isTemuan ? isReportFieldValid(activePatrolState.tindakLanjut) : true;
+  const allFieldsValid = kejadianValid && penyebabValid && tindakLanjutValid;
 
   return (
     <div className={`flex flex-col h-full bg-[#0b1229] ${isInline ? 'border-l border-cyan-900/50' : 'max-w-md w-full border rounded-2xl shadow-2xl overflow-hidden'} transition-all ${activePatrolState.type === 'temuan' ? 'border-yellow-500/50 shadow-[0_0_50px_rgba(250,204,21,0.1)]' : 'border-emerald-500/50 shadow-[0_0_50px_rgba(16,185,129,0.1)]'}`}>
@@ -114,16 +127,61 @@ export default function PatrolFormView({ isInline = false }) {
               </div>
             )}
             <div>
-              <label className="text-[10px] uppercase tracking-widest text-cyan-500 mb-1.5 block font-bold">Deskripsi Temuan</label>
-              <textarea placeholder="Jelaskan detail temuan..." rows={3} value={activePatrolState.kejadian} onChange={(event) => handleFormChange(activePatrolId, 'kejadian', event.target.value)} className="w-full bg-[#070b19] border border-cyan-800/50 rounded-xl p-3 text-sm text-cyan-50 focus:border-yellow-500 outline-none resize-none" />
+              <label className="text-[10px] uppercase tracking-widest text-cyan-500 mb-1.5 block font-bold">
+                Deskripsi Temuan <span className="text-yellow-500">*</span>
+              </label>
+              <textarea
+                placeholder={`Jelaskan detail temuan (min. ${REPORT_FIELD_MIN_LENGTH} karakter)...`}
+                rows={3}
+                value={activePatrolState.kejadian}
+                onChange={(event) => { handleFormChange(activePatrolId, 'kejadian', event.target.value); touch('kejadian'); }}
+                onBlur={() => touch('kejadian')}
+                className={`w-full bg-[#070b19] border rounded-xl p-3 text-sm text-cyan-50 outline-none resize-none transition-colors ${touched.kejadian && !kejadianValid ? 'border-rose-500 focus:border-rose-400' : 'border-cyan-800/50 focus:border-yellow-500'}`}
+              />
+              {touched.kejadian && !kejadianValid && (
+                <p className="mt-1.5 flex items-center gap-1 text-[11px] text-rose-400">
+                  <AlertCircle className="w-3 h-3 shrink-0" />
+                  Deskripsi wajib diisi minimal {REPORT_FIELD_MIN_LENGTH} karakter ({activePatrolState.kejadian.trim().length}/{REPORT_FIELD_MIN_LENGTH})
+                </p>
+              )}
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-widest text-cyan-500 mb-1.5 block font-bold">Penyebab Kejadian</label>
-              <textarea placeholder="Apa indikasi penyebabnya..." rows={3} value={activePatrolState.penyebab} onChange={(event) => handleFormChange(activePatrolId, 'penyebab', event.target.value)} className="w-full bg-[#070b19] border border-cyan-800/50 rounded-xl p-3 text-sm text-cyan-50 focus:border-yellow-500 outline-none resize-none" />
+              <label className="text-[10px] uppercase tracking-widest text-cyan-500 mb-1.5 block font-bold">
+                Penyebab Kejadian <span className="text-yellow-500">*</span>
+              </label>
+              <textarea
+                placeholder={`Apa indikasi penyebabnya (min. ${REPORT_FIELD_MIN_LENGTH} karakter)...`}
+                rows={3}
+                value={activePatrolState.penyebab}
+                onChange={(event) => { handleFormChange(activePatrolId, 'penyebab', event.target.value); touch('penyebab'); }}
+                onBlur={() => touch('penyebab')}
+                className={`w-full bg-[#070b19] border rounded-xl p-3 text-sm text-cyan-50 outline-none resize-none transition-colors ${touched.penyebab && !penyebabValid ? 'border-rose-500 focus:border-rose-400' : 'border-cyan-800/50 focus:border-yellow-500'}`}
+              />
+              {touched.penyebab && !penyebabValid && (
+                <p className="mt-1.5 flex items-center gap-1 text-[11px] text-rose-400">
+                  <AlertCircle className="w-3 h-3 shrink-0" />
+                  Penyebab wajib diisi minimal {REPORT_FIELD_MIN_LENGTH} karakter ({activePatrolState.penyebab.trim().length}/{REPORT_FIELD_MIN_LENGTH})
+                </p>
+              )}
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-widest text-cyan-500 mb-1.5 block font-bold">Tindak Lanjut</label>
-              <textarea placeholder="Tindakan / Update..." rows={3} value={activePatrolState.tindakLanjut} onChange={(event) => handleFormChange(activePatrolId, 'tindakLanjut', event.target.value)} className="w-full bg-[#070b19] border border-cyan-800/50 rounded-xl p-3 text-sm text-cyan-50 focus:border-emerald-500 outline-none resize-none" />
+              <label className="text-[10px] uppercase tracking-widest text-cyan-500 mb-1.5 block font-bold">
+                Tindak Lanjut <span className="text-yellow-500">*</span>
+              </label>
+              <textarea
+                placeholder={`Tindakan yang dilakukan (min. ${REPORT_FIELD_MIN_LENGTH} karakter)...`}
+                rows={3}
+                value={activePatrolState.tindakLanjut}
+                onChange={(event) => { handleFormChange(activePatrolId, 'tindakLanjut', event.target.value); touch('tindakLanjut'); }}
+                onBlur={() => touch('tindakLanjut')}
+                className={`w-full bg-[#070b19] border rounded-xl p-3 text-sm text-cyan-50 outline-none resize-none transition-colors ${touched.tindakLanjut && !tindakLanjutValid ? 'border-rose-500 focus:border-rose-400' : 'border-cyan-800/50 focus:border-emerald-500'}`}
+              />
+              {touched.tindakLanjut && !tindakLanjutValid && (
+                <p className="mt-1.5 flex items-center gap-1 text-[11px] text-rose-400">
+                  <AlertCircle className="w-3 h-3 shrink-0" />
+                  Tindak lanjut wajib diisi minimal {REPORT_FIELD_MIN_LENGTH} karakter ({activePatrolState.tindakLanjut.trim().length}/{REPORT_FIELD_MIN_LENGTH})
+                </p>
+              )}
             </div>
           </>
         ) : (
@@ -147,13 +205,28 @@ export default function PatrolFormView({ isInline = false }) {
             {trustMessage}
           </p>
         )}
+        {/* Ringkasan error validasi jika user mencoba submit dengan field tidak lengkap */}
+        {isTemuan && !allFieldsValid && (touched.kejadian || touched.penyebab || touched.tindakLanjut) && (
+          <div className="mb-3 flex items-start gap-2 bg-rose-950/50 border border-rose-500/40 rounded-xl p-3">
+            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+            <p className="text-[11px] text-rose-300 leading-relaxed">
+              Lengkapi semua isian: <strong>Deskripsi</strong>, <strong>Penyebab</strong>, dan <strong>Tindak Lanjut</strong> masing-masing minimal {REPORT_FIELD_MIN_LENGTH} karakter.
+            </p>
+          </div>
+        )}
         <button
-          disabled={!activePatrolState.photoUrl || isSubmitting}
-          onClick={() => handleSubmitPatrol(activePatrolItem.id)}
-          className={`w-full py-4 rounded-xl font-black tracking-widest uppercase text-xs flex items-center justify-center gap-2 transition-all ${activePatrolState.photoUrl && !isSubmitting ? (activePatrolState.type === 'temuan' ? 'bg-yellow-600 hover:bg-yellow-500 text-black shadow-[0_0_15px_rgba(250,204,21,0.3)]' : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]') : 'bg-[#0b1229] border border-cyan-900 text-cyan-700 cursor-not-allowed'}`}
+          disabled={!activePatrolState.photoUrl || isSubmitting || (isTemuan && !allFieldsValid)}
+          onClick={() => {
+            if (isTemuan && !allFieldsValid) {
+              setTouched({ kejadian: true, penyebab: true, tindakLanjut: true });
+              return;
+            }
+            handleSubmitPatrol(activePatrolItem.id);
+          }}
+          className={`w-full py-4 rounded-xl font-black tracking-widest uppercase text-xs flex items-center justify-center gap-2 transition-all ${activePatrolState.photoUrl && !isSubmitting && allFieldsValid ? (activePatrolState.type === 'temuan' ? 'bg-yellow-600 hover:bg-yellow-500 text-black shadow-[0_0_15px_rgba(250,204,21,0.3)]' : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]') : 'bg-[#0b1229] border border-cyan-900 text-cyan-700 cursor-not-allowed'}`}
         >
-          {activePatrolState.photoUrl && !isSubmitting ? <Send className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-          {isSubmitting ? 'Syncing...' : activePatrolState.photoUrl ? 'Sync Laporan' : 'Butuh Visual'}
+          {activePatrolState.photoUrl && !isSubmitting && allFieldsValid ? <Send className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+          {isSubmitting ? 'Syncing...' : !activePatrolState.photoUrl ? 'Butuh Visual' : (isTemuan && !allFieldsValid) ? 'Isian Belum Lengkap' : 'Sync Laporan'}
         </button>
       </div>
     </div>

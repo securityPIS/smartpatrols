@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { createPosterDataUrl, DEFAULT_LOCATION_OPTIONS } from '../data/defaultData';
 import { readFileAsDataUrl, readImageFileAsDataUrl } from '../utils/images';
-import { sanitizeEmail, sanitizeMultilineText, sanitizePhone, sanitizeText, sanitizeUrl } from '../utils/sanitize';
+import { sanitizeEmail, sanitizeMultilineText, sanitizePhone, sanitizeText, sanitizeUrl, isReportFieldValid } from '../utils/sanitize';
 import { loadImageFromDB, saveImageToDB } from '../utils/imageStore';
 import { checkStorageQuota } from '../utils/storageQuota';
 import { assignUserToExclusiveShip, reconcileUserShipAssignments, removeUserFromShipAssignment, resolveExplicitOverride, shouldDeferPetugasFleetValidation } from '../utils/userManagement';
@@ -7421,6 +7421,14 @@ export function AppProvider({ children }) {
     const formState = activeForms[id];
     if (!formState || submittingPatrolId === id) return;
 
+    // Validasi isian wajib untuk laporan temuan: penyebab, deskripsi (kejadian), dan tindak lanjut
+    // harus diisi dengan konten bermakna (minimal REPORT_FIELD_MIN_LENGTH karakter).
+    if (formState.type === 'temuan') {
+      if (!isReportFieldValid(formState.kejadian) || !isReportFieldValid(formState.penyebab) || !isReportFieldValid(formState.tindakLanjut)) {
+        return;
+      }
+    }
+
     setSubmittingPatrolId(id);
 
     try {
@@ -7660,7 +7668,10 @@ export function AppProvider({ children }) {
     if (!currentUserRecord) return;
     if (showTrustedTimeGateDialog()) return;
     const loc = incidentForm.locType === 'custom' ? sanitizeText(incidentForm.customLocation, 80) : sanitizeText(incidentForm.location, 80);
-    if (!loc || !sanitizeMultilineText(incidentForm.deskripsi, 320)) return;
+    if (!loc) return;
+    // Validasi isian wajib: deskripsi, penyebab, dan tindak lanjut harus diisi
+    // dengan konten bermakna (minimal REPORT_FIELD_MIN_LENGTH karakter).
+    if (!isReportFieldValid(incidentForm.deskripsi) || !isReportFieldValid(incidentForm.penyebab) || !isReportFieldValid(incidentForm.tindakLanjut)) return;
     const trustedTimestamp = createTrustedTimestampRecord();
     const trustedNow = new Date(trustedTimestamp.occurredAtTrustedMs);
     const createdAt = trustedTimestamp.occurredAtTrustedIso;

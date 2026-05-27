@@ -71,6 +71,23 @@ export function normalizeLookup(value) {
   return sanitizeText(value, 120).toLowerCase();
 }
 
+/**
+ * Minimum number of meaningful characters required for report text fields
+ * (penyebab, deskripsi/kejadian, tindakLanjut).
+ * Prevents "asal-asalan" entries like "ok", "ada", "abc".
+ */
+export const REPORT_FIELD_MIN_LENGTH = 10;
+
+/**
+ * Validates a report text field: must be non-empty and at least
+ * REPORT_FIELD_MIN_LENGTH characters after trimming whitespace.
+ * @param {string} value
+ * @returns {boolean}
+ */
+export function isReportFieldValid(value) {
+  return String(value ?? '').trim().length >= REPORT_FIELD_MIN_LENGTH;
+}
+
 export function makeId(prefix = "item") {
   const random = globalThis.crypto?.randomUUID?.();
   return `${prefix}-${random ?? `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`}`;
