@@ -2,7 +2,7 @@
 Tujuan: Mencegah regresi finalize_shift kembali bergantung pada tabel ship_checkpoints
         yang TIDAK pernah ditulis aplikasi (definisi checkpoint ada di ships.custom_checkpoints).
 Caller: Node test runner saat verifikasi migration history shift.
-Dependensi: supabase/migrations/202605290001_finalize_shift_from_custom_checkpoints.sql.
+Dependensi: supabase/migrations/202605290002_finalize_shift_from_custom_checkpoints.sql.
 Main Functions: Memastikan finalize_shift membaca custom_checkpoints dan mencocokkan laporan via nama.
 Side Effects: Tidak ada; test membaca file sumber secara read-only.
 */
@@ -12,7 +12,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const source = readFileSync(
-  new URL('../../supabase/migrations/202605290001_finalize_shift_from_custom_checkpoints.sql', import.meta.url),
+  new URL('../../supabase/migrations/202605290002_finalize_shift_from_custom_checkpoints.sql', import.meta.url),
   'utf8',
 );
 
