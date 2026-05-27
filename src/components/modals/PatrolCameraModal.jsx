@@ -1,9 +1,9 @@
 /*
-Tujuan: Membuka kamera native perangkat (Android via Capacitor, atau browser via input capture) untuk foto patroli tanpa jalur impor galeri.
+Tujuan: Membuka kamera native perangkat (Android via Capacitor, atau browser via input capture) untuk foto patroli tanpa jalur impor galeri dan tanpa layar antara.
 Caller: App shell melalui pendingPatrolCameraCapture dari AppContextRuntime.
 Dependensi: React, lucide-react, AppContextRuntime, adapter native Capacitor, dan utilitas kompresi gambar.
-Main Functions: Memicu kamera native Android langsung saat modal dibuka (auto-trigger via Capacitor), atau menampilkan tombol buka kamera native browser (web). Auto-rotate dan landscape didukung penuh karena menggunakan kamera bawaan perangkat OS. Tidak ada jalur galeri.
-Side Effects: Memicu permission kamera Android/browser dan membuka kamera native via Capacitor API atau <input capture>.
+Main Functions: Auto-trigger kamera native HP segera saat modal terbuka — tidak ada layar "Kamera siap" atau tombol yang harus ditekan terlebih dahulu. Mendukung auto-rotate dan landscape karena memakai kamera bawaan OS. Tidak ada jalur galeri.
+Side Effects: Memicu permission kamera dan membuka kamera native via Capacitor API atau <input capture> browser.
 */
 
 import React from 'react';
@@ -17,15 +17,14 @@ const PATROL_CAMERA_IMAGE_QUALITY = 0.80;
 
 /**
  * Membuka kamera native perangkat di browser via <input type="file" capture>.
- * Atribut capture="environment"/"user" memastikan kamera bawaan terbuka,
- * bukan galeri — auto-rotate dan landscape didukung penuh oleh OS.
- * Tidak ada fallback ke galeri: jika pengguna menekan batal, resolve(null).
+ * capture="environment"/"user" memastikan kamera bawaan terbuka, bukan galeri.
+ * Auto-rotate dan landscape didukung penuh oleh OS.
  */
 function pickWebNativeCameraDataUrl(cameraDirection = 'environment') {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
-  input.capture = cameraDirection; // 'environment' = belakang, 'user' = depan
+  input.capture = cameraDirection;
   input.multiple = false;
   input.tabIndex = -1;
   input.setAttribute('aria-hidden', 'true');
@@ -40,26 +39,14 @@ function pickWebNativeCameraDataUrl(cameraDirection = 'environment') {
     const cleanup = () => {
       input.onchange = null;
       input.oncancel = null;
-      if (input.parentNode) {
-        input.parentNode.removeChild(input);
-      }
+      if (input.parentNode) input.parentNode.removeChild(input);
     };
 
     input.onchange = async () => {
       const file = input.files?.[0];
-      if (!file) {
-        cleanup();
-        resolve(null);
-        return;
-      }
-
+      if (!file) { cleanup(); resolve(null); return; }
       try {
-        // Kompresi dengan mempertahankan aspect ratio asli (landscape tetap landscape).
-        const dataUrl = await readImageFileAsDataUrl(
-          file,
-          PATROL_CAMERA_MAX_EDGE,
-          PATROL_CAMERA_IMAGE_QUALITY,
-        );
+        const dataUrl = await readImageFileAsDataUrl(file, PATROL_CAMERA_MAX_EDGE, PATROL_CAMERA_IMAGE_QUALITY);
         cleanup();
         resolve(dataUrl);
       } catch (error) {
@@ -69,10 +56,7 @@ function pickWebNativeCameraDataUrl(cameraDirection = 'environment') {
       }
     };
 
-    input.oncancel = () => {
-      cleanup();
-      resolve(null);
-    };
+    input.oncancel = () => { cleanup(); resolve(null); };
 
     document.body.appendChild(input);
     input.click();
@@ -98,20 +82,15 @@ export default function PatrolCameraModal() {
       ? 'Foto Temuan'
       : 'Foto Aman';
 
-  /**
-   * Ambil foto via Capacitor native camera (Android).
-   * Menggunakan kamera bawaan Android — mendukung auto-rotate, landscape, HDR, dll.
-   */
   const triggerNativeCapacitorCapture = React.useCallback(async (facingMode) => {
     setIsCapturing(true);
     setCameraError('');
-
     try {
       const direction = facingMode === 'user' ? 'front' : 'rear';
       const dataUrl = await captureNativeCameraPhoto({ direction });
       if (!dataUrl) {
         setIsCapturing(false);
-        setCameraError('Pengambilan foto dibatalkan atau tidak menghasilkan gambar.');
+        setCameraError('Foto tidak diambil. Tekan tombol di bawah untuk coba lagi.');
         return;
       }
       await handlePatrolCameraCapture(dataUrl);
@@ -122,21 +101,15 @@ export default function PatrolCameraModal() {
     }
   }, [handlePatrolCameraCapture]);
 
-  /**
-   * Ambil foto via input capture browser (web/PWA mobile).
-   * Membuka kamera native HP — mendukung auto-rotate dan landscape.
-   * Atribut capture mencegah akses galeri pada browser mobile.
-   */
   const triggerWebCapture = React.useCallback(async (facingMode) => {
     setIsCapturing(true);
     setCameraError('');
-
     try {
       const dir = facingMode === 'user' ? 'user' : 'environment';
       const dataUrl = await pickWebNativeCameraDataUrl(dir);
       if (!dataUrl) {
         setIsCapturing(false);
-        setCameraError('Pengambilan foto dibatalkan atau tidak menghasilkan gambar.');
+        setCameraError('Foto tidak diambil. Tekan tombol di bawah untuk coba lagi.');
         return;
       }
       await handlePatrolCameraCapture(dataUrl);
@@ -147,18 +120,24 @@ export default function PatrolCameraModal() {
     }
   }, [handlePatrolCameraCapture]);
 
-  // Auto-trigger kamera native Android segera saat modal terbuka.
-  // Tidak perlu menunggu user tekan tombol karena Capacitor punya flow permission sendiri.
+  // Auto-trigger kamera native segera saat modal terbuka — tanpa perlu tekan tombol.
+  // Bekerja untuk Capacitor (Android APK) dan browser mobile (Chrome Android).
+  // Input.click() di dalam useEffect masih dalam window user-gesture browser (~1 detik).
   const autoTriggerRef = React.useRef(false);
   React.useEffect(() => {
-    if (!pendingPatrolCameraCapture || !canUseNativeCapacitor) {
+    if (!pendingPatrolCameraCapture) {
       autoTriggerRef.current = false;
       return;
     }
     if (autoTriggerRef.current) return;
     autoTriggerRef.current = true;
-    triggerNativeCapacitorCapture('environment');
-  }, [pendingPatrolCameraCapture, canUseNativeCapacitor, triggerNativeCapacitorCapture]);
+
+    if (canUseNativeCapacitor) {
+      triggerNativeCapacitorCapture('environment');
+    } else {
+      triggerWebCapture('environment');
+    }
+  }, [pendingPatrolCameraCapture, canUseNativeCapacitor, triggerNativeCapacitorCapture, triggerWebCapture]);
 
   // Reset state saat modal ditutup
   React.useEffect(() => {
@@ -173,16 +152,6 @@ export default function PatrolCameraModal() {
     closePatrolCameraCapture();
   }, [closePatrolCameraCapture]);
 
-  const handleSwitchCamera = React.useCallback(() => {
-    if (isCapturing) return;
-    const newMode = cameraFacingMode === 'environment' ? 'user' : 'environment';
-    setCameraFacingMode(newMode);
-    // Di Android, langsung buka ulang kamera dengan arah baru
-    if (canUseNativeCapacitor) {
-      triggerNativeCapacitorCapture(newMode);
-    }
-  }, [cameraFacingMode, canUseNativeCapacitor, isCapturing, triggerNativeCapacitorCapture]);
-
   const handleRetry = React.useCallback(() => {
     if (canUseNativeCapacitor) {
       triggerNativeCapacitorCapture(cameraFacingMode);
@@ -190,6 +159,16 @@ export default function PatrolCameraModal() {
       triggerWebCapture(cameraFacingMode);
     }
   }, [canUseNativeCapacitor, cameraFacingMode, triggerNativeCapacitorCapture, triggerWebCapture]);
+
+  const handleSwitchCamera = React.useCallback(() => {
+    const newMode = cameraFacingMode === 'environment' ? 'user' : 'environment';
+    setCameraFacingMode(newMode);
+    if (canUseNativeCapacitor) {
+      triggerNativeCapacitorCapture(newMode);
+    } else {
+      triggerWebCapture(newMode);
+    }
+  }, [cameraFacingMode, canUseNativeCapacitor, triggerNativeCapacitorCapture, triggerWebCapture]);
 
   if (!pendingPatrolCameraCapture) return null;
 
@@ -218,13 +197,10 @@ export default function PatrolCameraModal() {
 
           {/* Ikon status */}
           <div className="w-24 h-24 rounded-full bg-[#0b1229] border border-cyan-900/50 flex items-center justify-center">
-            {cameraError ? (
-              <CameraOff className="w-10 h-10 text-rose-400" />
-            ) : isCapturing ? (
-              <Camera className="w-10 h-10 text-cyan-300 animate-pulse" />
-            ) : (
-              <Camera className="w-10 h-10 text-cyan-400" />
-            )}
+            {cameraError
+              ? <CameraOff className="w-10 h-10 text-rose-400" />
+              : <Camera className="w-10 h-10 text-cyan-300 animate-pulse" />
+            }
           </div>
 
           {/* Teks status */}
@@ -232,29 +208,23 @@ export default function PatrolCameraModal() {
             {cameraError ? (
               <>
                 <p className="text-sm font-semibold text-rose-300">{cameraError}</p>
-                <p className="text-xs text-cyan-500/70">Tekan tombol di bawah untuk mencoba lagi</p>
+                <p className="text-xs text-cyan-500/70">Pilih kamera lalu tekan Coba Lagi</p>
               </>
-            ) : isCapturing ? (
+            ) : (
               <>
                 <p className="text-sm font-semibold text-cyan-200">
                   Membuka kamera {activeCameraLabel.toLowerCase()}...
                 </p>
                 <p className="text-xs text-cyan-500/70">
-                  Kamera HP sedang dibuka — foto portrait maupun landscape didukung
+                  Kamera HP sedang dibuka — portrait &amp; landscape didukung
                 </p>
-              </>
-            ) : (
-              <>
-                <p className="text-sm font-semibold text-cyan-200">Kamera siap</p>
-                <p className="text-xs text-cyan-500/70">Tekan tombol ambil foto untuk membuka kamera HP</p>
               </>
             )}
           </div>
 
-          {/* Tombol aksi */}
+          {/* Tombol — hanya muncul saat error/dibatalkan */}
           <div className="w-full max-w-xs space-y-3">
-            {cameraError ? (
-              /* Error: tombol coba lagi + ganti kamera */
+            {cameraError && (
               <div className="grid grid-cols-[1fr_auto] gap-3">
                 <button
                   type="button"
@@ -264,52 +234,6 @@ export default function PatrolCameraModal() {
                 >
                   <Camera className="w-4 h-4" />
                   Coba Lagi
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSwitchCamera}
-                  disabled={isCapturing}
-                  className="w-14 rounded-xl border border-cyan-700/60 bg-[#0b1229] text-cyan-300 flex items-center justify-center disabled:opacity-50"
-                  aria-label="Ganti kamera depan atau belakang"
-                  title={`Ganti ke kamera ${cameraFacingMode === 'environment' ? 'depan' : 'belakang'}`}
-                >
-                  <RefreshCcw className="w-4 h-4" />
-                </button>
-              </div>
-            ) : canUseNativeCapacitor ? (
-              /* Android native: tombol ambil foto + ganti kamera (auto-trigger sudah jalan) */
-              !isCapturing && (
-                <div className="grid grid-cols-[1fr_auto] gap-3">
-                  <button
-                    type="button"
-                    onClick={handleRetry}
-                    className="py-4 rounded-xl bg-emerald-600 text-white font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2"
-                  >
-                    <Camera className="w-4 h-4" />
-                    Ambil Foto
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSwitchCamera}
-                    className="w-14 rounded-xl border border-cyan-700/60 bg-[#0b1229] text-cyan-300 flex items-center justify-center"
-                    aria-label="Ganti kamera depan atau belakang"
-                    title={`Ganti ke kamera ${cameraFacingMode === 'environment' ? 'depan' : 'belakang'}`}
-                  >
-                    <RefreshCcw className="w-4 h-4" />
-                  </button>
-                </div>
-              )
-            ) : (
-              /* Web/browser: tombol ambil foto via input capture + ganti kamera */
-              <div className="grid grid-cols-[1fr_auto] gap-3">
-                <button
-                  type="button"
-                  onClick={() => triggerWebCapture(cameraFacingMode)}
-                  disabled={isCapturing}
-                  className="py-4 rounded-xl bg-emerald-600 text-white font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                  <Camera className="w-4 h-4" />
-                  Ambil Foto
                 </button>
                 <button
                   type="button"
@@ -334,11 +258,9 @@ export default function PatrolCameraModal() {
           </div>
 
           {/* Info kamera aktif */}
-          {!cameraError && (
-            <p className="text-[10px] text-cyan-600/50 uppercase tracking-widest">
-              Kamera {activeCameraLabel} · Native HP
-            </p>
-          )}
+          <p className="text-[10px] text-cyan-600/50 uppercase tracking-widest">
+            Kamera {activeCameraLabel} · Native HP
+          </p>
         </div>
       </div>
     </div>
