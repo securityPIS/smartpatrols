@@ -44,6 +44,7 @@ Deno.serve(async (request) => {
       shipAssigned: payload.shipAssigned || '',
       type: pending.type,
       workerNumber: pending.worker_number,
+      photoUrl: pending.photo_url,
       reviewState: 'approved',
       source: 'onboarding',
     });

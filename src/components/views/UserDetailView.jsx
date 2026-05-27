@@ -7,13 +7,14 @@ Side Effects: Memicu sinkronisasi perubahan user ke AppContextRuntime dan dialog
 */
 
 import React from 'react';
-import { ACCESS_ROLES, useAuth, useRole, useUI, useUsers } from '../../context/AppContextRuntime';
+import { ACCESS_ROLES, useAuth, useReports, useRole, useUI, useUsers } from '../../context/AppContextRuntime';
 import { ChevronDown, Trash2, Camera, Save, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import AsyncImage from '../AsyncImage';
 
 export default function UserDetailView({ isInline = false }) {
   const { selectedUser, setSelectedUser, userFormError, userFormNotice, clearUserManagementFeedback, handleUpdateUser, handleDeleteUser, handleEditUserPhotoUpload } = useUsers();
   const { sessionUserId } = useAuth();
+  const { setPreviewPhoto } = useReports();
   const { currentUserRecord, isAdmin } = useRole();
   const { setConfirmDialog } = useUI();
   const isFirebaseAccount = selectedUser?.authProvider === 'supabase' || selectedUser?.authProvider === 'firebase' || Boolean(selectedUser?.firebaseUid);
@@ -78,7 +79,9 @@ export default function UserDetailView({ isInline = false }) {
               </button>
             ) : (
               <div className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-cyan-500 shadow-md">
-                <AsyncImage src={selectedUser.photoUrl} alt="Profile" className="w-full h-full object-cover" />
+                <button type="button" onClick={() => setPreviewPhoto({ url: selectedUser.photoUrl, author: selectedUser.name, time: '' })} className="block w-full h-full cursor-pointer" aria-label="Lihat foto profil">
+                  <AsyncImage src={selectedUser.photoUrl} alt="Profile" className="w-full h-full object-cover" />
+                </button>
                 <button onClick={() => setSelectedUser({ ...selectedUser, photoUrl: null })} className="absolute bottom-0 inset-x-0 bg-rose-500/90 py-1 text-[9px] text-white font-bold hover:bg-rose-600 transition-colors">
                   HAPUS
                 </button>
