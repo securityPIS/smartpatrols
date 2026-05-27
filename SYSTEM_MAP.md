@@ -172,3 +172,27 @@ Prasyarat agar sinkron jalan:
 Cara verifikasi cepat: buka Console browser HP petugas saat submit — bila muncul
 `Gagal menulis laporan patroli ke patrol_reports...` berarti tulis ditolak DB
 (lihat code/message, biasanya RLS/approval).
+
+## Hasil Patroli "Aman" Hilang di Device Lain (bug fix)
+
+Gejala: di device yang sama hasil patroli benar; di device lain hanya "temuan" yang
+tampak benar, "aman" tetap nol, dan "missed" memakan sisa.
+
+Akar masalah: jalur rekonstruksi snapshot penuh
+(`createCheckpointsByShipState`/`normalizeShipScopedCheckpoints` lalu
+`migrateCheckpointStateToCurrentShift` di `AppContextRuntime.jsx`) membangun ulang
+`checkpointsByShip` HANYA dari definisi base checkpoint kapal, lalu MEMBUANG laporan
+`completed`/`missed` yang tak cocok base id/nama. Jalur realtime
+(`mergePatrolReportDocumentsIntoCheckpoints`) justru mempertahankannya, jadi tidak
+konsisten. Laporan "aman" yang dibuang berubah jadi `missed` saat finalisasi shift,
+sedangkan "temuan" tetap tampak karena punya cadangan independen di tabel `incidents`.
+
+Perbaikan: pertahankan laporan resolved (completed/missed) yang orphan
+(`isResolvedResultCheckpoint`) di kedua fungsi rekonstruksi — orphan shift lampau
+dipindah ke history, orphan shift berjalan disambung ke daftar live. Regresi dijaga
+oleh `tests/pages/patrol-report-cross-device-sync.test.mjs`.
+
+Catatan terkait: cron `finalize_shift` (migration `202605280001`) bergantung pada tabel
+`ship_checkpoints` yang TIDAK pernah ditulis klien (definisi checkpoint disimpan di
+JSONB `ships.custom_checkpoints`), sehingga history server-side praktis tidak pernah
+terbentuk dan device lain bergantung penuh pada rekonstruksi klien di atas.
