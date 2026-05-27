@@ -53,6 +53,15 @@ jobs:
       - name: Deploy edge function approve-pending-registration
         run: supabase functions deploy approve-pending-registration
 
+      - name: Deploy edge function resolve-operational-access
+        run: supabase functions deploy resolve-operational-access
+
+      - name: Deploy edge function sync-operational-access
+        run: supabase functions deploy sync-operational-access
+
+      - name: Deploy edge function revoke-operational-access
+        run: supabase functions deploy revoke-operational-access
+
       - name: Deploy edge function resign-expiring-assets
         # --no-verify-jwt: dipanggil pg_cron via header x-cron-secret, bukan JWT user.
         run: supabase functions deploy resign-expiring-assets --no-verify-jwt
