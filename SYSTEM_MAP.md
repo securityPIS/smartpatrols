@@ -136,3 +136,39 @@ npm run build
 - `setupNativePushNotifications` sekarang no-op agar Android tidak meminta izin push dan tidak mendaftarkan token.
 - `src/context/AppContext.jsx` legacy dihapus agar tidak ada import backend lama.
 - Jika schema/flow utama berubah, update file ini pada sesi yang sama.
+
+## Sinkronisasi Laporan Patroli ke Admin & Petugas Sekapal (bug fix tervalidasi)
+
+Gejala: petugas submit laporan tapi admin (tab On Going) dan petugas lain di kapal
+yang sama tidak melihatnya.
+
+Kunci alur (semua pembaca membaca-ulang dari tabel `patrol_reports`):
+
+1. Submit petugas → `handleSubmitPatrol` (`AppContextRuntime.jsx`) set checkpoint
+   `status:'completed'` + `shiftKey/shipId/shipName` → `syncPatrolReportToDomain`
+   → `savePatrolReport` → upsert `patrol_reports` (onConflict `shift_key,ship_id,checkpoint_id`).
+2. Admin & petugas lain menerima lewat `hydrateStateFromSql` (`cloudState.js`, baca
+   SEMUA `patrol_reports`) dan `subscribeToPatrolReports` per kapal/shift.
+3. Admin On Going = `adminLiveHistoryEntries` membangun live entry dari
+   `checkpointsByShip` shift berjalan; History = entry shift lampau + `shift_history_entries`.
+
+Akar masalah & perbaikan (commit `dd75b93`):
+
+- `hydrateStateFromSql` dulu `throw` bila SALAH SATU dari 6 query tabel error,
+  sehingga error tabel sekunder (incidents/sos_alerts/notifications) ikut membuang
+  laporan patroli. Fix: pisahkan domain inti (`profiles`/`ships`/`patrol_reports`,
+  tetap throw → fallback cache) dari domain sekunder (log + anggap kosong).
+- `savePatrolReport` dulu menelan SEMUA error tulis sebagai "offline" diam-diam.
+  Fix: catat error asli (`code`/`message`/RLS hint) sebelum antre outbox.
+
+Prasyarat agar sinkron jalan:
+
+- Migrasi terbaru `202605280001_add_shift_history_cron.sql` ter-apply (tabel
+  `shift_history_entries` + fungsi `finalize_shift`).
+- Petugas & admin `enabled=true` + `review_state='approved'`; `profiles.ship_assigned`
+  petugas HARUS sama persis dengan `ship_name` laporan (syarat RLS `can_access_ship_name`).
+- `VITE_ENABLE_CLOUD_SYNC=1` dan `VITE_ENABLE_CLOUD_SYNC_WRITE=1`.
+
+Cara verifikasi cepat: buka Console browser HP petugas saat submit — bila muncul
+`Gagal menulis laporan patroli ke patrol_reports...` berarti tulis ditolak DB
+(lihat code/message, biasanya RLS/approval).
