@@ -25,9 +25,11 @@ export async function captureNativeCameraPhoto(options = {}) {
 
   const {
     direction = 'rear',
-    height = 1200,
-    quality = 72,
-    width = 960,
+    // Dimensi max 1600 di sisi terpanjang agar landscape (mis. 16:9 → 1600×900)
+    // dan portrait (mis. 3:4 → 1200×1600) sama-sama menghasilkan kualitas baik.
+    height = 1600,
+    quality = 78,
+    width = 1600,
   } = options;
   const {
     Camera,
@@ -44,9 +46,9 @@ export async function captureNativeCameraPhoto(options = {}) {
     const photo = await Camera.getPhoto({
       quality,
       allowEditing: false,
-      correctOrientation: true,
+      correctOrientation: true,  // terapkan EXIF orientation agar landscape tetap benar
       resultType: CameraResultType.DataUrl,
-      source: CameraSource.Camera,
+      source: CameraSource.Camera,  // camera-only, tidak ada jalur galeri
       direction: cameraDirection,
       cameraDirection,
       saveToGallery: false,
