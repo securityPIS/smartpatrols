@@ -61,9 +61,10 @@ jobs:
         run: |
           functions_url="https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1"
           sql=$(cat <<SQL
-          ALTER DATABASE postgres SET "app.supabase_functions_url" = '${functions_url}';
-          ALTER DATABASE postgres SET "app.cron_secret" = '${CRON_SECRET}';
-          SELECT pg_reload_conf();
+          insert into private.app_config (key, value) values
+            ('functions_url', '${functions_url}'),
+            ('cron_secret', '${CRON_SECRET}')
+          on conflict (key) do update set value = excluded.value, updated_at = now();
           SQL
           )
           payload=$(jq -n --arg q "$sql" '{query: $q}')
@@ -79,15 +80,14 @@ jobs:
               echo "Konfigurasi database berhasil."
               ;;
             *)
-              # Supabase menolak ALTER DATABASE SET parameter custom (app.*) via Management API
-              # (permission denied 42501). Ini HANYA dipakai cron resign-expiring-assets (refresh
-              # signed URL foto) — bukan finalize_shift/history patroli. Jangan gagalkan deploy;
-              # parameter ini memang setup manual sekali oleh admin (lihat header migration
-              # 202605290001_add_asset_resign_cron.sql). Jalankan di Supabase SQL Editor:
-              #   ALTER DATABASE postgres SET "app.supabase_functions_url" = '<functions_url>';
-              #   ALTER DATABASE postgres SET "app.cron_secret" = '<CRON_SECRET>';
-              #   SELECT pg_reload_conf();
-              echo "::warning::Lewati konfigurasi GUC cron asset-resign (HTTP $http_code). Set manual di SQL Editor bila fitur re-sign foto dipakai. Tidak memengaruhi sinkronisasi patroli / finalize_shift."
+              # Config disimpan di tabel private.app_config (lihat migration
+              # 202605290003_fix_asset_resign_config.sql). Ini HANYA dipakai cron
+              # resign-expiring-assets (refresh signed URL foto) — bukan finalize_shift/
+              # history patroli. Jangan gagalkan deploy; bila perlu, set manual di SQL Editor:
+              #   insert into private.app_config (key, value) values
+              #     ('functions_url', '<functions_url>'), ('cron_secret', '<CRON_SECRET>')
+              #   on conflict (key) do update set value = excluded.value, updated_at = now();
+              echo "::warning::Gagal tulis private.app_config (HTTP $http_code). Set manual di SQL Editor bila fitur re-sign foto dipakai. Tidak memengaruhi sinkronisasi patroli / finalize_shift."
               ;;
           esac
 
