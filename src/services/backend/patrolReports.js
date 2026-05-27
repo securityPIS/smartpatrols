@@ -121,6 +121,19 @@ export async function savePatrolReport(report, options = {}) {
   try {
     return await writePatrolReport(report, options);
   } catch (error) {
+    // Jangan telan diam-diam: kegagalan permanen (RLS/constraint/auth) tampak sama
+    // dengan kegagalan jaringan dari sisi pemanggil. Catat error asli agar penyebab
+    // laporan tidak sampai ke admin/petugas lain bisa didiagnosis, bukan hilang senyap.
+    console.error('Gagal menulis laporan patroli ke patrol_reports, mengantre ke outbox', {
+      code: error?.code,
+      message: error?.message,
+      details: error?.details,
+      hint: error?.hint,
+      clientEventId: report?.clientEventId || report?.client_event_id || null,
+      shiftKey: report?.shiftKey || null,
+      shipId: report?.shipId || null,
+      checkpointId: report?.checkpointId || null,
+    });
     await enqueueOutboxMutation({
       type: 'patrol_report.upsert',
       payload: report,

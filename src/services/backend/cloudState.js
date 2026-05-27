@@ -208,8 +208,19 @@ async function hydrateStateFromSql() {
     supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(120),
   ]);
 
-  for (const result of [profiles, ships, reports, incidents, sosAlerts, notifications]) {
+  // Domain inti — tanpa data ini state tidak bisa dibangun, jadi gagalkan hydrate
+  // agar fallback cache dipakai. Laporan patroli termasuk inti supaya admin/petugas
+  // tetap melihat laporan walau domain lain (incidents/sos/notifications) bermasalah.
+  for (const result of [profiles, ships, reports]) {
     if (result.error) throw result.error;
+  }
+  // Domain sekunder — bila gagal (mis. RLS atau drift skema), jangan jatuhkan seluruh
+  // sinkronisasi; cukup perlakukan sebagai kosong agar laporan patroli tetap tersinkron.
+  for (const [label, result] of [['incidents', incidents], ['sos_alerts', sosAlerts], ['notifications', notifications]]) {
+    if (result.error) {
+      console.error(`Gagal memuat domain '${label}' saat hydrate cloud, lanjut tanpa data domain tersebut`, result.error);
+      result.data = [];
+    }
   }
 
   const checkpointsByShip = {};
