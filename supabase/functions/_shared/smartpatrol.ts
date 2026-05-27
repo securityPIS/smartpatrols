@@ -108,7 +108,21 @@ export async function findProfileForUser(user: { id: string; email?: string | nu
       .eq(candidate.column, candidate.value)
       .maybeSingle();
     if (error) throw error;
-    if (data) return data;
+    if (data) {
+      // Self-heal auth_uid: bila profil ketemu via fallback (id/email) tetapi auth_uid
+      // basi/kosong, samakan dengan UID Auth aktif. Tanpa ini, helper RLS (yang juga
+      // cocok via auth_uid) gagal mengenali user sehingga tulisan operasional ditolak.
+      if (user.id && data.auth_uid !== user.id) {
+        const { data: healed, error: healError } = await supabase
+          .from('profiles')
+          .update({ auth_uid: user.id })
+          .eq('id', data.id)
+          .select('*')
+          .maybeSingle();
+        if (!healError && healed) return healed;
+      }
+      return data;
+    }
   }
 
   return null;
