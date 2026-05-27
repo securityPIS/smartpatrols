@@ -1,0 +1,83 @@
+# Deploy Supabase: migrations, edge functions, secret, dan konfigurasi cron.
+# Trigger: manual lewat tab Actions -> "Run workflow".
+#
+# WAJIB di-set sekali di GitHub: Settings -> Secrets and variables -> Actions -> New repository secret
+#   SUPABASE_ACCESS_TOKEN  : Personal access token (Supabase Dashboard -> Account -> Access Tokens)
+#   SUPABASE_PROJECT_REF   : Project ref (Dashboard -> Project Settings -> General -> Reference ID)
+#   SUPABASE_DB_PASSWORD   : Password database (Dashboard -> Project Settings -> Database)
+#   CRON_SECRET            : String random panjang buatan Anda (lihat catatan di chat untuk cara generate)
+
+name: Deploy Supabase
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Validasi secrets tersedia
+        run: |
+          missing=0
+          for v in SUPABASE_ACCESS_TOKEN SUPABASE_PROJECT_REF SUPABASE_DB_PASSWORD CRON_SECRET; do
+            if [ -z "${!v}" ]; then
+              echo "::error::Secret $v belum di-set di GitHub repo secrets."
+              missing=1
+            fi
+          done
+          [ "$missing" -eq 0 ] || exit 1
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link ke project Supabase
+        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
+
+      - name: Push database migrations
+        run: supabase db push
+
+      - name: Set edge function secret (CRON_SECRET)
+        run: supabase secrets set CRON_SECRET="$CRON_SECRET"
+
+      - name: Deploy edge function approve-pending-registration
+        run: supabase functions deploy approve-pending-registration
+
+      - name: Deploy edge function resign-expiring-assets
+        # --no-verify-jwt: dipanggil pg_cron via header x-cron-secret, bukan JWT user.
+        run: supabase functions deploy resign-expiring-assets --no-verify-jwt
+
+      - name: Konfigurasi database settings untuk cron (via Management API)
+        run: |
+          functions_url="https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1"
+          sql=$(cat <<SQL
+          ALTER DATABASE postgres SET "app.supabase_functions_url" = '${functions_url}';
+          ALTER DATABASE postgres SET "app.cron_secret" = '${CRON_SECRET}';
+          SELECT pg_reload_conf();
+          SQL
+          )
+          payload=$(jq -n --arg q "$sql" '{query: $q}')
+          http_code=$(curl -sS -o /tmp/resp.json -w "%{http_code}" \
+            -X POST "https://api.supabase.com/v1/projects/${SUPABASE_PROJECT_REF}/database/query" \
+            -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "$payload")
+          echo "HTTP $http_code"
+          cat /tmp/resp.json
+          case "$http_code" in
+            2*) echo "Konfigurasi database berhasil." ;;
+            *)  echo "::error::Gagal konfigurasi database settings (HTTP $http_code)."; exit 1 ;;
+          esac
+
+      - name: Selesai
+        run: echo "Deploy Supabase selesai. Cron resign-expiring-assets aktif setiap 01:00 UTC (08:00 WIB)."
