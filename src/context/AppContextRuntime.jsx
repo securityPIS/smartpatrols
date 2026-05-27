@@ -51,6 +51,7 @@ import {
   saveIncidentReport,
   subscribeToIncidents,
 } from '../services/backend/incidentReports';
+import { subscribeToShiftHistoryEntries } from '../services/backend/shiftHistory';
 import {
   approvePendingRegistration,
   createPendingRegistration,
@@ -9130,6 +9131,57 @@ export function AppProvider({ children }) {
       unsubIncidents();
     };
   }, [hasOperationalCloudAccess]);
+
+  // Subscribe ke shift_history_entries — history yang dibuat server-side oleh cron job.
+  // Merge ke historyEntries agar tab History terisi otomatis walau app tidak terbuka saat shift berakhir.
+  useEffect(() => {
+    if (!isCloudSyncEnabled || !hasOperationalCloudAccess) return () => { };
+
+    const unsubShiftHistory = subscribeToShiftHistoryEntries(
+      (rows) => {
+        if (!Array.isArray(rows) || rows.length === 0) return;
+        const serverEntries = rows.map((row) => {
+          // Bentuk key identik dengan createHistoryEntryKey di client
+          const shipToken = String(row.ship_id || 'ship')
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '') || 'ship';
+          const key = `${shipToken}|${row.shift_key}`;
+          const id  = `history-${key}`;
+          return {
+            id,
+            key,
+            date:    formatDateLabel(row.date_key),
+            dateKey: row.date_key,
+            shift:   row.shift_label,
+            shiftId: row.shift_id,
+            time:    row.time_range,
+            ship:    row.ship_name,
+            createdAt: row.finalized_at,
+            isLive:    false,
+            readOnly:  true,
+            summary: {
+              aman:      row.aman_count   || 0,
+              temuan:    row.temuan_count || 0,
+              missed:    row.missed_count || 0,
+              total:     row.total_count  || 0,
+              completed: (row.aman_count || 0) + (row.temuan_count || 0),
+              pending:   0,
+            },
+            checkpoints:  Array.isArray(row.checkpoints)   ? row.checkpoints   : [],
+            crewSnapshot: Array.isArray(row.crew_snapshot) ? row.crew_snapshot : [],
+          };
+        });
+        setHistoryEntries((prev) => mergeHistoryEntries(prev, serverEntries));
+      },
+      (error) => {
+        console.error('Gagal subscribe shift history entries', error);
+      },
+    );
+
+    return () => { unsubShiftHistory(); };
+  }, [hasOperationalCloudAccess, isCloudSyncEnabled]);
+
   useEffect(() => {
     const hasLocalIncidentMedia = Object.values(incidentMeta || {}).some((meta) => (
       ensureArray(meta?.documentation).some((item) => isLocalOnlyAssetUrl(item?.photoUrl))
