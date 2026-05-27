@@ -12,7 +12,7 @@ import { ensureSupabaseClient } from './app';
 
 const OPERATIONAL_BUCKET = 'operational-assets';
 const REGISTRATION_BUCKET = 'registration-assets';
-const SIGNED_URL_TTL_SECONDS = 7 * 24 * 60 * 60;
+const SIGNED_URL_TTL_SECONDS = 30 * 24 * 60 * 60;
 
 function sanitizeStorageSegment(value, fallback = 'item') {
   return sanitizeText(String(value || ''), 120)
@@ -84,6 +84,7 @@ export async function uploadDataUrlAsset({ bucket = OPERATIONAL_BUCKET, dataUrl,
     domain: metadata.domain || 'operational',
     mime_type: blob.type || null,
     byte_size: blob.size,
+    signed_url: signedUrl,
     signed_url_expires_at: new Date(Date.now() + (SIGNED_URL_TTL_SECONDS * 1000)).toISOString(),
   }, { onConflict: 'bucket,object_path' }).throwOnError();
 
