@@ -21,7 +21,7 @@ const SideNav = React.memo(function SideNav() {
 
   const tabs = isPrivilegedRole
     ? [
-        {id: 'history', icon: <FileText className="w-5 h-5"/>, label: 'Riwayat'},
+        {id: 'history', icon: <FileText className="w-5 h-5"/>, label: 'Laporan'},
         {id: 'incidents', icon: <AlertOctagon className="w-5 h-5"/>, label: 'Temuan'},
         {id: 'daily-report', icon: <BarChart3 className="w-5 h-5"/>, label: 'Report'},
         {id: 'notifications', icon: <Bell className="w-5 h-5"/>, label: 'Notif'}
@@ -29,7 +29,7 @@ const SideNav = React.memo(function SideNav() {
     : [
         {id: 'home', icon: <Home className="w-5 h-5"/>, label: 'Patroli'},
         {id: 'incidents', icon: <AlertOctagon className="w-5 h-5"/>, label: 'Temuan'},
-        {id: 'history', icon: <FileText className="w-5 h-5"/>, label: 'Riwayat'},
+        {id: 'history', icon: <FileText className="w-5 h-5"/>, label: 'Laporan'},
         {id: 'notifications', icon: <Bell className="w-5 h-5"/>, label: 'Notif'}
       ];
 

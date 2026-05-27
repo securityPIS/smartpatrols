@@ -85,6 +85,7 @@ export default function HistoryPage() {
   const [selectedIdsForBulk, setSelectedIdsForBulk] = useState(() => new Set());
   const [expandedDateKeys, setExpandedDateKeys] = useState(() => new Set());
   const [expandedShipKeys, setExpandedShipKeys] = useState(() => new Set());
+  const [activeTab, setActiveTab] = useState('ongoing'); // 'ongoing' | 'history'
 
   const shipOptions = useMemo(() => (
     Array.from(new Set(historyEntries.map(entry => entry.ship).filter(Boolean))).sort((left, right) => left.localeCompare(right))
@@ -492,21 +493,57 @@ export default function HistoryPage() {
       {/* Left Pane: List */}
       <div className={`flex-1 overflow-y-auto p-4 space-y-4 lg:border-r lg:border-cyan-900/50 ${showMobileDetail ? 'hidden lg:block' : ''}`}>
         <div className="flex items-center justify-between gap-3 mb-2">
-          <h2 className="text-xl font-bold text-cyan-50">Riwayat Sistem</h2>
-          <button
-            type="button"
-            onClick={() => setShowFilters(previousValue => !previousValue)}
-            className={`px-3 py-2 rounded-xl border text-xs font-bold uppercase tracking-widest transition-colors flex items-center gap-2 ${
-              showFilters || hasActiveFilter
-                ? 'border-cyan-400/50 bg-cyan-500/10 text-cyan-200'
-                : 'border-cyan-800/60 text-cyan-400 hover:bg-cyan-900/30'
-            }`}
-          >
-            <Filter className="w-4 h-4" />
-            Filter
-          </button>
+          <h2 className="text-xl font-bold text-cyan-50">Laporan</h2>
+          {(!isAdmin || activeTab === 'history') && (
+            <button
+              type="button"
+              onClick={() => setShowFilters(previousValue => !previousValue)}
+              className={`px-3 py-2 rounded-xl border text-xs font-bold uppercase tracking-widest transition-colors flex items-center gap-2 ${
+                showFilters || hasActiveFilter
+                  ? 'border-cyan-400/50 bg-cyan-500/10 text-cyan-200'
+                  : 'border-cyan-800/60 text-cyan-400 hover:bg-cyan-900/30'
+              }`}
+            >
+              <Filter className="w-4 h-4" />
+              Filter
+            </button>
+          )}
         </div>
-        {showFilters && (
+        {/* Tab bar — hanya tampil untuk admin yang punya live entries */}
+        {isAdmin && (
+          <div className="flex rounded-xl overflow-hidden border border-cyan-900/40 bg-[#080d1f]">
+            <button
+              type="button"
+              onClick={() => setActiveTab('ongoing')}
+              className={`flex-1 py-2.5 text-sm font-bold flex items-center justify-center gap-2 transition-all border-r border-cyan-900/40 ${
+                activeTab === 'ongoing'
+                  ? 'bg-emerald-500/15 text-emerald-300 border-r-emerald-500/30'
+                  : 'text-cyan-600 hover:text-cyan-400'
+              }`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${activeTab === 'ongoing' ? 'bg-emerald-400 animate-pulse' : 'bg-cyan-700'}`} />
+              On Going
+              {liveEntries.length > 0 && activeTab !== 'ongoing' && (
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.5 rounded-full font-black">
+                  {liveEntries.length}
+                </span>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('history')}
+              className={`flex-1 py-2.5 text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+                activeTab === 'history'
+                  ? 'bg-cyan-500/15 text-cyan-300'
+                  : 'text-cyan-600 hover:text-cyan-400'
+              }`}
+            >
+              <FileText className="w-4 h-4" />
+              History
+            </button>
+          </div>
+        )}
+        {(!isAdmin || activeTab === 'history') && showFilters && (
           <div className="bg-[#0b1229] border border-cyan-800/50 rounded-xl p-4 space-y-3">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
               <div>
@@ -606,13 +643,22 @@ export default function HistoryPage() {
             </div>
           </div>
         )}
-        {selectMode && (
+        {(!isAdmin || activeTab === 'history') && selectMode && (
           <div className="rounded-xl border border-amber-400/40 bg-amber-500/10 px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest text-amber-200 flex flex-wrap items-center justify-between gap-2">
             <span>Mode Pilih Aktif — Klik kartu untuk menandai</span>
             <span className="text-amber-100">{selectedBulkCount} ditandai</span>
           </div>
         )}
-        {filteredHistoryEntries.length === 0 && (
+        {/* Empty state: tab On Going */}
+        {isAdmin && activeTab === 'ongoing' && liveEntries.length === 0 && (
+          <div className="p-8 text-center border border-dashed border-emerald-900/50 rounded-xl">
+            <CheckCircle2 className="w-10 h-10 text-emerald-900 mx-auto mb-2" />
+            <p className="text-cyan-600 text-sm font-bold uppercase tracking-widest">Tidak Ada Patroli Aktif</p>
+            <p className="text-xs text-cyan-700 mt-2">Belum ada sesi patroli yang sedang berlangsung saat ini.</p>
+          </div>
+        )}
+        {/* Empty state: tab History */}
+        {(!isAdmin || activeTab === 'history') && dateGroups.length === 0 && (
           <div className="p-8 text-center border border-dashed border-cyan-900/50 rounded-xl">
             <FileText className="w-10 h-10 text-cyan-900 mx-auto mb-2" />
             <p className="text-cyan-600 text-sm font-bold uppercase tracking-widest">{hasActiveFilter ? 'Riwayat Tidak Ditemukan' : 'Belum Ada Riwayat Shift'}</p>
@@ -621,8 +667,8 @@ export default function HistoryPage() {
             )}
           </div>
         )}
-        {/* ON GOING entries: tetap kartu besar, tidak di-grouping. */}
-        {liveEntries.map((data) => {
+        {/* ON GOING entries: tampil di tab 'ongoing' saja (admin). */}
+        {isAdmin && activeTab === 'ongoing' && liveEntries.map((data) => {
           const isSelectedEntry = selectedHistoryEntry?.id === data.id;
           const bulkSelectableLive = selectMode;
           const cardClassName = (isSelectedEntry && !selectMode)
@@ -683,8 +729,8 @@ export default function HistoryPage() {
           );
         })}
 
-        {/* Riwayat arsip: progressive disclosure — Tanggal → Kapal → Shift entries. */}
-        {dateGroups.length > 0 && (
+        {/* Riwayat arsip: progressive disclosure — Tanggal → Kapal → Shift entries. Tampil di tab 'history' (atau untuk non-admin). */}
+        {(!isAdmin || activeTab === 'history') && dateGroups.length > 0 && (
           <div className="rounded-xl border border-cyan-900/40 bg-[#080d1f] divide-y divide-cyan-900/40 overflow-hidden">
             {dateGroups.map((dateGroup) => {
               const isDateExpanded = expandedDateKeys.has(dateGroup.dateKey);
