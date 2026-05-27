@@ -820,6 +820,17 @@ function isTemporaryShiftCheckpoint(checkpoint) {
   return Boolean(checkpoint?.isTemporaryShiftNode);
 }
 
+// Laporan checkpoint yang sudah menghasilkan status final (completed/missed). Ini adalah
+// data yang TIDAK boleh hilang saat rekonstruksi lintas-device: bila dibuang karena tidak
+// cocok dengan definisi checkpoint kapal di device penerima, hasil patroli "aman" lenyap
+// (temuan tetap tampak karena punya cadangan di tabel incidents).
+function isResolvedResultCheckpoint(checkpoint) {
+  return Boolean(
+    checkpoint
+    && (checkpoint.status === 'completed' || checkpoint.status === 'missed' || checkpoint.resultType === 'missed'),
+  );
+}
+
 function getCheckpointScopedShiftKey(checkpoint) {
   return sanitizeText(checkpoint?.shiftKey || checkpoint?.createdInShiftKey || '', 160) || null;
 }
@@ -971,9 +982,30 @@ function normalizeShipScopedCheckpoints(ship, checkpoints = [], activeShiftKey =
       && !baseCheckpointNameKeys.has(createCheckpointNameKey(checkpoint.name))
     ));
 
+  // Laporan completed/missed yang tidak punya padanan di definisi checkpoint kapal device
+  // ini (mis. definisi berbeda urutan/nama, atau belum tersinkron) JANGAN dibuang. Jalur
+  // realtime (mergePatrolReportDocumentsIntoCheckpoints) sudah mempertahankan laporan
+  // semacam ini; jalur snapshot penuh harus konsisten agar hasil patroli tidak lenyap di
+  // device lain.
+  const orphanResultCheckpoints = safeCheckpoints
+    .filter(checkpoint => !isTemporaryShiftCheckpoint(checkpoint))
+    .filter(isResolvedResultCheckpoint)
+    .filter(checkpoint => (
+      !baseCheckpointIds.has(String(checkpoint.id))
+      && !baseCheckpointNameKeys.has(createCheckpointNameKey(checkpoint.name))
+    ))
+    // Orphan dari shift lampau (relatif activeShiftKey) bukan milik tampilan live —
+    // biarkan jalur migrate yang memindahkannya ke history, jangan tahan di sini.
+    .filter(checkpoint => !shouldResetCheckpointForActiveShift(checkpoint, activeShiftKey))
+    .map(checkpoint => ({
+      ...checkpoint,
+      shipId: ship?.id || checkpoint.shipId || null,
+      shipName: ship?.name || checkpoint.shipName || '',
+    }));
+
   // Titik tambahan shift tidak ada di definisi kapal, jadi harus disambung
   // kembali setelah normalisasi agar tidak hilang saat submit/snapshot cloud.
-  return [...normalizedBaseCheckpoints, ...temporaryCheckpoints];
+  return [...normalizedBaseCheckpoints, ...temporaryCheckpoints, ...orphanResultCheckpoints];
 }
 
 function createCheckpointsByShipState(ships = [], savedCheckpointsByShip = {}, legacyCheckpoints = null, activeShiftKey = null) {
@@ -1647,9 +1679,12 @@ function migrateCheckpointStateToCurrentShift({
       .filter(checkpoint => isTemporaryShiftCheckpoint(checkpoint))
       .map(checkpoint => normalizeTemporaryShiftCheckpointForShip(checkpoint, ship, null))
       .filter(Boolean);
+    const baseCheckpointIdSet = new Set(baseCheckpoints.map(baseCheckpoint => String(baseCheckpoint.id)));
+    const baseCheckpointNameKeySet = new Set(baseCheckpoints.map(baseCheckpoint => createCheckpointNameKey(baseCheckpoint.name)));
     const pastShiftGroups = new Map();
     const currentShiftCheckpoints = new Map();
     const currentTemporaryCheckpoints = [];
+    const currentOrphanCheckpoints = [];
 
     matchedCheckpoints.forEach((matchedCheckpoint, index) => {
       if (!matchedCheckpoint || matchedCheckpoint.status !== 'completed' || matchedCheckpoint.isTemporaryShiftNode) return;
@@ -1732,6 +1767,43 @@ function migrateCheckpointStateToCurrentShift({
       currentTemporaryCheckpoints.push(normalizedCurrentTemporaryCheckpoint);
     });
 
+    // Laporan completed/missed yang tak punya padanan di definisi checkpoint kapal (orphan)
+    // tetap dipertahankan: bila shift-nya lampau dipindah ke history, bila shift berjalan
+    // disambung ke daftar live. Tanpa ini, hasil patroli "aman" lintas-device hilang.
+    savedCheckpoints.forEach((savedCheckpoint) => {
+      if (isTemporaryShiftCheckpoint(savedCheckpoint)) return;
+      if (!isResolvedResultCheckpoint(savedCheckpoint)) return;
+      if (
+        baseCheckpointIdSet.has(String(savedCheckpoint.id))
+        || baseCheckpointNameKeySet.has(createCheckpointNameKey(savedCheckpoint.name))
+      ) return;
+
+      const normalizedOrphan = {
+        ...savedCheckpoint,
+        shipId: ship?.id || savedCheckpoint.shipId || null,
+        shipName: ship?.name || savedCheckpoint.shipName || '',
+      };
+      const canonicalShiftMeta = getCanonicalShiftMetaForCheckpoint(savedCheckpoint, safeCurrentShiftMeta);
+      if (!canonicalShiftMeta) {
+        currentOrphanCheckpoints.push(normalizedOrphan);
+        return;
+      }
+
+      const canonicalShiftStartAt = getShiftScheduleTimes(canonicalShiftMeta).startAt.getTime();
+      if (canonicalShiftStartAt < currentShiftStartAt) {
+        const shiftGroup = pastShiftGroups.get(canonicalShiftMeta.key) || new Map();
+        shiftGroup.set(String(normalizedOrphan.id), { ...normalizedOrphan, shiftKey: canonicalShiftMeta.key });
+        pastShiftGroups.set(canonicalShiftMeta.key, shiftGroup);
+        didMigrate = true;
+        return;
+      }
+
+      currentOrphanCheckpoints.push({
+        ...normalizedOrphan,
+        shiftKey: canonicalShiftStartAt > currentShiftStartAt ? safeCurrentShiftMeta.key : (savedCheckpoint.shiftKey || canonicalShiftMeta.key),
+      });
+    });
+
     pastShiftGroups.forEach((shiftGroup, shiftKey) => {
       const shiftMeta = getShiftMetaFromKey(shiftKey);
       if (!shiftMeta) return;
@@ -1781,7 +1853,7 @@ function migrateCheckpointStateToCurrentShift({
       return { ...baseCheckpoint };
     });
 
-    collection[ship.id] = [...normalizedBaseCheckpoints, ...currentTemporaryCheckpoints];
+    collection[ship.id] = [...normalizedBaseCheckpoints, ...currentTemporaryCheckpoints, ...currentOrphanCheckpoints];
 
     return collection;
   }, {});
