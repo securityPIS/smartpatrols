@@ -196,3 +196,18 @@ Catatan terkait: cron `finalize_shift` (migration `202605280001`) bergantung pad
 `ship_checkpoints` yang TIDAK pernah ditulis klien (definisi checkpoint disimpan di
 JSONB `ships.custom_checkpoints`), sehingga history server-side praktis tidak pernah
 terbentuk dan device lain bergantung penuh pada rekonstruksi klien di atas.
+
+### Perbaikan cron finalize_shift (migration `202605290001`)
+
+Migration `202605290001_finalize_shift_from_custom_checkpoints.sql` me-`replace`
+`finalize_shift` agar:
+- membaca definisi checkpoint langsung dari `ships.custom_checkpoints` (JSONB,
+  `jsonb_array_elements ... with ordinality`), bukan dari tabel `ship_checkpoints` kosong;
+- mencocokkan laporan TERUTAMA via nama checkpoint ternormalisasi (lower + whitespace
+  tunggal) agar tahan terhadap perbedaan `checkpoint_id` antar-device, dengan fallback ke
+  id runtime klien `${shipId}::slug::index`;
+- menghitung aman/temuan/missed dan menyimpan snapshot checkpoints + `total_count`.
+
+Jadwal cron (`finalize-shift-1/2/3`) tidak diubah — cukup ganti body fungsi. Diverifikasi
+behavioral lewat Postgres lokal (aman/temuan/missed benar, termasuk match-by-name saat id
+berbeda) dan dijaga `tests/pages/finalize-shift-source.test.mjs`.
