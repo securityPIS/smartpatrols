@@ -60,7 +60,7 @@ drop policy if exists "shift_history_read" on public.shift_history_entries;
 create policy "shift_history_read"
   on public.shift_history_entries
   for select
-  using (public.is_operational_user() or public.is_admin());
+  using (public.has_operational_access() or public.is_admin());
 
 drop policy if exists "shift_history_service_write" on public.shift_history_entries;
 create policy "shift_history_service_write"
