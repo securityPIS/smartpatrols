@@ -21,7 +21,7 @@ const BottomNav = React.memo(function BottomNav() {
 
   const tabs = isPrivilegedRole
     ? [
-        {id: 'history', icon: <FileText className="w-5 h-5 mb-0.5"/>, label: 'Riwayat'},
+        {id: 'history', icon: <FileText className="w-5 h-5 mb-0.5"/>, label: 'Laporan'},
         {id: 'incidents', icon: <AlertOctagon className="w-5 h-5 mb-0.5"/>, label: 'Temuan'},
         {id: 'daily-report', icon: <BarChart3 className="w-5 h-5 mb-0.5"/>, label: 'Report'},
         {id: 'notifications', icon: <Bell className="w-5 h-5 mb-0.5"/>, label: 'Notif'}
@@ -29,7 +29,7 @@ const BottomNav = React.memo(function BottomNav() {
     : [
         {id: 'home', icon: <Home className="w-5 h-5 mb-0.5"/>, label: 'Patroli'},
         {id: 'incidents', icon: <AlertOctagon className="w-5 h-5 mb-0.5"/>, label: 'Temuan'},
-        {id: 'history', icon: <FileText className="w-5 h-5 mb-0.5"/>, label: 'Riwayat'},
+        {id: 'history', icon: <FileText className="w-5 h-5 mb-0.5"/>, label: 'Laporan'},
         {id: 'notifications', icon: <Bell className="w-5 h-5 mb-0.5"/>, label: 'Notif'}
       ];
   const leftTabs = tabs.slice(0, 2);
