@@ -163,16 +163,7 @@ export default function IncidentFormView({ isInline = false }) {
           )}
         </div>
       </div>
-      <div className="p-4 bg-[#0b1229] border-t border-cyan-900/50 shrink-0 pb-safe space-y-3">
-        {/* Ringkasan error validasi */}
-        {!allFieldsValid && (touched.deskripsi || touched.penyebab || touched.tindakLanjut) && (
-          <div className="flex items-start gap-2 bg-rose-950/50 border border-rose-500/40 rounded-xl p-3">
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-            <p className="text-[11px] text-rose-300 leading-relaxed">
-              Lengkapi semua isian: <strong>Deskripsi</strong>, <strong>Penyebab</strong>, dan <strong>Tindak Lanjut</strong> masing-masing minimal {REPORT_FIELD_MIN_LENGTH} karakter.
-            </p>
-          </div>
-        )}
+      <div className="p-4 bg-[#0b1229] border-t border-cyan-900/50 shrink-0 pb-safe">
         <div className="flex gap-3">
           {!isInline && (
             <button onClick={closeIncidentModal} className="flex-1 py-4 rounded-xl font-black tracking-widest uppercase text-xs border border-cyan-800 text-cyan-300 hover:bg-cyan-900/30 transition-colors">Batal</button>

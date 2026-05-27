@@ -205,15 +205,6 @@ export default function PatrolFormView({ isInline = false }) {
             {trustMessage}
           </p>
         )}
-        {/* Ringkasan error validasi jika user mencoba submit dengan field tidak lengkap */}
-        {isTemuan && !allFieldsValid && (touched.kejadian || touched.penyebab || touched.tindakLanjut) && (
-          <div className="mb-3 flex items-start gap-2 bg-rose-950/50 border border-rose-500/40 rounded-xl p-3">
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-            <p className="text-[11px] text-rose-300 leading-relaxed">
-              Lengkapi semua isian: <strong>Deskripsi</strong>, <strong>Penyebab</strong>, dan <strong>Tindak Lanjut</strong> masing-masing minimal {REPORT_FIELD_MIN_LENGTH} karakter.
-            </p>
-          </div>
-        )}
         <button
           disabled={!activePatrolState.photoUrl || isSubmitting || (isTemuan && !allFieldsValid)}
           onClick={() => {
