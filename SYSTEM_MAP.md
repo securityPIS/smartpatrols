@@ -289,3 +289,34 @@ Perbaikan:
   nilai berkoma (saat flush ulang).
 
 Regresi dijaga `tests/pages/patrol-report-offline-sync.test.mjs`.
+
+## Checkpoint Hilang Saat Back Online (bug fix)
+
+Gejala: setelah perbaikan anti-logout reconnect, petugas tetap login saat koneksi pulih,
+tetapi daftar titik patroli kosong total ("Belum ada titik patroli yang tersedia", progres
+0/0). Di-refresh manual langsung normal.
+
+Akar masalah: efek resolver akses (`AppContextRuntime.jsx`, deps `[firebaseAuthReady,
+firebaseAuthUser]`) re-run saat reconnect (token refresh mengubah `firebaseAuthUser`).
+Bila `resolveOperationalAccess()` gagal sesaat di momen reconnect, `.catch` men-set
+`authAccessState=null` + `authAccessOfflineUid=currentUid` lalu BERHENTI (tidak pernah
+retry). Akibatnya `authAccessEnabled=false` → `currentUserRecord` kolaps ke `null` (online)
+→ `operationalShip` null → `checkpoints` memo `[]`. State macet sampai refresh penuh
+me-resolve ulang. Ini efek samping dari fix anti-logout: logout dicegah, tapi akses gagal
+dibiarkan macet.
+
+Perbaikan (seamless, tanpa reload):
+- Self-heal retry: state `authAccessResolveNonce` ditambahkan ke deps resolver. Efek baru
+  `authAccessRetryRef` menjadwalkan re-resolve berbackoff (≤6 kali) saat akses belum
+  ter-resolve & belum definitif & online & tidak busy; reset saat offline/teratasi. Begitu
+  `resolveOperationalAccess` berhasil, `authAccessState.access` pulih →
+  `buildOperationalUserRecordFromAccess` mengisi `shipAssigned`/`status` dari server →
+  `operationalShip` & checkpoint kembali otomatis.
+- Anti-blink: `currentUserRecord` hanya kolaps ke `null` saat resolusi DEFINITIF
+  (`authAccessResolvedUid === firebaseAuthUid`). Saat resolusi gagal/menunggu retry,
+  pertahankan record terakhir (`resolvePreferredUserRecord(usersData)`/`sessionUserRecord`)
+  agar operationalShip tetap resolve dan checkpoint tidak hilang.
+
+Konsisten dengan prinsip: sesi/akses operasional hanya berubah karena jawaban DEFINITIF
+server, bukan kegagalan jaringan transien. Regresi dijaga `tests/security/auth-access.test.mjs`
+("resolusi akses sembuh sendiri setelah reconnect").

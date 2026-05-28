@@ -198,3 +198,27 @@ test('validator sesi hanya reset saat resolusi akses DEFINITIF (anti tendangan r
     'validasi armada petugas harus ditunda saat ships belum termuat agar tidak kick di window reconnect',
   );
 });
+
+test('resolusi akses sembuh sendiri setelah reconnect (checkpoint tidak hilang)', () => {
+  // Resolver akses harus bisa di-ulang lewat nonce, dan ada retry berbackoff saat
+  // resolusi gagal jaringan agar authAccessState (sumber shipAssigned/status) pulih
+  // tanpa refresh manual. Tanpa ini, currentUserRecord null -> operationalShip null
+  // -> "Belum ada titik patroli" sampai user refresh.
+  assert.match(
+    appContextSource,
+    /\}, \[firebaseAuthReady, firebaseAuthUser, authAccessResolveNonce\]\);/,
+    'effect resolver akses harus bergantung pada authAccessResolveNonce agar bisa di-retry',
+  );
+  assert.match(
+    appContextSource,
+    /authAccessRetryRef[\s\S]*?setTimeout\([\s\S]*?setAuthAccessResolveNonce\(\(nonce\) => nonce \+ 1\)/,
+    'harus ada retry resolusi akses berbackoff yang menaikkan authAccessResolveNonce',
+  );
+  // currentUserRecord tidak boleh kolaps ke null saat resolusi belum definitif —
+  // pertahankan record terakhir agar operationalShip & checkpoint tetap tampil.
+  assert.match(
+    appContextSource,
+    /const isAccessResolutionDefinitive = authAccessResolvedUid === firebaseAuthUid;\s*\n\s*if \(isAccessResolutionDefinitive\) return offlineSessionUser;/,
+    'currentUserRecord hanya boleh kolaps ke null saat resolusi akses sudah definitif',
+  );
+});

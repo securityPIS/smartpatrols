@@ -4737,6 +4737,10 @@ export function AppProvider({ children }) {
   const [authAccessResolvedUid, setAuthAccessResolvedUid] = useState('');
   // Fallback offline: UID yang masih boleh akses lokal walau callable gagal.
   const [authAccessOfflineUid, setAuthAccessOfflineUid] = useState('');
+  // Pemicu re-resolve akses. Dinaikkan saat resolusi gagal jaringan & koneksi pulih,
+  // agar authAccessState (sumber shipAssigned/status) sembuh sendiri tanpa refresh manual.
+  const [authAccessResolveNonce, setAuthAccessResolveNonce] = useState(0);
+  const authAccessRetryRef = useRef({ attempts: 0, timer: null });
 
   // Crew migration effect
   useEffect(() => {
@@ -4915,7 +4919,19 @@ export function AppProvider({ children }) {
         && authAccessOfflineUid
         && authAccessOfflineUid === firebaseAuthUid,
       );
-      if (!authAccessEnabled && !isOfflineAccessFallback) return offlineSessionUser;
+      if (!authAccessEnabled && !isOfflineAccessFallback) {
+        // Hanya kolapskan ke null bila server SUDAH menjawab definitif untuk UID ini
+        // (akses memang nonaktif). Bila resolusi sedang gagal jaringan / menunggu retry
+        // (belum definitif), pertahankan record terakhir yang diketahui agar
+        // operationalShip & checkpoint tidak hilang saat koneksi baru pulih.
+        const isAccessResolutionDefinitive = authAccessResolvedUid === firebaseAuthUid;
+        if (isAccessResolutionDefinitive) return offlineSessionUser;
+        return resolvePreferredUserRecord(usersData, {
+          sessionUserId,
+          firebaseAuthEmail,
+          firebaseAuthUid,
+        }) || sessionUserRecord || offlineSessionUser;
+      }
 
       const matchedUser = resolvePreferredUserRecord(usersData, {
         sessionUserId,
@@ -4938,7 +4954,7 @@ export function AppProvider({ children }) {
       firebaseAuthUid: sessionUserRecord?.firebaseUid || '',
       firebaseAuthEmail: sessionUserRecord?.email || '',
     }) || sessionUserRecord;
-  }, [authAccessEnabled, authAccessOfflineUid, authAccessState, firebaseAuthEmail, firebaseAuthReady, firebaseAuthUid, firebaseAuthUser, isOffline, sessionUserId, sessionUserRecord, usersData]);
+  }, [authAccessEnabled, authAccessOfflineUid, authAccessResolvedUid, authAccessState, firebaseAuthEmail, firebaseAuthReady, firebaseAuthUid, firebaseAuthUser, isOffline, sessionUserId, sessionUserRecord, usersData]);
   const effectiveSessionUser = isFirebaseAuthEnabled
     ? currentUserRecord
     : (currentUserRecord || sessionUserRecord || null);
@@ -9895,7 +9911,52 @@ export function AppProvider({ children }) {
     return () => {
       cancelled = true;
     };
-  }, [firebaseAuthReady, firebaseAuthUser]);
+  }, [firebaseAuthReady, firebaseAuthUser, authAccessResolveNonce]);
+  // Self-heal: bila resolusi akses gagal jaringan (authAccessState null, belum definitif)
+  // dan koneksi tersedia, jadwalkan re-resolve dengan backoff. Ini memulihkan
+  // currentUserRecord -> operationalShip -> daftar checkpoint setelah reconnect TANPA
+  // perlu refresh manual. Berhenti saat akses ter-resolve, jawaban definitif, atau offline.
+  useEffect(() => {
+    const retryState = authAccessRetryRef.current;
+    const clearRetryTimer = () => {
+      if (retryState.timer) {
+        clearTimeout(retryState.timer);
+        retryState.timer = null;
+      }
+    };
+
+    if (!isFirebaseAuthEnabled || !firebaseAuthReady || !firebaseAuthUser) {
+      clearRetryTimer();
+      retryState.attempts = 0;
+      return clearRetryTimer;
+    }
+    if (isOffline) {
+      // Reset budget retry agar reconnect berikutnya dapat percobaan penuh.
+      clearRetryTimer();
+      retryState.attempts = 0;
+      return clearRetryTimer;
+    }
+
+    const currentUid = sanitizeText(firebaseAuthUser.uid || '', 160);
+    const isResolved = Boolean(authAccessState?.access);
+    const isDefinitive = authAccessResolvedUid === currentUid;
+    if (isResolved || isDefinitive) {
+      clearRetryTimer();
+      retryState.attempts = 0;
+      return clearRetryTimer;
+    }
+    if (authAccessBusy || retryState.timer || retryState.attempts >= 6) {
+      return clearRetryTimer;
+    }
+
+    const delay = Math.min(800 * 2 ** retryState.attempts, 15000);
+    retryState.timer = setTimeout(() => {
+      retryState.timer = null;
+      retryState.attempts += 1;
+      setAuthAccessResolveNonce((nonce) => nonce + 1);
+    }, delay);
+    return clearRetryTimer;
+  }, [authAccessBusy, authAccessResolvedUid, authAccessState, firebaseAuthReady, firebaseAuthUser, isOffline]);
   useEffect(() => {
     if (!isFirebaseAuthEnabled || !firebaseAuthUser || !authAccessState?.access) return;
     const matchedUser = resolvePreferredUserRecord(usersData, {
