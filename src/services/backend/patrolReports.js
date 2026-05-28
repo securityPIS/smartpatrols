@@ -135,6 +135,9 @@ export async function savePatrolReport(report, options = {}) {
       checkpointId: report?.checkpointId || null,
     });
     await enqueueOutboxMutation({
+      // Id deterministik per checkpoint agar submit offline berulang untuk titik yang
+      // sama menimpa antrean lama, bukan menumpuk duplikat di outbox.
+      id: report?.clientEventId || report?.client_event_id || createClientEventId(report),
       type: 'patrol_report.upsert',
       payload: report,
     });

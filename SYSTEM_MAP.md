@@ -211,3 +211,31 @@ Migration `202605290002_finalize_shift_from_custom_checkpoints.sql` me-`replace`
 Jadwal cron (`finalize-shift-1/2/3`) tidak diubah — cukup ganti body fungsi. Diverifikasi
 behavioral lewat Postgres lokal (aman/temuan/missed benar, termasuk match-by-name saat id
 berbeda) dan dijaga `tests/pages/finalize-shift-source.test.mjs`.
+
+## Laporan Offline Tidak Muncul di Device Lain (bug fix)
+
+Gejala: laporan (aman/temuan) yang disubmit terlihat benar HANYA di device pembuat. Di device
+lain temuan tidak ada, jumlah "aman" beda, dan submit offline tidak pernah muncul walau sudah
+kembali online.
+
+Akar masalah: `syncPatrolReportToDomain` (`AppContextRuntime.jsx`) — satu-satunya jalur yang
+menulis tabel `patrol_reports` — langsung `return null` saat `isOffline`. Submit offline jadi
+TIDAK ditulis dan TIDAK diantrekan ke outbox. Jalur reconnect `requestCloudSync` hanya menyinkron
+`profiles`/`ships` (lihat `cloudState.js` `writeStateToSql`), bukan `patrol_reports`, sehingga
+laporan offline hanya hidup di state lokal device pembuat dan tak pernah sampai ke device lain.
+
+Perbaikan:
+- Penjaga `syncPatrolReportToDomain` tidak lagi memakai `isOffline`. Saat offline, `savePatrolReport`
+  tetap dipanggil; tulisan gagal otomatis masuk outbox IndexedDB (`patrol_report.upsert`) dan
+  ter-flush saat online (`startSqlOutboxWorker`, listener `online` + interval) → terlihat di
+  semua device sekapal/ADMIN/PIC sesuai RLS.
+- Upload media dilewati saat `isOffline` (Storage tak terjangkau); baris laporan tetap diantrekan,
+  foto lokal disimpan di `patrolReportLocalMediaRef` untuk unggah ulang saat online.
+- `savePatrolReport` mengantre dengan id deterministik (`createClientEventId`) agar submit offline
+  berulang untuk titik yang sama menimpa antrean, bukan menumpuk duplikat.
+
+Catatan: baris laporan (status/resultType/penyebab/kejadian/tindakLanjut + hitungan aman/temuan)
+kini tersinkron lintas-device walau disubmit offline. FOTO laporan offline belum otomatis ter-upload
+saat reconnect (rewrite `patrol_reports.photo_url` setelah upload) — tindak lanjut terpisah.
+
+Regresi dijaga `tests/pages/patrol-report-offline-sync.test.mjs`.

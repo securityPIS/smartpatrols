@@ -5890,7 +5890,13 @@ export function AppProvider({ children }) {
     });
   }, [prepareCloudPhotoUrl]);
   const syncPatrolReportToDomain = useCallback(async (checkpoint, options = {}) => {
-    if (!isCloudSyncEnabled || !isCloudWriteEnabled || !hasOperationalCloudAccess || isOffline) return null;
+    // JANGAN bail saat isOffline. savePatrolReport adalah SATU-SATUNYA jalur yang menulis
+    // tabel patrol_reports (requestCloudSync hanya sinkron profiles/ships). Bila kita berhenti
+    // di sini saat offline, laporan tidak pernah ditulis MAUPUN diantrekan, sehingga hanya ada
+    // di device pembuat dan tak pernah terlihat di device lain. Dengan tetap memanggil
+    // savePatrolReport, tulisan yang gagal (offline) otomatis masuk outbox IndexedDB dan
+    // ter-flush saat kembali online.
+    if (!isCloudSyncEnabled || !isCloudWriteEnabled || !hasOperationalCloudAccess) return null;
 
     const checkpointReport = createPatrolReportDomainRecord(checkpoint);
     if (!checkpointReport) return null;
@@ -5931,7 +5937,10 @@ export function AppProvider({ children }) {
 
     await writeIfChanged(pendingReport);
 
-    if (!hasLocalMedia || options.skipMediaUpload || patrolReportDomainUploadInFlightRef.current.has(reportKey)) {
+    // Saat offline, Storage tak terjangkau: lewati upload media. Baris laporan sudah
+    // diantrekan ke outbox di atas (savePatrolReport), foto lokal tetap tersimpan di
+    // patrolReportLocalMediaRef untuk diunggah ulang saat online.
+    if (!hasLocalMedia || options.skipMediaUpload || isOffline || patrolReportDomainUploadInFlightRef.current.has(reportKey)) {
       return pendingReport;
     }
 
