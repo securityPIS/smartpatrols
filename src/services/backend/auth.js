@@ -2,8 +2,8 @@
 Tujuan: Menyediakan wrapper Supabase Auth kompatibel dengan flow auth SmartPatrol lama.
 Caller: AppContextRuntime, LoginPage, dan form admin yang butuh login/register/provision akun.
 Dependensi: Supabase Auth dan Edge Function provision-operational-user untuk pembuatan user oleh admin.
-Main Functions: Login/register email-password, provision user operasional, logout, subscribe auth state dengan guard offline, dan normalisasi error.
-Side Effects: Membuat/menghapus sesi Supabase Auth aktif, membaca sesi lokal, dan dapat memanggil Edge Function service-role terproteksi.
+Main Functions: Login/register email-password, provision user operasional, logout, subscribe auth state, dan normalisasi error.
+Side Effects: Membuat/menghapus sesi Supabase Auth aktif dan dapat memanggil Edge Function service-role terproteksi.
 */
 
 import { ensureSupabaseClient, isSupabaseConfigured, normalizeSupabaseUser } from './app';
@@ -95,62 +95,21 @@ async function logoutFirebaseUser() {
   await supabase.auth.signOut();
 }
 
-function isBrowserOffline() {
-  return typeof navigator !== 'undefined' && navigator.onLine === false;
-}
-
-function isTransientAuthError(error) {
-  if (isBrowserOffline()) return true;
-  const code = String(error?.code || error?.name || '').toLowerCase();
-  const message = String(error?.message || '').toLowerCase();
-  return (
-    code.includes('network')
-    || code.includes('fetch')
-    || message.includes('failed to fetch')
-    || message.includes('network')
-    || message.includes('fetch')
-  );
-}
-
 function subscribeToFirebaseAuthChanges(callback) {
   if (!isSupabaseConfigured) return () => {};
   const supabase = ensureSupabaseClient();
   let disposed = false;
 
-  supabase.auth.getSession()
-    .then(({ data, error }) => {
-      if (disposed) return;
-      if (error) {
-        callback(null, {
-          event: 'INITIAL_SESSION_ERROR',
-          isTransient: isTransientAuthError(error),
-          error,
-        });
-        return;
-      }
-      const normalizedUser = normalizeSupabaseUser(data?.session?.user);
-      callback(normalizedUser, {
-        event: 'INITIAL_SESSION',
-        isTransient: !normalizedUser && isBrowserOffline(),
-      });
+  supabase.auth.getUser()
+    .then(({ data }) => {
+      if (!disposed) callback(normalizeSupabaseUser(data?.user));
     })
-    .catch((error) => {
-      if (!disposed) {
-        callback(null, {
-          event: 'INITIAL_SESSION_ERROR',
-          isTransient: isTransientAuthError(error),
-          error,
-        });
-      }
+    .catch(() => {
+      if (!disposed) callback(null);
     });
 
-  const { data } = supabase.auth.onAuthStateChange((event, session) => {
-    if (disposed) return;
-    const normalizedUser = normalizeSupabaseUser(session?.user);
-    callback(normalizedUser, {
-      event,
-      isTransient: !normalizedUser && isBrowserOffline(),
-    });
+  const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+    callback(normalizeSupabaseUser(session?.user));
   });
 
   return () => {
