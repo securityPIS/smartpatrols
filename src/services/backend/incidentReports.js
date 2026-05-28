@@ -31,8 +31,9 @@ function mapIncidentToRow(incident = {}, options = {}) {
     status: incident.status || 'open',
     location: incident.location || '',
     reported_by: incident.reportedBy || '',
-    occurred_at_trusted_ms: Number.isFinite(incident.occurredAtTrustedMs) ? incident.occurredAtTrustedMs : null,
-    client_updated_at_ms: clientUpdatedAt,
+    // Kolom *_ms bertipe bigint: paksa integer (performance.now() bisa berkoma → ditolak Postgres).
+    occurred_at_trusted_ms: Number.isFinite(incident.occurredAtTrustedMs) ? Math.round(incident.occurredAtTrustedMs) : null,
+    client_updated_at_ms: Math.round(clientUpdatedAt),
     photo_url: incident.photoUrl || null,
     payload,
   };

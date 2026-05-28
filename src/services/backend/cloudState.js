@@ -355,7 +355,7 @@ async function writeStateToSql(state, options = {}) {
   await supabase.from('client_mutations').insert({
     client_event_id: `state-sync-${options.clientUpdatedAt || Date.now()}`,
     mutation_type: 'state-sync',
-    client_updated_at_ms: options.clientUpdatedAt || Date.now(),
+    client_updated_at_ms: Math.round(options.clientUpdatedAt || Date.now()),
     payload: {
       reason: options.reason || 'state-sync',
       users: profileRows.length,
@@ -395,7 +395,7 @@ registerOutboxHandler('signal.publish', async (payload) => {
 
 export async function publishCloudSyncSignal(signal) {
   if (!isCloudWriteEnabled || !signal || typeof signal !== 'object') return null;
-  const clientUpdatedAt = Number.isFinite(signal.clientUpdatedAt) ? signal.clientUpdatedAt : Date.now();
+  const clientUpdatedAt = Math.round(Number.isFinite(signal.clientUpdatedAt) ? signal.clientUpdatedAt : Date.now());
   const payload = {
     client_event_id: signal.clientEventId || `signal-${clientUpdatedAt}-${Math.random().toString(36).slice(2, 8)}`,
     mutation_type: signal.reason || 'state-signal',

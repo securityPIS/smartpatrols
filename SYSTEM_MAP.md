@@ -266,4 +266,20 @@ Notifikasi error di layar (diagnosa di HP): `savePatrolReport` membedakan gagal 
 lain MUNCUL di layar (mis. nama kapal `ship_assigned` ≠ `ship_name`, akun belum approved,
 atau cloud nonaktif) — tidak lagi gagal diam-diam. `ConfirmModal` memakai `whitespace-pre-line`.
 
+### Akar gagal sinkron lintas-device: bigint vs milidetik pecahan
+
+Gejala (terungkap lewat notifikasi error di layar): `invalid input syntax for type bigint:
+"1779986567403.7"`. Penyebab: `performance.now()` membawa presisi sub-ms, sehingga
+`occurredAtTrustedMs` (dari `getTrustedNowMs()`) berisi pecahan. Kolom `*_trusted_ms` dan
+`client_updated_at_ms` di Postgres bertipe `bigint` → setiap tulisan `patrol_reports`
+(dan `incidents`) ditolak, laporan tak pernah masuk DB, jadi tak terlihat di device lain
+(ONLINE maupun offline). Inilah akar "berfungsi hanya di device sama".
+
+Perbaikan:
+- `trustedTime.js` `buildTrustedTimeSnapshot`: `nowMs = Math.round(getTrustedNowMs())` —
+  semua timestamp baru jadi integer ms.
+- `mapReportToRow`/`mapIncidentToRow` + insert `client_mutations`: `Math.round` pada kolom
+  `*_ms` — juga memperbaiki laporan LAMA yang sudah terlanjur diantrekan di outbox dengan
+  nilai berkoma (saat flush ulang).
+
 Regresi dijaga `tests/pages/patrol-report-offline-sync.test.mjs`.

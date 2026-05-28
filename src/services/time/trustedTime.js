@@ -413,7 +413,11 @@ export function getTimeTrustStatus() {
 }
 
 function buildTrustedTimeSnapshot() {
-  const nowMs = getTrustedNowMs();
+  // Bulatkan ke milidetik bulat: performance.now() membawa pecahan sub-ms sehingga
+  // nowMs bisa seperti 1779986567403.7. Kolom *_trusted_ms di Postgres bertipe bigint
+  // dan menolak nilai berkoma ("invalid input syntax for type bigint"), membuat seluruh
+  // tulisan laporan gagal. Wall-clock ms tidak butuh presisi sub-ms.
+  const nowMs = Math.round(getTrustedNowMs());
   const nowDate = new Date(nowMs);
   const status = getTimeTrustStatus();
   const warningMessage = status.clockTamperDetected

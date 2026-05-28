@@ -37,8 +37,11 @@ function mapReportToRow(report = {}, options = {}) {
     result_type: report.resultType || null,
     completed_by_user_id: report.completedByUserId || null,
     completed_by: report.completedBy || null,
-    occurred_at_trusted_ms: Number.isFinite(report.occurredAtTrustedMs) ? report.occurredAtTrustedMs : null,
-    client_updated_at_ms: clientUpdatedAt,
+    // Kolom *_ms bertipe bigint: paksa ke integer (performance.now() bisa hasilkan pecahan
+    // sub-ms seperti 1779986567403.7 yang ditolak Postgres). Termasuk untuk laporan lama
+    // yang sudah terlanjur diantrekan di outbox dengan nilai berkoma.
+    occurred_at_trusted_ms: Number.isFinite(report.occurredAtTrustedMs) ? Math.round(report.occurredAtTrustedMs) : null,
+    client_updated_at_ms: Math.round(clientUpdatedAt),
     media_status: report.mediaStatus || 'none',
     photo_url: report.photoUrl || null,
     payload: {

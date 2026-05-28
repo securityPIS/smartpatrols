@@ -21,6 +21,14 @@ const patrolReportsSource = readFileSync(
   new URL('../../src/services/backend/patrolReports.js', import.meta.url),
   'utf8',
 );
+const incidentReportsSource = readFileSync(
+  new URL('../../src/services/backend/incidentReports.js', import.meta.url),
+  'utf8',
+);
+const trustedTimeSource = readFileSync(
+  new URL('../../src/services/time/trustedTime.js', import.meta.url),
+  'utf8',
+);
 
 function extractSyncPatrolReportToDomain(source) {
   const startIndex = source.indexOf('const syncPatrolReportToDomain = useCallback');
@@ -86,6 +94,29 @@ test('savePatrolReport menandai syncError untuk penolakan server (bukan offline)
     patrolReportsSource,
     /const offline = \(typeof navigator[\s\S]*?syncError: offline \? null : \{[\s\S]*?code: error\?\.code/,
     'gagal saat online (RLS dll) harus membawa syncError; offline tidak',
+  );
+});
+
+test('kolom *_ms bigint dipaksa integer (cegah error invalid input syntax for type bigint)', () => {
+  assert.match(
+    trustedTimeSource,
+    /const nowMs = Math\.round\(getTrustedNowMs\(\)\)/,
+    'trusted time harus membulatkan nowMs (performance.now() berkoma) agar bukan pecahan',
+  );
+  assert.match(
+    patrolReportsSource,
+    /occurred_at_trusted_ms: Number\.isFinite\(report\.occurredAtTrustedMs\) \? Math\.round\(report\.occurredAtTrustedMs\) : null/,
+    'patrol_reports.occurred_at_trusted_ms harus integer (Math.round)',
+  );
+  assert.match(
+    patrolReportsSource,
+    /client_updated_at_ms: Math\.round\(clientUpdatedAt\)/,
+    'patrol_reports.client_updated_at_ms harus integer',
+  );
+  assert.match(
+    incidentReportsSource,
+    /occurred_at_trusted_ms: Number\.isFinite\(incident\.occurredAtTrustedMs\) \? Math\.round\(incident\.occurredAtTrustedMs\) : null/,
+    'incidents.occurred_at_trusted_ms harus integer',
   );
 });
 
