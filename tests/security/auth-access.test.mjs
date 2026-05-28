@@ -142,16 +142,26 @@ test('listener auth tidak mengubah gagal jaringan menjadi logout final', () => {
   );
   assert.match(
     authSource,
-    /isTransient:\s*!normalizedUser\s*&&\s*isBrowserOffline\(\)/,
-    'auth-null ketika browser offline harus dikirim sebagai event transien, bukan logout eksplisit',
+    /explicitFirebaseLogout\s*=\s*true[\s\S]*supabase\.auth\.signOut\(\)[\s\S]*explicitFirebaseLogout\s*=\s*false/,
+    'logout eksplisit harus men-set flag selama signOut agar SIGNED_OUT yang menyusul dikenali eksplisit',
+  );
+  assert.match(
+    authSource,
+    /const isExplicitLogout\s*=\s*event\s*===\s*'SIGNED_OUT'\s*&&\s*explicitFirebaseLogout/,
+    'listener harus membedakan SIGNED_OUT eksplisit dari auth-null involunter',
+  );
+  assert.match(
+    authSource,
+    /isTransient:\s*!normalizedUser\s*&&\s*!isExplicitLogout\s*&&\s*\(isBrowserOffline\(\)\s*\|\|\s*event\s*===\s*'SIGNED_OUT'\)/,
+    'SIGNED_OUT involunter / browser offline harus transien; hanya logout eksplisit yang final',
   );
 });
 
 test('runtime auth mempertahankan sesi patroli saat auth-null offline', () => {
   assert.match(
     appContextSource,
-    /const isTransientAuthNull = !nextUser && \(authEvent\?\.isTransient \|\| isOfflineRef\.current\)[\s\S]*?return;/,
-    'callback auth-null transien harus berhenti sebelum setFirebaseAuthUser(null)',
+    /const isTransientAuthNull = !nextUser\s*&& !authEvent\?\.explicit\s*&& \(authEvent\?\.isTransient \|\| isOfflineRef\.current\)[\s\S]*?return;/,
+    'callback auth-null transien (non-eksplisit) harus berhenti sebelum setFirebaseAuthUser(null)',
   );
   assert.match(
     appContextSource,

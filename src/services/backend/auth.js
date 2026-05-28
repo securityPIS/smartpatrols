@@ -89,10 +89,22 @@ async function provisionFirebaseEmailUser({ email, password, displayName = '' })
   };
 }
 
+// Ditandai true hanya selama logout yang DISENGAJA pengguna (lewat fungsi ini).
+// Dipakai listener untuk membedakan SIGNED_OUT eksplisit dari auth-null involunter
+// (mis. refresh token gagal saat internet hilang) yang tidak boleh memutus sesi.
+let explicitFirebaseLogout = false;
+
 async function logoutFirebaseUser() {
   if (!isSupabaseConfigured) return;
   const supabase = ensureSupabaseClient();
-  await supabase.auth.signOut();
+  explicitFirebaseLogout = true;
+  try {
+    // signOut menunggu notifikasi subscriber selesai sebelum resolve, jadi event
+    // SIGNED_OUT yang menyusul masih membaca flag true sebelum direset di finally.
+    await supabase.auth.signOut();
+  } finally {
+    explicitFirebaseLogout = false;
+  }
 }
 
 function isBrowserOffline() {
@@ -147,9 +159,16 @@ function subscribeToFirebaseAuthChanges(callback) {
   const { data } = supabase.auth.onAuthStateChange((event, session) => {
     if (disposed) return;
     const normalizedUser = normalizeSupabaseUser(session?.user);
+    const isExplicitLogout = event === 'SIGNED_OUT' && explicitFirebaseLogout;
     callback(normalizedUser, {
       event,
-      isTransient: !normalizedUser && isBrowserOffline(),
+      explicit: isExplicitLogout,
+      // Auth-null involunter (SIGNED_OUT non-eksplisit dari refresh gagal, atau
+      // browser offline) ditandai transien agar sesi patroli tidak diputus di
+      // tengah submit. Hanya logout eksplisit pengguna yang membersihkan sesi.
+      isTransient: !normalizedUser
+        && !isExplicitLogout
+        && (isBrowserOffline() || event === 'SIGNED_OUT'),
     });
   });
 

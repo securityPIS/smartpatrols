@@ -9809,10 +9809,14 @@ export function AppProvider({ children }) {
     }
 
     return subscribeToFirebaseAuthChanges((nextUser, authEvent = {}) => {
-      const isTransientAuthNull = !nextUser && (authEvent?.isTransient || isOfflineRef.current);
+      const isTransientAuthNull = !nextUser
+        && !authEvent?.explicit
+        && (authEvent?.isTransient || isOfflineRef.current);
       if (isTransientAuthNull) {
-        // Saat jaringan hilang, Supabase bisa memberi auth-null sementara.
-        // Pertahankan user terakhir agar sesi patroli offline tidak diputus.
+        // Auth-null involunter (refresh token gagal / SIGNED_OUT non-eksplisit saat
+        // internet hilang walau radio menyala). Pertahankan user terakhir agar sesi
+        // patroli tidak diputus di tengah submit. Hanya logout eksplisit pengguna
+        // (authEvent.explicit) atau pencabutan akses server yang membersihkan sesi.
         const activeUid = sanitizeText(firebaseAuthUserRef.current?.uid || '', 160);
         if (activeUid) setAuthAccessOfflineUid(activeUid);
         setFirebaseAuthReady(true);

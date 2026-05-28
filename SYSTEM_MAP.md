@@ -77,14 +77,20 @@ initializeTrustedTime
 ```
 Supabase Auth listener
   -> getSession lokal untuk initial restore
-  -> auth-null saat offline ditandai transient, bukan logout
+  -> SIGNED_OUT/auth-null INVOLUNTER ditandai transient (flag explicitFirebaseLogout=false)
   -> AppContextRuntime mempertahankan firebaseAuthUser terakhir / sessionUserRecord
   -> authAccessOfflineUid menjaga sesi patroli sampai koneksi pulih
 ```
 
-Catatan: `SIGNED_OUT` online tetap membersihkan sesi. Saat device offline, null auth
-dari refresh/getSession tidak boleh menghapus sesi operasional atau melempar petugas ke
-login ketika submit patroli/foto sedang berjalan.
+Catatan: hanya logout EKSPLISIT pengguna yang membersihkan sesi. `logoutFirebaseUser()`
+men-set flag modul `explicitFirebaseLogout` selama `supabase.auth.signOut()`, sehingga
+`SIGNED_OUT` yang menyusul ditandai `explicit:true` dan listener membersihkan sesi.
+Auth-null involunter — `SIGNED_OUT` dari refresh token yang gagal, atau saat browser
+offline — SELALU transien (tidak bergantung `navigator.onLine`, karena "internet hilang"
+≠ "radio terputus": `navigator.onLine` bisa tetap `true` tanpa data). Ini mencegah petugas
+ketendang login saat menekan tombol "Sync Laporan" / submit patroli di jaringan buruk.
+Pencabutan akun (disabled/rejected/restricted) tetap ditegakkan jalur `resolveOperationalAccess`
+→ `handleLogout` saat benar-benar online, bukan oleh listener auth.
 
 ## Important Files
 
