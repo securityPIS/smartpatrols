@@ -174,3 +174,27 @@ test('runtime auth mempertahankan sesi patroli saat auth-null offline', () => {
     'validator tidak boleh reset sesi cloud ketika device sedang offline dan masih ada user lokal aktif',
   );
 });
+
+test('validator sesi hanya reset saat resolusi akses DEFINITIF (anti tendangan reconnect)', () => {
+  // Reset cloud session hanya boleh saat resolveOperationalAccess memberi jawaban definitif
+  // untuk UID aktif. Resolusi gagal jaringan (authAccessOfflineUid di-set) saat baru pulih
+  // koneksi TIDAK boleh memicu reset — itulah penyebab logout "saat back online".
+  const definitiveGuards = appContextSource.match(
+    /if \(authAccessResolvedUid !== currentUid\) return;\s*\n\s*resetAuthSession\('Sesi cloud Anda telah berakhir/g,
+  ) || [];
+  assert.equal(
+    definitiveGuards.length,
+    2,
+    'kedua validator harus pakai guard definitif resolvedUid sebelum resetAuthSession',
+  );
+  assert.doesNotMatch(
+    appContextSource,
+    /authAccessResolvedUid !== currentUid && authAccessOfflineUid !== currentUid\) return;\s*\n\s*resetAuthSession/,
+    'guard lama yang ikut reset saat offlineUid cocok harus dihapus (penyebab logout reconnect)',
+  );
+  assert.match(
+    appContextSource,
+    /if \(!shipsData\?\.length\) return;/,
+    'validasi armada petugas harus ditunda saat ships belum termuat agar tidak kick di window reconnect',
+  );
+});

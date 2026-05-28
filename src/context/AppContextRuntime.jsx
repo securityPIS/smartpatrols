@@ -9918,11 +9918,12 @@ export function AppProvider({ children }) {
       }
       return;
     }
-    // Guard: jangan reset sesi jika resolveOperationalAccess belum settle untuk UID aktif.
-    // authAccessResolvedUid === '' berarti masih pending. authAccessOfflineUid di-set
-    // saat offline/callable gagal, agar sesi tidak di-reset karena error jaringan.
+    // Reset HANYA bila resolveOperationalAccess sudah memberi jawaban DEFINITIF untuk UID
+    // aktif (authAccessResolvedUid === currentUid). Bila resolusi gagal jaringan
+    // (authAccessOfflineUid di-set, resolvedUid belum cocok) atau masih pending, JANGAN
+    // reset — mencegah logout liar saat koneksi flaky / baru pulih (reconnect).
     const currentUid = sanitizeText(firebaseAuthUser?.uid || '', 160);
-    if (authAccessResolvedUid !== currentUid && authAccessOfflineUid !== currentUid) return;
+    if (authAccessResolvedUid !== currentUid) return;
     resetAuthSession('Sesi cloud Anda telah berakhir. Silakan login kembali.');
   }, [authAccessBusy, authAccessResolvedUid, authAccessOfflineUid, authBusy, firebaseAuthReady, firebaseAuthUser, isOffline, resetAuthSession, sessionUserId, usersData]);
   useEffect(() => {
@@ -9955,11 +9956,11 @@ export function AppProvider({ children }) {
           }
           return;
         }
-        // Guard: jangan reset sesi jika resolveOperationalAccess belum settle.
-        // authAccessResolvedUid === '' berarti masih pending;
-        // authAccessOfflineUid di-set saat offline agar sesi tetap valid.
+        // Reset HANYA saat jawaban akses DEFINITIF (resolvedUid === currentUid). Resolusi
+        // gagal jaringan (authAccessOfflineUid di-set) atau masih pending JANGAN memicu
+        // logout — mencegah tendangan saat koneksi baru pulih (reconnect).
         const currentUid = sanitizeText(firebaseAuthUser?.uid || '', 160);
-        if (authAccessResolvedUid !== currentUid && authAccessOfflineUid !== currentUid) return;
+        if (authAccessResolvedUid !== currentUid) return;
         resetAuthSession('Sesi cloud Anda telah berakhir. Silakan login kembali.');
         return;
       }
@@ -9984,10 +9985,13 @@ export function AppProvider({ children }) {
     if (isWaitingForAssignedFleetSync) {
       return;
     }
+    // Armada belum termuat (mis. window hydrate saat baru reconnect): assignedShip bisa
+    // sesaat null walau petugas masih terdaftar. Jangan kick — tunggu ships terisi.
+    if (!shipsData?.length) return;
     if (activeUser.role === ACCESS_ROLES.PETUGAS && !assignedShipForCurrentUser) {
       handleLogout('Petugas yang tidak lagi terdaftar di armada aktif tidak bisa tetap login.');
     }
-  }, [assignedShipForCurrentUser, authAccessBusy, authAccessEnabled, authAccessOfflineUid, authAccessStatus, authBusy, currentUserRecord, firebaseAuthReady, firebaseAuthUser, handleLogout, isOffline, isWaitingForAssignedFleetSync, resetAuthSession, sessionUserId, usersData]);
+  }, [assignedShipForCurrentUser, authAccessBusy, authAccessEnabled, authAccessOfflineUid, authAccessStatus, authBusy, currentUserRecord, firebaseAuthReady, firebaseAuthUser, handleLogout, isOffline, isWaitingForAssignedFleetSync, resetAuthSession, sessionUserId, shipsData, usersData]);
   useEffect(() => { if (!currentUserRecord) return; if (!isAdmin && (currentPage === 'users' || currentPage === 'ships' || currentPage === 'daily-report')) { setCurrentPage('home'); setActiveShipId(null); setShowShipForm(false); setShowShipDocForm(false); setShowUserForm(false); setSelectedUser(null); } }, [currentPage, currentUserRecord, isAdmin]);
   useEffect(() => { if (activeShipId) return; setShowShipDocForm(false); }, [activeShipId]);
   useEffect(() => {
