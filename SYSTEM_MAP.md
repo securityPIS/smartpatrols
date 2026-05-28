@@ -72,6 +72,20 @@ initializeTrustedTime
   -> offline-trusted/offline-interrupted tetap memakai monotonic timer
 ```
 
+### Auth Session Offline Guard
+
+```
+Supabase Auth listener
+  -> getSession lokal untuk initial restore
+  -> auth-null saat offline ditandai transient, bukan logout
+  -> AppContextRuntime mempertahankan firebaseAuthUser terakhir / sessionUserRecord
+  -> authAccessOfflineUid menjaga sesi patroli sampai koneksi pulih
+```
+
+Catatan: `SIGNED_OUT` online tetap membersihkan sesi. Saat device offline, null auth
+dari refresh/getSession tidak boleh menghapus sesi operasional atau melempar petugas ke
+login ketika submit patroli/foto sedang berjalan.
+
 ## Important Files
 
 | Path | Peran |
