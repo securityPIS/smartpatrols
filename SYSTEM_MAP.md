@@ -235,7 +235,13 @@ Perbaikan:
   berulang untuk titik yang sama menimpa antrean, bukan menumpuk duplikat.
 
 Catatan: baris laporan (status/resultType/penyebab/kejadian/tindakLanjut + hitungan aman/temuan)
-kini tersinkron lintas-device walau disubmit offline. FOTO laporan offline belum otomatis ter-upload
-saat reconnect (rewrite `patrol_reports.photo_url` setelah upload) — tindak lanjut terpisah.
+tersinkron lintas-device walau disubmit offline.
+
+Foto laporan offline: `healPatrolReportMedia` + efeknya (`AppContextRuntime.jsx`) menaikkan foto
+checkpoint kapal operasional yang masih lokal (`idb://`) ke Storage saat online, lalu menulis
+SEKALI ke `patrol_reports` dengan URL `https` (tanpa strip-null lebih dulu, jadi tak ada jendela
+foto kosong) dan menyelaraskan state lokal ke URL `https` agar konvergen (tidak diunggah berulang /
+flap). Upload media helper di-ekstrak ke `uploadPatrolReportDomainMedia` dan dipakai bersama oleh
+`syncPatrolReportToDomain` dan `healPatrolReportMedia`.
 
 Regresi dijaga `tests/pages/patrol-report-offline-sync.test.mjs`.

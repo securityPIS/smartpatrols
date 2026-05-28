@@ -5889,6 +5889,25 @@ export function AppProvider({ children }) {
       sosHistory: boundedStateSnapshot.sosHistory || [],
     });
   }, [prepareCloudPhotoUrl]);
+  const uploadPatrolReportDomainMedia = useCallback(async (checkpointReport, galleryPhotos = []) => (
+    Promise.all([
+      isLocalOnlyAssetUrl(checkpointReport.photoUrl)
+        ? prepareCloudPhotoUrl(
+          checkpointReport.photoUrl,
+          ['patrol-reports', checkpointReport.shipId, checkpointReport.shiftKey, checkpointReport.checkpointId, checkpointReport.photoUrl],
+        )
+        : Promise.resolve(checkpointReport.photoUrl),
+      Promise.all(ensureArray(galleryPhotos).map(async (galleryPhoto, galleryIndex) => ({
+        ...galleryPhoto,
+        photoUrl: isLocalOnlyAssetUrl(galleryPhoto?.photoUrl)
+          ? await prepareCloudPhotoUrl(
+            galleryPhoto.photoUrl,
+            ['patrol-reports-gallery', checkpointReport.shipId, checkpointReport.shiftKey, checkpointReport.checkpointId, galleryPhoto.id || galleryIndex, galleryPhoto.photoUrl],
+          )
+          : galleryPhoto?.photoUrl || null,
+      }))),
+    ])
+  ), [prepareCloudPhotoUrl]);
   const syncPatrolReportToDomain = useCallback(async (checkpoint, options = {}) => {
     // JANGAN bail saat isOffline. savePatrolReport adalah SATU-SATUNYA jalur yang menulis
     // tabel patrol_reports (requestCloudSync hanya sinkron profiles/ships). Bila kita berhenti
@@ -5946,23 +5965,10 @@ export function AppProvider({ children }) {
 
     patrolReportDomainUploadInFlightRef.current.add(reportKey);
     try {
-      const [uploadedPhotoUrl, uploadedGalleryPhotos] = await Promise.all([
-        isLocalOnlyAssetUrl(checkpointReport.photoUrl)
-          ? prepareCloudPhotoUrl(
-            checkpointReport.photoUrl,
-            ['patrol-reports', checkpointReport.shipId, checkpointReport.shiftKey, checkpointReport.checkpointId, checkpointReport.photoUrl],
-          )
-          : Promise.resolve(checkpointReport.photoUrl),
-        Promise.all(galleryPhotos.map(async (galleryPhoto, galleryIndex) => ({
-          ...galleryPhoto,
-          photoUrl: isLocalOnlyAssetUrl(galleryPhoto?.photoUrl)
-            ? await prepareCloudPhotoUrl(
-              galleryPhoto.photoUrl,
-              ['patrol-reports-gallery', checkpointReport.shipId, checkpointReport.shiftKey, checkpointReport.checkpointId, galleryPhoto.id || galleryIndex, galleryPhoto.photoUrl],
-            )
-            : galleryPhoto?.photoUrl || null,
-        }))),
-      ]);
+      const [uploadedPhotoUrl, uploadedGalleryPhotos] = await uploadPatrolReportDomainMedia(
+        checkpointReport,
+        galleryPhotos,
+      );
       const mediaReady = Boolean(uploadedPhotoUrl)
         || uploadedGalleryPhotos.some((galleryPhoto) => Boolean(galleryPhoto?.photoUrl));
       const readyReport = createPatrolReportDomainRecord(checkpointReport, {
@@ -5985,7 +5991,105 @@ export function AppProvider({ children }) {
     } finally {
       patrolReportDomainUploadInFlightRef.current.delete(reportKey);
     }
-  }, [hasOperationalCloudAccess, isOffline, prepareCloudPhotoUrl]);
+  }, [hasOperationalCloudAccess, isOffline, uploadPatrolReportDomainMedia]);
+  // Unggah ulang foto laporan patroli yang masih lokal (idb://) ke Storage saat online,
+  // lalu tulis SEKALI ke patrol_reports dengan URL https. Dipakai untuk laporan yang
+  // disubmit offline (fotonya belum sempat naik) — tanpa ini laporan muncul di device
+  // lain tanpa foto. Menulis langsung URL https (tanpa strip-null lebih dulu) agar tidak
+  // ada jendela foto kosong, dan menyelaraskan state lokal agar tidak diunggah berulang.
+  const healPatrolReportMedia = useCallback(async (checkpoint) => {
+    if (!isCloudSyncEnabled || !isCloudWriteEnabled || !hasOperationalCloudAccess || isOffline) return;
+
+    const checkpointReport = createPatrolReportDomainRecord(checkpoint);
+    if (!checkpointReport) return;
+
+    const galleryPhotos = ensureArray(checkpointReport.galleryPhotos);
+    const hasLocalMedia = isLocalOnlyAssetUrl(checkpointReport.photoUrl)
+      || galleryPhotos.some((galleryPhoto) => isLocalOnlyAssetUrl(galleryPhoto?.photoUrl));
+    if (!hasLocalMedia) return;
+
+    const reportKey = createPatrolReportMediaKey(checkpointReport);
+    if (!reportKey || patrolReportDomainUploadInFlightRef.current.has(reportKey)) return;
+
+    patrolReportDomainUploadInFlightRef.current.add(reportKey);
+    try {
+      const [uploadedPhotoUrl, uploadedGalleryPhotos] = await uploadPatrolReportDomainMedia(
+        checkpointReport,
+        galleryPhotos,
+      );
+      const mediaReady = Boolean(uploadedPhotoUrl)
+        || uploadedGalleryPhotos.some((galleryPhoto) => Boolean(galleryPhoto?.photoUrl));
+      if (!mediaReady) return; // upload belum berhasil; dicoba lagi pada trigger berikutnya
+
+      const readyReport = createPatrolReportDomainRecord(checkpointReport, {
+        photoUrl: uploadedPhotoUrl || null,
+        galleryPhotos: uploadedGalleryPhotos,
+        mediaStatus: 'ready',
+      });
+      if (!readyReport) return;
+
+      await savePatrolReport(readyReport, { clientUpdatedAt: Date.now() });
+      const serializedReadyReport = serializeSharedStateSnapshot(readyReport);
+      if (serializedReadyReport) {
+        patrolReportDomainWriteCacheRef.current.set(reportKey, serializedReadyReport);
+      }
+      patrolReportLocalMediaRef.current.delete(reportKey);
+
+      setCheckpointsByShip((previousState) => {
+        const shipCheckpoints = ensureArray(previousState?.[readyReport.shipId]);
+        let didChange = false;
+        const nextShipCheckpoints = shipCheckpoints.map((shipCheckpoint) => {
+          if (String(shipCheckpoint?.id) !== String(readyReport.id)) return shipCheckpoint;
+          if (
+            shipCheckpoint.photoUrl === readyReport.photoUrl
+            && shipCheckpoint.mediaStatus === readyReport.mediaStatus
+          ) return shipCheckpoint;
+          didChange = true;
+          return {
+            ...shipCheckpoint,
+            photoUrl: readyReport.photoUrl,
+            galleryPhotos: readyReport.galleryPhotos,
+            mediaStatus: readyReport.mediaStatus,
+          };
+        });
+        if (!didChange) return previousState;
+        return { ...previousState, [readyReport.shipId]: nextShipCheckpoints };
+      });
+    } catch (error) {
+      console.error('Gagal mengunggah ulang foto laporan patroli saat online', error);
+    } finally {
+      patrolReportDomainUploadInFlightRef.current.delete(reportKey);
+    }
+  }, [hasOperationalCloudAccess, isOffline, uploadPatrolReportDomainMedia]);
+  // Saat online, naikkan foto laporan kapal operasional yang masih lokal (mis. disubmit
+  // offline) ke Storage lalu tulis ke patrol_reports. Konvergen: setelah ter-upload,
+  // foto lokal jadi https sehingga tidak diproses ulang pada render berikutnya.
+  useEffect(() => {
+    if (isOffline || !isCloudSyncEnabled || !isCloudWriteEnabled || !hasOperationalCloudAccess || !cloudSyncBootstrapped) {
+      return undefined;
+    }
+
+    const pendingMediaCheckpoints = ensureArray(checkpoints).filter((checkpoint) => (
+      checkpoint?.status === 'completed'
+      && (
+        isLocalOnlyAssetUrl(checkpoint?.photoUrl)
+        || ensureArray(checkpoint?.galleryPhotos).some((galleryPhoto) => isLocalOnlyAssetUrl(galleryPhoto?.photoUrl))
+      )
+    ));
+    if (pendingMediaCheckpoints.length === 0) return undefined;
+
+    let cancelled = false;
+    (async () => {
+      for (const checkpoint of pendingMediaCheckpoints) {
+        if (cancelled) break;
+        await healPatrolReportMedia(checkpoint);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [checkpoints, cloudSyncBootstrapped, hasOperationalCloudAccess, healPatrolReportMedia, isOffline]);
   const syncIncidentDetailToDomain = useCallback((incident, meta = {}, options = {}) => {
     if (!incident || incident.isSOS) return null;
 
