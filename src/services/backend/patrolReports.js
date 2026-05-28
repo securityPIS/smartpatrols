@@ -119,7 +119,8 @@ export function subscribeToPatrolReports({ shiftKey, shipId, shipName }, callbac
 
 export async function savePatrolReport(report, options = {}) {
   try {
-    return await writePatrolReport(report, options);
+    const saved = await writePatrolReport(report, options);
+    return { ...saved, synced: true };
   } catch (error) {
     // Jangan telan diam-diam: kegagalan permanen (RLS/constraint/auth) tampak sama
     // dengan kegagalan jaringan dari sisi pemanggil. Catat error asli agar penyebab
@@ -141,11 +142,26 @@ export async function savePatrolReport(report, options = {}) {
       type: 'patrol_report.upsert',
       payload: report,
     });
+    // Bedakan gagal jaringan/offline (wajar, akan di-flush outbox) dari penolakan server
+    // (RLS/constraint/auth) yang harus ditampilkan ke pengguna karena laporan tak akan
+    // pernah terlihat di device lain sampai akar masalahnya diperbaiki.
+    const message = String(error?.message || '');
+    const looksLikeNetworkError = !error?.code
+      && (error?.name === 'TypeError' || /failed to fetch|network|fetch|load failed/i.test(message));
+    const offline = (typeof navigator !== 'undefined' && navigator.onLine === false) || looksLikeNetworkError;
     return {
       ...report,
       schemaVersion: PATROL_REPORTS_SCHEMA_VERSION,
       clientUpdatedAt: Number.isFinite(options.clientUpdatedAt) ? options.clientUpdatedAt : Date.now(),
       pendingOfflineSync: true,
+      synced: false,
+      offline,
+      syncError: offline ? null : {
+        code: error?.code || null,
+        message: error?.message || 'unknown',
+        hint: error?.hint || null,
+        details: error?.details || null,
+      },
     };
   }
 }

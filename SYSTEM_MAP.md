@@ -244,4 +244,12 @@ foto kosong) dan menyelaraskan state lokal ke URL `https` agar konvergen (tidak 
 flap). Upload media helper di-ekstrak ke `uploadPatrolReportDomainMedia` dan dipakai bersama oleh
 `syncPatrolReportToDomain` dan `healPatrolReportMedia`.
 
+Notifikasi error di layar (diagnosa di HP): `savePatrolReport` membedakan gagal offline
+(diantrekan, wajar) dari penolakan server (RLS/constraint/auth → `syncError`).
+`syncPatrolReportToDomain` mengembalikan status (`ok`/`offline`/`blocked`/`no-access`/
+`sync-disabled`) dan, untuk submit eksplisit (`notifyOnError`), memanggil
+`notifyPatrolSyncIssue` → `setConfirmDialog` agar penyebab laporan tak sampai ke device
+lain MUNCUL di layar (mis. nama kapal `ship_assigned` ≠ `ship_name`, akun belum approved,
+atau cloud nonaktif) — tidak lagi gagal diam-diam. `ConfirmModal` memakai `whitespace-pre-line`.
+
 Regresi dijaga `tests/pages/patrol-report-offline-sync.test.mjs`.

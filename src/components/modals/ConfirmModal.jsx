@@ -19,7 +19,7 @@ const ConfirmModal = React.memo(function ConfirmModal({ isOpen, title, message, 
             </div>
             <h3 className="text-xl font-bold text-white tracking-wide">{title || 'Konfirmasi'}</h3>
           </div>
-          <p className="text-sm text-cyan-200/80 leading-relaxed">
+          <p className="text-sm text-cyan-200/80 leading-relaxed whitespace-pre-line">
             {message || 'Apakah Anda yakin ingin melakukan tindakan ini?'}
           </p>
         </div>

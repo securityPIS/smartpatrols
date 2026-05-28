@@ -33,12 +33,17 @@ test('syncPatrolReportToDomain TIDAK berhenti saat offline (agar masuk outbox)',
   const fn = extractSyncPatrolReportToDomain(runtimeSource);
   assert.match(
     fn,
-    /if \(!isCloudSyncEnabled \|\| !isCloudWriteEnabled \|\| !hasOperationalCloudAccess\) return null;/,
-    'penjaga awal tidak boleh menyertakan isOffline — submit offline harus tetap ditulis/antre',
+    /if \(!isCloudSyncEnabled \|\| !isCloudWriteEnabled\) \{/,
+    'penjaga config terpisah (tanpa isOffline) supaya submit offline tetap ditulis/antre',
+  );
+  assert.match(
+    fn,
+    /if \(!hasOperationalCloudAccess\) \{/,
+    'penjaga akses terpisah supaya bisa memunculkan status no-access ke layar',
   );
   assert.doesNotMatch(
     fn,
-    /if \([^\n]*!hasOperationalCloudAccess \|\| isOffline\) return null;/,
+    /!hasOperationalCloudAccess \|\| isOffline/,
     'penjaga awal yang lama (memakai isOffline) tidak boleh muncul kembali',
   );
 });
@@ -56,6 +61,31 @@ test('savePatrolReport mengantrekan laporan gagal ke outbox dengan id determinis
     patrolReportsSource,
     /enqueueOutboxMutation\(\{[\s\S]*?id: report\?\.clientEventId \|\| report\?\.client_event_id \|\| createClientEventId\(report\)[\s\S]*?type: 'patrol_report\.upsert'/,
     'kegagalan tulis (mis. offline) harus diantrekan ke outbox dengan id per-checkpoint',
+  );
+});
+
+test('submit patroli meminta notifikasi error di layar (notifyOnError)', () => {
+  assert.match(
+    runtimeSource,
+    /void syncPatrolReportToDomain\(submittedItem, \{ notifyOnError: true \}\);/,
+    'handleSubmitPatrol harus minta notifikasi bila laporan gagal/terblokir sampai ke server',
+  );
+});
+
+test('notifyPatrolSyncIssue memunculkan dialog untuk no-access dan blocked', () => {
+  const startIndex = runtimeSource.indexOf('const notifyPatrolSyncIssue = useCallback');
+  assert.notEqual(startIndex, -1, 'notifyPatrolSyncIssue harus ada');
+  const fn = runtimeSource.slice(startIndex, startIndex + 2600);
+  assert.match(fn, /syncStatus === 'no-access'[\s\S]*?setConfirmDialog\(/, 'tampilkan dialog saat akses cloud tidak aktif');
+  assert.match(fn, /syncStatus === 'blocked'[\s\S]*?setConfirmDialog\(/, 'tampilkan dialog saat server menolak (RLS/constraint)');
+  assert.match(fn, /status\.error[\s\S]*?\.hint/, 'sertakan message/hint error agar penyebab terlihat di layar');
+});
+
+test('savePatrolReport menandai syncError untuk penolakan server (bukan offline)', () => {
+  assert.match(
+    patrolReportsSource,
+    /const offline = \(typeof navigator[\s\S]*?syncError: offline \? null : \{[\s\S]*?code: error\?\.code/,
+    'gagal saat online (RLS dll) harus membawa syncError; offline tidak',
   );
 });
 

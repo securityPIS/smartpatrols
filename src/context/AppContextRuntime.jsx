@@ -4021,6 +4021,18 @@ function compactCheckpointRecordForCloudSync(record = {}) {
   };
 }
 
+// Petakan hasil savePatrolReport menjadi status sinkronisasi untuk umpan balik UI.
+// 'ok' = tertulis ke patrol_reports; 'offline' = diantrekan, akan dikirim saat online;
+// 'blocked' = server menolak (RLS/constraint/auth) sehingga laporan TIDAK akan terlihat
+// di device lain sampai akarnya diperbaiki.
+function toPatrolSyncStatus(result) {
+  if (!result || result.synced || result.unchanged) return { syncStatus: 'ok' };
+  if (result.offline) return { syncStatus: 'offline' };
+  if (result.syncError) return { syncStatus: 'blocked', error: result.syncError };
+  if (result.pendingOfflineSync) return { syncStatus: 'offline' };
+  return { syncStatus: 'ok' };
+}
+
 function createPatrolReportDomainRecord(checkpoint = {}, options = {}) {
   if (!checkpoint || typeof checkpoint !== 'object') return null;
 
@@ -5889,6 +5901,54 @@ export function AppProvider({ children }) {
       sosHistory: boundedStateSnapshot.sosHistory || [],
     });
   }, [prepareCloudPhotoUrl]);
+  // Tampilkan penyebab laporan tidak tersinkron langsung ke layar (penting di HP yang
+  // tak bisa buka Console). Hanya muncul untuk submit eksplisit (notifyOnError), bukan
+  // untuk re-sync latar belakang.
+  const notifyPatrolSyncIssue = useCallback((status) => {
+    if (!status || status.syncStatus === 'ok' || status.syncStatus === 'invalid') return;
+
+    if (status.syncStatus === 'sync-disabled') {
+      setConfirmDialog({
+        title: 'Sinkronisasi nonaktif',
+        message: 'Aplikasi tidak terhubung ke server. Laporan hanya tersimpan di perangkat ini dan TIDAK akan terlihat di device lain. Hubungi admin untuk memeriksa konfigurasi server.',
+        confirmText: 'MENGERTI',
+        isAlert: true,
+        onConfirm: () => {},
+      });
+      return;
+    }
+    if (status.syncStatus === 'no-access') {
+      setConfirmDialog({
+        title: 'Laporan belum terkirim ke server',
+        message: 'Laporan tersimpan di perangkat, tetapi BELUM terkirim ke server karena sesi/izin cloud tidak aktif. Pastikan akun sudah di-approve admin, lalu coba keluar dan masuk kembali. Selama ini laporan tidak akan terlihat di device lain.',
+        confirmText: 'MENGERTI',
+        isAlert: true,
+        onConfirm: () => {},
+      });
+      return;
+    }
+    if (status.syncStatus === 'offline') {
+      setConfirmDialog({
+        title: 'Sedang offline',
+        message: 'Laporan tersimpan dan akan otomatis dikirim ke server saat koneksi kembali online.',
+        confirmText: 'MENGERTI',
+        isAlert: true,
+        onConfirm: () => {},
+      });
+      return;
+    }
+    if (status.syncStatus === 'blocked') {
+      const error = status.error || {};
+      const detail = [error.message, error.hint, error.details].filter(Boolean).join(' — ');
+      setConfirmDialog({
+        title: 'Laporan GAGAL dikirim ke server',
+        message: `Server menolak menyimpan laporan, jadi laporan ini TIDAK akan terlihat di device lain.\n\nPenyebab: ${detail || 'tidak diketahui'}\n\nSering karena nama kapal yang ditugaskan ke akun Anda tidak sama persis dengan kapal patroli, atau akun belum di-approve admin. Laporan tetap diantrekan dan dicoba lagi otomatis.`,
+        confirmText: 'MENGERTI',
+        isAlert: true,
+        onConfirm: () => {},
+      });
+    }
+  }, []);
   const uploadPatrolReportDomainMedia = useCallback(async (checkpointReport, galleryPhotos = []) => (
     Promise.all([
       isLocalOnlyAssetUrl(checkpointReport.photoUrl)
@@ -5915,10 +5975,19 @@ export function AppProvider({ children }) {
     // di device pembuat dan tak pernah terlihat di device lain. Dengan tetap memanggil
     // savePatrolReport, tulisan yang gagal (offline) otomatis masuk outbox IndexedDB dan
     // ter-flush saat kembali online.
-    if (!isCloudSyncEnabled || !isCloudWriteEnabled || !hasOperationalCloudAccess) return null;
+    if (!isCloudSyncEnabled || !isCloudWriteEnabled) {
+      const status = { syncStatus: 'sync-disabled' };
+      if (options.notifyOnError) notifyPatrolSyncIssue(status);
+      return status;
+    }
+    if (!hasOperationalCloudAccess) {
+      const status = { syncStatus: 'no-access' };
+      if (options.notifyOnError) notifyPatrolSyncIssue(status);
+      return status;
+    }
 
     const checkpointReport = createPatrolReportDomainRecord(checkpoint);
-    if (!checkpointReport) return null;
+    if (!checkpointReport) return { syncStatus: 'invalid' };
 
     const reportKey = createPatrolReportMediaKey(checkpointReport);
     const galleryPhotos = ensureArray(checkpointReport.galleryPhotos);
@@ -5939,28 +6008,31 @@ export function AppProvider({ children }) {
       mediaStatus: hasLocalMedia ? 'uploading' : checkpointReport.mediaStatus,
     });
 
-    if (!pendingReport) return null;
+    if (!pendingReport) return { syncStatus: 'invalid' };
 
     const writeIfChanged = async (report) => {
       const serializedReport = serializeSharedStateSnapshot(report);
       if (!serializedReport || patrolReportDomainWriteCacheRef.current.get(reportKey) === serializedReport) {
-        return report;
+        return { synced: true, unchanged: true };
       }
 
-      await savePatrolReport(report, {
+      const result = await savePatrolReport(report, {
         clientUpdatedAt: Date.now(),
       });
       patrolReportDomainWriteCacheRef.current.set(reportKey, serializedReport);
-      return report;
+      return result;
     };
 
-    await writeIfChanged(pendingReport);
+    // Status laporan ditentukan oleh tulisan BARIS (pendingReport). Upload media menyusul.
+    const primaryResult = await writeIfChanged(pendingReport);
+    const primaryStatus = toPatrolSyncStatus(primaryResult);
+    if (options.notifyOnError) notifyPatrolSyncIssue(primaryStatus);
 
     // Saat offline, Storage tak terjangkau: lewati upload media. Baris laporan sudah
     // diantrekan ke outbox di atas (savePatrolReport), foto lokal tetap tersimpan di
     // patrolReportLocalMediaRef untuk diunggah ulang saat online.
     if (!hasLocalMedia || options.skipMediaUpload || isOffline || patrolReportDomainUploadInFlightRef.current.has(reportKey)) {
-      return pendingReport;
+      return primaryStatus;
     }
 
     patrolReportDomainUploadInFlightRef.current.add(reportKey);
@@ -5984,14 +6056,14 @@ export function AppProvider({ children }) {
         }
       }
 
-      return readyReport || pendingReport;
+      return primaryStatus;
     } catch (error) {
       console.error('Gagal sync domain laporan patroli', error);
-      return pendingReport;
+      return primaryStatus;
     } finally {
       patrolReportDomainUploadInFlightRef.current.delete(reportKey);
     }
-  }, [hasOperationalCloudAccess, isOffline, uploadPatrolReportDomainMedia]);
+  }, [hasOperationalCloudAccess, isOffline, notifyPatrolSyncIssue, uploadPatrolReportDomainMedia]);
   // Unggah ulang foto laporan patroli yang masih lokal (idb://) ke Storage saat online,
   // lalu tulis SEKALI ke patrol_reports dengan URL https. Dipakai untuk laporan yang
   // disubmit offline (fotonya belum sempat naik) — tanpa ini laporan muncul di device
@@ -7688,7 +7760,9 @@ export function AppProvider({ children }) {
       }
       // Signal dikirim SETELAH data tersimpan ke cloud (di write effect baris ~6932),
       // bukan di sini. Sebelumnya signal prematur menyebabkan Device B fetch data lama.
-      void syncPatrolReportToDomain(submittedItem);
+      // notifyOnError menampilkan ke layar bila laporan gagal/terblokir sampai ke server
+      // (RLS/izin/offline) — penting karena di HP Console tak bisa dibuka.
+      void syncPatrolReportToDomain(submittedItem, { notifyOnError: true });
       requestCloudSync('urgent');
     } finally {
       setSubmittingPatrolId(previousId => (previousId === id ? null : previousId));
