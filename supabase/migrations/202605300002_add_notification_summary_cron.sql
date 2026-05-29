@@ -186,7 +186,7 @@ begin
 
     -- Tambahkan ke baris summary admin
     v_admin_lines := v_admin_lines
-      || format('%s: %s/%s titik belum selesai', v_ship.name, v_pending_count, v_total_count);
+      || format('🚢 %s: %s titik belum dilaporkan', v_ship.name, v_pending_count);
 
     -- Kumpulkan PIC + Petugas aktif kapal ini
     select array_agg(p.id) into v_user_ids
@@ -208,9 +208,9 @@ begin
       p_user_ids   => v_user_ids,
       p_ship_name  => v_ship.name,
       p_type       => 'checkpoint_pending',
-      p_title      => 'Checkpoint belum tuntas',
+      p_title      => '⚠️ Checkpoint belum tuntas',
       p_body       => format(
-        'Masih ada %s dari %s titik patroli belum diisi di %s. Segera selesaikan sebelum shift berakhir.',
+        '⚠️ Masih ada %s dari %s titik patroli belum diisi di 🚢 %s. Segera selesaikan sebelum shift berakhir.',
         v_pending_count, v_total_count, v_ship.name
       ),
       p_route      => 'patrol/checkpoint',
@@ -225,7 +225,7 @@ begin
     and array_length(v_admin_lines, 1) > 0
   then
     v_admin_body := format(
-      'CHECKPOINT PENDING %s (%s) — 1 jam sebelum shift berakhir:%s%s',
+      '⚠️ Masih terdapat CHECKPOINT PENDING pada %s (%s) —%s%s',
       v_shift_label,
       v_time_range,
       E'\n',
@@ -238,7 +238,7 @@ begin
       p_user_ids   => v_admin_ids,
       p_ship_name  => null,
       p_type       => 'checkpoint_pending_summary',
-      p_title      => format('Checkpoint pending — %s %s', v_shift_label, v_time_range),
+      p_title      => format('⏳ Checkpoint pending — %s %s', v_shift_label, v_time_range),
       p_body       => v_admin_body,
       p_route      => 'history/list',
       p_shift_key  => v_shift_key,
@@ -350,7 +350,7 @@ begin
 
     -- Susun ringkasan per kapal
     v_admin_lines := v_admin_lines
-      || format('%s: %s Aman, %s Temuan, %s Missed (total %s)',
+      || format('🚢 %s: ✅ %s Aman, ⚠️ %s Temuan, ❌ %s Missed (total %s)',
                 v_ship.name, v_aman, v_temuan, v_missed, v_total);
 
     -- Notif untuk PIC kapal ini
@@ -363,12 +363,10 @@ begin
 
     if v_user_ids is not null and array_length(v_user_ids, 1) > 0 then
       v_pic_body := format(
-        'REKAP %s (%s) — %s%s%s Aman  |  %s Temuan  |  %s Missed%sDari total %s titik patroli.',
-        v_shift_label, v_time_range, v_ship.name,
+        '📋 Laporan Ringkasan Patroli %s (%s)%s🚢 %s: ✅ %s Aman, ⚠️ %s Temuan, ❌ %s Missed (total %s)',
+        v_shift_label, v_time_range,
         E'\n',
-        v_aman, v_temuan, v_missed,
-        E'\n',
-        v_total
+        v_ship.name, v_aman, v_temuan, v_missed, v_total
       );
       v_base_id := 'shift-wrapup:' || v_ship.name || ':' || v_shift_key;
 
@@ -377,7 +375,7 @@ begin
         p_user_ids   => v_user_ids,
         p_ship_name  => v_ship.name,
         p_type       => 'shift_wrap_up',
-        p_title      => format('Shift selesai — %s %s', v_shift_label, v_ship.name),
+        p_title      => format('📋 Shift selesai — %s %s', v_shift_label, v_ship.name),
         p_body       => v_pic_body,
         p_route      => 'history/list',
         p_shift_key  => v_shift_key,
@@ -392,7 +390,7 @@ begin
     and array_length(v_admin_lines, 1) > 0
   then
     v_admin_body := format(
-      'SHIFT WRAP-UP %s (%s)%s%s',
+      '📋 Laporan Ringkasan Patroli %s (%s)%s%s',
       v_shift_label,
       v_time_range,
       E'\n',
@@ -405,7 +403,7 @@ begin
       p_user_ids   => v_admin_ids,
       p_ship_name  => null,
       p_type       => 'shift_wrap_up',
-      p_title      => format('Shift Wrap-Up — %s %s', v_shift_label, v_time_range),
+      p_title      => format('📋 Shift Wrap-Up — %s %s', v_shift_label, v_time_range),
       p_body       => v_admin_body,
       p_route      => 'history/list',
       p_shift_key  => v_shift_key,
