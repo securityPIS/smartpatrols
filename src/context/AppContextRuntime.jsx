@@ -34,8 +34,11 @@ import {
 } from '../services/backend/auth';
 import {
   fetchCloudAppState,
+  getNotificationCloudBaseId,
   isCloudSyncEnabled,
   isCloudWriteEnabled,
+  markNotificationRecipientRead,
+  persistNotificationRecords,
   publishCloudSyncSignal,
   saveCloudAppState,
   subscribeToCloudAppState,
@@ -2945,6 +2948,7 @@ function normalizeNotificationRoute(notification = {}) {
   if (route === 'history' || route === 'history/list') return 'history/list';
   if (route === 'daily-report' && type === 'shift_wrap_up') return 'history/list';
   if (!route && type === 'checkpoint_pending') return 'patrol/checkpoint';
+  if (!route && type === 'checkpoint_pending_summary') return 'history/list';
   if (!route && type === 'shift_wrap_up') return 'history/list';
   if (!route && (type === 'incident_created' || type === 'incident_progress_updated')) return 'incidents/detail';
   return route || 'history/list';
@@ -2988,7 +2992,13 @@ function isShiftNotificationDebugEnabled() {
 }
 
 function isShiftNotificationType(type) {
-  return type === 'shift_started' || type === 'shift_ending_soon' || type === 'checkpoint_pending';
+  return (
+    type === 'shift_started'
+    || type === 'shift_ending_soon'
+    || type === 'checkpoint_pending'
+    || type === 'checkpoint_pending_summary'
+    || type === 'shift_wrap_up'
+  );
 }
 
 function logShiftNotificationDebug(event, payload) {
@@ -7434,6 +7444,22 @@ export function AppProvider({ children }) {
 
     const scheduledNotifications = [];
 
+    if (pendingCheckpoints > 0 && now >= checkpointPendingAt) {
+      scheduledNotifications.push({
+        type: 'checkpoint_pending',
+        title: 'Checkpoint belum tuntas',
+        message: `Masih ada ${pendingCheckpoints} titik patroli belum diisi di ${operationalShipName}. Segera selesaikan sebelum shift berakhir (±1 jam lagi).`,
+        senderName: 'Sistem',
+        senderRole: 'SYSTEM',
+        targetUserIds,
+        route: 'patrol/checkpoint',
+        shipName: operationalShipName,
+        shiftKey: currentShiftMeta.key,
+        dedupeKey: `checkpoint-pending:${operationalShipName}:${currentShiftMeta.key}`,
+        createdAt: checkpointPendingAt.toISOString(),
+      });
+    }
+
     if (now >= shiftEndingSoonAt) {
       scheduledNotifications.push({
         type: 'shift_ending_soon',
@@ -9999,6 +10025,42 @@ export function AppProvider({ children }) {
       console.error('Gagal memuat onboarding pending', error);
     });
   }, [hasOperationalCloudAccess, isAdmin]);
+  // Notif user management untuk admin: registrasi baru menunggu persetujuan.
+  // Run pertama hanya menyemai ref agar pending lama tidak menghasilkan notif retroaktif.
+  const previousPendingRegistrationsRef = useRef(null);
+  useEffect(() => {
+    const previousList = previousPendingRegistrationsRef.current;
+    previousPendingRegistrationsRef.current = pendingRegistrations;
+    if (!isAdmin || previousList === null) return;
+
+    const previousPendingUids = new Set(
+      ensureArray(previousList)
+        .filter((entry) => sanitizeText(entry?.status || 'pending', 30) === 'pending')
+        .map((entry) => entry?.uid)
+        .filter(Boolean),
+    );
+    const adminIds = getUsersByRole([ACCESS_ROLES.ADMIN]);
+    if (adminIds.length === 0) return;
+
+    const registrationNotifications = [];
+    ensureArray(pendingRegistrations).forEach((entry) => {
+      if (!entry?.uid) return;
+      if (sanitizeText(entry?.status || 'pending', 30) !== 'pending') return;
+      if (previousPendingUids.has(entry.uid)) return;
+      registrationNotifications.push({
+        type: 'registration_pending',
+        title: 'Registrasi baru menunggu persetujuan',
+        message: `${entry.name || 'Pengguna baru'} (${entry.email || '-'}) mendaftar dan menunggu persetujuan admin.`,
+        senderName: 'Sistem',
+        senderRole: 'SYSTEM',
+        targetUserIds: adminIds,
+        route: 'users/list',
+        dedupeKey: `registration-pending:${entry.uid}`,
+      });
+    });
+
+    if (registrationNotifications.length > 0) appendNotifications(registrationNotifications);
+  }, [appendNotifications, getUsersByRole, isAdmin, pendingRegistrations]);
   useEffect(() => {
     if (!sessionUserId) return;
     const activeUser = currentUserRecord || usersData.find(user => user.id === sessionUserId);
@@ -10073,22 +10135,74 @@ export function AppProvider({ children }) {
       if (previousUser.shipAssigned === user.shipAssigned && previousUser.status === user.status) return;
       if (!user.shipAssigned) return;
 
+      // Notif untuk PIC kapal: ada perubahan penugasan personel.
       assignmentNotifications.push({
         type: 'assignment_changed',
         title: 'Penugasan patroli diperbarui',
         message: `${user.name} sekarang ditugaskan ke ${user.shipAssigned}.`,
         senderName: 'Sistem',
         senderRole: 'SYSTEM',
-        targetUserIds: getShipRecipients(user.shipAssigned, { includePic: true, includeUserIds: [user.id] }),
+        targetUserIds: getShipRecipients(user.shipAssigned, { includePic: true }),
         route: 'patrol/info',
         shipName: user.shipAssigned,
         dedupeKey: `assignment-changed:${user.id}:${user.shipAssigned}:${user.status}`,
       });
+
+      // Notif "selamat bertugas" personal saat user dipindahkan/ditugaskan ke kapal baru.
+      if (previousUser.shipAssigned !== user.shipAssigned) {
+        assignmentNotifications.push({
+          type: 'welcome_to_ship',
+          title: 'Selamat bertugas',
+          message: `Anda telah ditugaskan ke ${user.shipAssigned}. Selamat bertugas dan tetap waspada!`,
+          senderName: 'Sistem',
+          senderRole: 'SYSTEM',
+          targetUserIds: [user.id],
+          route: 'patrol/info',
+          shipName: user.shipAssigned,
+          dedupeKey: `welcome-to-ship:${user.id}:${user.shipAssigned}`,
+        });
+      }
     });
 
     previousUsersDataRef.current = usersData;
     appendNotifications(assignmentNotifications);
   }, [appendNotifications, getShipRecipients, usersData]);
+
+  // Persistensi notifikasi ke cloud (fan-out per penerima). Efek ini menjaga agar
+  // notifikasi yang dibuat lokal benar-benar tersimpan di tabel notifications sehingga
+  // sampai ke device penerima lain, dan status baca milik user ini ikut tersinkron.
+  // Idempoten: insert pakai ignoreDuplicates, update read hanya untuk baris milik user.
+  const notificationSyncRef = useRef(new Map());
+  useEffect(() => {
+    if (!isCloudSyncEnabled || !isCloudWriteEnabled || isOffline || !hasOperationalCloudAccess) return;
+    const recordsToCreate = [];
+    const readBaseIds = [];
+    ensureArray(notifications).forEach((notification) => {
+      if (!notification?.id) return;
+      const targetUserIds = Array.isArray(notification.targetUserIds) ? notification.targetUserIds : [];
+      if (targetUserIds.length === 0) return;
+      const readByUserIds = Array.isArray(notification.readByUserIds) ? notification.readByUserIds : [];
+      const targetSig = targetUserIds.slice().sort().join(',');
+      const ownRead = Boolean(currentUserId && readByUserIds.includes(currentUserId));
+      const signature = `${targetSig}|${ownRead ? 1 : 0}`;
+      const previousSig = notificationSyncRef.current.get(notification.id);
+      if (previousSig === signature) return;
+      const previousTargetSig = previousSig ? previousSig.split('|')[0] : null;
+      if (previousTargetSig !== targetSig) recordsToCreate.push(notification);
+      if (ownRead) readBaseIds.push(getNotificationCloudBaseId(notification));
+      notificationSyncRef.current.set(notification.id, signature);
+    });
+    if (recordsToCreate.length > 0) {
+      persistNotificationRecords(recordsToCreate).catch((error) => {
+        console.warn('Gagal menyimpan notifikasi ke cloud', error);
+      });
+    }
+    if (readBaseIds.length > 0 && currentUserId) {
+      markNotificationRecipientRead(readBaseIds, currentUserId).catch((error) => {
+        console.warn('Gagal menandai notifikasi dibaca di cloud', error);
+      });
+    }
+  }, [currentUserId, hasOperationalCloudAccess, isOffline, notifications]);
 
   // Weather
   useEffect(() => {

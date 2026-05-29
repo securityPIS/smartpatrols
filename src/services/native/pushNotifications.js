@@ -1,11 +1,90 @@
 /*
-Tujuan: Menyediakan adapter no-op untuk notifikasi native pada versi SQL tanpa Firebase/FCM.
-Caller: AppContextRuntime setelah user operasional berhasil login.
-Dependensi: Tidak ada; Supabase Realtime in-app menangani notifikasi saat aplikasi aktif.
-Main Functions: Mengembalikan cleanup kosong agar flow runtime tetap kompatibel.
-Side Effects: Tidak meminta izin push, tidak mendaftarkan token, dan tidak membuka service background.
+Tujuan: Web push notification berbasis FCM untuk browser/PWA (tanpa Capacitor/Android).
+Caller: AppContextRuntime setelah user operasional berhasil login (effect setupNativePushNotifications).
+Dependensi: Firebase JS SDK (app + messaging), service worker /firebase-messaging-sw.js,
+            VITE_FIREBASE_* & VITE_FCM_VAPID_KEY, tabel push_subscriptions via Supabase.
+Main Functions: Minta izin notifikasi, daftarkan SW, ambil FCM token, simpan ke push_subscriptions,
+                dengarkan pesan foreground; teardown: lepas listener & hapus token.
+Side Effects: Registrasi service worker, prompt izin notifikasi, tulis/hapus push_subscriptions.
 */
 
-export async function setupNativePushNotifications() {
-  return () => {};
+import { initializeApp, getApps } from 'firebase/app';
+import { getMessaging, getToken, isSupported, onMessage } from 'firebase/messaging';
+import { removePushSubscription, upsertPushSubscription } from '../backend/pushSubscriptions';
+
+// Catatan foreground: saat tab aktif, FCM tidak menampilkan notifikasi sistem dan memanggil
+// onMessage. Kita SENGAJA tidak menambahkan notifikasi ke inbox di sini karena Supabase
+// Realtime (subscribe tabel notifications) sudah mengirim baris yang sama; menambah lagi
+// akan terhitung sebagai notifikasi baru dan ter-persist ulang (duplikat). Web push berperan
+// utama saat tab/app TIDAK aktif — itu ditangani service worker di background.
+
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || '',
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || '',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || '',
+};
+const VAPID_KEY = import.meta.env.VITE_FCM_VAPID_KEY || '';
+
+const NOOP = () => {};
+
+function isPushConfigured() {
+  return Boolean(firebaseConfig.apiKey && firebaseConfig.messagingSenderId && firebaseConfig.appId && VAPID_KEY);
+}
+
+function getFirebaseApp() {
+  return getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+}
+
+export async function setupNativePushNotifications(profile, handlers = {}) {
+  try {
+    if (typeof window === 'undefined') return NOOP;
+    if (!('serviceWorker' in navigator) || !('Notification' in window) || !('PushManager' in window)) {
+      return NOOP;
+    }
+    if (!isPushConfigured()) return NOOP;
+
+    const userId = profile?.legacyUserId || '';
+    if (!userId) return NOOP;
+
+    if (!(await isSupported().catch(() => false))) return NOOP;
+
+    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' });
+
+    let permission = Notification.permission;
+    if (permission === 'default') {
+      permission = await Notification.requestPermission();
+    }
+    if (permission !== 'granted') return NOOP;
+
+    const messaging = getMessaging(getFirebaseApp());
+    const token = await getToken(messaging, {
+      vapidKey: VAPID_KEY,
+      serviceWorkerRegistration: registration,
+    }).catch((error) => {
+      console.warn('Gagal mengambil FCM token', error);
+      return '';
+    });
+
+    if (token) {
+      await upsertPushSubscription({ userId, token, userAgent: navigator.userAgent }).catch((error) => {
+        console.warn('Gagal menyimpan langganan push', error);
+      });
+    }
+
+    // Subscribe foreground hanya untuk mencegah warning SDK & membuka peluang debug.
+    // Tidak menambah ke inbox (lihat catatan di atas) — Realtime yang menangani.
+    const unsubscribeForeground = onMessage(messaging, () => { /* in-app via Realtime */ });
+
+    return () => {
+      try { unsubscribeForeground?.(); } catch { /* abaikan */ }
+      // Hapus token saat user berganti/logout agar device tidak menerima push milik akun lama.
+      if (token) void removePushSubscription(token).catch(() => {});
+    };
+  } catch (error) {
+    console.error('Setup web push (FCM) gagal', error);
+    return NOOP;
+  }
 }
