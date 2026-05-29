@@ -320,3 +320,5 @@ Perbaikan (seamless, tanpa reload):
 Konsisten dengan prinsip: sesi/akses operasional hanya berubah karena jawaban DEFINITIF
 server, bukan kegagalan jaringan transien. Regresi dijaga `tests/security/auth-access.test.mjs`
 ("resolusi akses sembuh sendiri setelah reconnect").
+
+**Status: TERVERIFIKASI di device (2026-05-29). Checkpoint kembali otomatis tanpa refresh manual.**
