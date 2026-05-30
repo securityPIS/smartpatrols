@@ -54,16 +54,16 @@ test('sync reset patrol report hanya boleh lewat jalur eksplisit', () => {
   );
 });
 
-test('delete patrol report memakai shift_key otoritatif dari DB dan tidak menyisakan referensi rows lama', () => {
+test('delete patrol report memakai RPC server-side atomic (bukan SELECT+DELETE client)', () => {
   assert.match(
     patrolReportsSource,
-    /const authoritativeRow = firestoreRow \|\| naturalRowMatchingClientShift \|\| \(hasNaturalKey \? foundRows\[0\] : null\);/,
-    'delete harus memilih shift_key dari baris DB yang ditemukan, bukan hanya dari client',
+    /supabase\.rpc\('admin_delete_patrol_report_findings'/,
+    'delete harus memanggil RPC server-side agar shift_key + tombstone konsisten dari DB',
   );
   assert.doesNotMatch(
     patrolReportsSource,
-    /baris ditemukan di patrol_reports \(SELECT\)|\(rows \|\| \[\]\)\.length/,
-    'blok diagnostik lama yang mereferensikan rows undefined harus sudah hilang',
+    /baris ditemukan di patrol_reports \(SELECT\)/,
+    'jalur SELECT+DELETE manual lama tidak boleh dipakai lagi',
   );
 });
 
