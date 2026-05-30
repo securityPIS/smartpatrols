@@ -173,135 +173,63 @@ export async function savePatrolReport(report, options = {}) {
 const PATROL_REPORT_TOMBSTONES_TABLE = 'patrol_report_tombstones';
 
 // Hapus permanen temuan/laporan patroli + tombstone agar tidak dihidupkan kembali
-// oleh re-upsert idempotent dari device lain (lihat migration 202605300007/202605300008).
+// oleh re-upsert idempotent dari device lain (lihat migration 202605300007/008/012/013).
 //
-// AKAR MASALAH "temuan dihapus admin balik lagi": versi lama menyaring SELECT & DELETE
-// dengan shift_key yang DIBAWA incident (client). shift_key itu bisa kosong/basi, sedangkan
-// baris DB memakai shift_key shift ASAL temuan (mis. '2026-05-27|shift-2-active'). Saat
-// keduanya beda, .eq('shift_key', ...) menghasilkan 0 baris -> DELETE tidak menghapus apa
-// pun -> temuan muncul lagi setiap hydrate. Tombstone pun tertulis dengan shift_key salah
-// sehingga trigger tidak memblokir re-upsert.
-//
-// Perbaikan: JANGAN percaya shift_key dari client. Cari baris lewat firestoreId dan/atau
-// (ship_id+checkpoint_id) TANPA filter shift_key, ambil shift_key ASLI dari baris DB,
-// lalu tombstone + DELETE memakai shift_key asli itu.
-async function performPatrolReportDelete({ firestoreId, checkpointId, shiftKey, shipId, shipName } = {}) {
+// PENDEKATAN: panggil RPC server-side `admin_delete_patrol_report_findings`. RPC ini
+// SECURITY DEFINER dan atomic (satu transaksi): membaca shift_key & client_event_id ASLI
+// dari DB, menulis tombstone yang konsisten, lalu DELETE baris. Client cukup mengirim
+// (shipId, checkpointId) atau firestoreId — TIDAK perlu shiftKey (yang sering basi/salah
+// dari incident object). Foto Storage dihapus terpisah karena pg function tidak punya
+// akses ke Storage.
+async function performPatrolReportDelete({ firestoreId, checkpointId, shipId } = {}) {
   const supabase = ensureSupabaseClient();
   const hasNaturalKey = Boolean(shipId && checkpointId);
 
   if (!firestoreId && !hasNaturalKey) return;
 
-  const selectColumns = 'id, client_event_id, shift_key, ship_id, checkpoint_id, ship_name, photo_url';
-  const foundRows = [];
-  const seenIds = new Set();
-  const collectRows = (rows) => (rows || []).forEach((row) => {
-    if (row?.id != null && !seenIds.has(row.id)) { seenIds.add(row.id); foundRows.push(row); }
+  // 1) Kumpulkan foto yang akan dihapus dari Storage (sebelum baris terhapus).
+  const photoUrls = [];
+  const collectPhotos = (rows) => (rows || []).forEach((r) => {
+    if (r?.photo_url) photoUrls.push(r.photo_url);
   });
-
-  // Cari tanpa filter shift_key agar shift_key ASLI dari DB bisa dipakai.
   if (hasNaturalKey) {
     const { data, error } = await supabase
-      .from(PATROL_REPORTS_TABLE).select(selectColumns)
-      .eq('ship_id', shipId).eq('checkpoint_id', checkpointId)
-      .order('updated_at', { ascending: false });
+      .from(PATROL_REPORTS_TABLE)
+      .select('photo_url')
+      .eq('ship_id', shipId)
+      .eq('checkpoint_id', checkpointId);
     if (error) throw error;
-    collectRows(data);
+    collectPhotos(data);
   }
   if (firestoreId) {
     const { data, error } = await supabase
-      .from(PATROL_REPORTS_TABLE).select(selectColumns).eq('id', firestoreId);
+      .from(PATROL_REPORTS_TABLE)
+      .select('photo_url')
+      .eq('id', firestoreId);
     if (error) throw error;
-    collectRows(data);
+    collectPhotos(data);
   }
 
-  // shift_key otoritatif: ambil dari baris DB (bukan dari client).
-  const firestoreRow = firestoreId ? foundRows.find((r) => String(r.id) === String(firestoreId)) : null;
-  const naturalRowMatchingClientShift = shiftKey
-    ? foundRows.find((r) => String(r.shift_key || '') === String(shiftKey))
-    : null;
-  const authoritativeRow = firestoreRow || naturalRowMatchingClientShift || (hasNaturalKey ? foundRows[0] : null);
-  const targetShiftKey = authoritativeRow?.shift_key ?? shiftKey ?? null;
-
-  // Baris yang akan dihapus: cocok firestoreId ATAU (natural-key + shift target).
-  const rowsToDelete = foundRows.filter((row) => {
-    if (firestoreId && String(row.id) === String(firestoreId)) return true;
-    if (!hasNaturalKey) return false;
-    if (String(row.ship_id) !== String(shipId) || String(row.checkpoint_id) !== String(checkpointId)) return false;
-    return targetShiftKey == null || (row.shift_key ?? null) === targetShiftKey;
+  // 2) Panggil RPC atomic: SELECT shift_key asli + tombstone + DELETE dalam satu transaksi.
+  //    RPC SECURITY DEFINER bypass RLS, jadi tidak ada masalah "is_admin() false" diam-diam.
+  //    Cek admin tetap dijalankan di dalam function via is_admin().
+  const { data, error } = await supabase.rpc('admin_delete_patrol_report_findings', {
+    p_ship_id: shipId || null,
+    p_checkpoint_id: checkpointId || null,
+    p_firestore_id: firestoreId || null,
   });
 
-  const resolvedShipName = shipName
-    || rowsToDelete.find((r) => r.ship_name)?.ship_name
-    || foundRows.find((r) => r.ship_name)?.ship_name
-    || null;
-
-  // Tombstone memakai shift_key ASLI dari DB agar trigger mencocokkan natural key.
-  const tombstoneMap = new Map();
-  const addTombstone = (entry) => { if (entry.client_event_id) tombstoneMap.set(entry.client_event_id, entry); };
-  rowsToDelete.forEach((row) => {
-    addTombstone({
-      client_event_id: row.client_event_id
-        || createClientEventId({ shiftKey: row.shift_key, shipId: row.ship_id, checkpointId: row.checkpoint_id }),
-      shift_key: row.shift_key ?? null,
-      ship_id: row.ship_id ?? null,
-      checkpoint_id: row.checkpoint_id ?? null,
-      ship_name: row.ship_name || resolvedShipName,
-    });
-  });
-  // Tombstone anti-resurrection: natural-key + shift_key asli, walau SELECT meleset.
-  if (hasNaturalKey) {
-    addTombstone({
-      client_event_id: createClientEventId({ shiftKey: targetShiftKey, shipId, checkpointId }),
-      shift_key: targetShiftKey,
-      ship_id: shipId,
-      checkpoint_id: checkpointId,
-      ship_name: resolvedShipName,
-    });
+  if (error) {
+    console.error('[hapus-temuan] RPC gagal:', error);
+    throw error;
   }
 
-  console.info('[hapus-temuan] kriteria', { firestoreId, checkpointId, shiftKey, shipId, hasNaturalKey });
-  console.info('[hapus-temuan] baris ditemukan (tanpa filter shift):', foundRows.length, foundRows);
-  console.info('[hapus-temuan] shift_key target (dari DB):', targetShiftKey, '| baris dihapus:', rowsToDelete.length);
+  const result = Array.isArray(data) ? data[0] : data;
+  console.info('[hapus-temuan] RPC result:', result);
 
-  if (tombstoneMap.size > 0) {
-    const { data: tombstoneData, error: tombstoneError } = await supabase
-      .from(PATROL_REPORT_TOMBSTONES_TABLE)
-      .upsert(Array.from(tombstoneMap.values()), { onConflict: 'client_event_id' })
-      .select();
-    if (tombstoneError) {
-      console.error('[hapus-temuan] GAGAL tulis tombstone:', tombstoneError);
-      throw tombstoneError;
-    }
-    console.info('[hapus-temuan] tombstone tertulis:', (tombstoneData || []).length, tombstoneData);
-  } else {
-    console.warn('[hapus-temuan] TIDAK ada tombstone ditulis.');
-  }
-
-  for (const row of rowsToDelete) {
-    if (row.photo_url) await deleteStorageAsset(row.photo_url);
-  }
-
-  let totalDeleted = 0;
-  if (rowsToDelete.length > 0) {
-    const { data: deletedById, error: errById } = await supabase
-      .from(PATROL_REPORTS_TABLE).delete()
-      .in('id', rowsToDelete.map((r) => r.id)).select();
-    if (errById) { console.error('[hapus-temuan] GAGAL delete (by id):', errById); throw errById; }
-    totalDeleted += (deletedById || []).length;
-  }
-  // Tangkap baris yang disisipkan ulang setelah SELECT (race condition lintas-device).
-  if (hasNaturalKey) {
-    let q = supabase.from(PATROL_REPORTS_TABLE).delete()
-      .eq('ship_id', shipId).eq('checkpoint_id', checkpointId);
-    if (targetShiftKey != null) q = q.eq('shift_key', targetShiftKey);
-    const { data: deletedByKey, error: errByKey } = await q.select();
-    if (errByKey) { console.error('[hapus-temuan] GAGAL delete (natural key):', errByKey); throw errByKey; }
-    totalDeleted += (deletedByKey || []).length;
-  }
-
-  console.info('[hapus-temuan] TOTAL baris terhapus:', totalDeleted);
-  if (totalDeleted === 0 && foundRows.length > 0) {
-    console.warn('[hapus-temuan] 0 terhapus padahal baris ditemukan — RLS is_admin() mungkin menolak DELETE. Periksa profil admin.');
+  // 3) Hapus foto Storage (best effort). Gagal hapus foto tidak boleh membatalkan delete.
+  for (const url of photoUrls) {
+    try { await deleteStorageAsset(url); } catch (e) { console.warn('[hapus-temuan] gagal hapus foto', url, e); }
   }
 }
 
