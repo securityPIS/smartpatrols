@@ -2105,6 +2105,24 @@ function isCheckpointResetRecord(checkpoint) {
     && ['manual-reset', 'shift-reset'].includes(getCheckpointPendingOrigin(checkpoint));
 }
 
+function shouldApplyPatrolReportTombstoneToCheckpoint(checkpoint, tombstone) {
+  if (!checkpoint || checkpoint.status !== 'completed') return false;
+
+  const tombstoneShiftKey = String(tombstone?.shiftKey || '');
+  const checkpointShiftKey = String(checkpoint?.shiftKey || '');
+  if (!tombstoneShiftKey || checkpointShiftKey === tombstoneShiftKey) return true;
+
+  // Device lama bisa memegang temuan yang sama dengan shift_key aktif berbeda. Reset hanya
+  // bila timestamp patrol lebih lama dari waktu hapus admin, supaya temuan baru tidak ikut hilang.
+  if (checkpoint?.resultType !== 'temuan') return false;
+  const deletedAtMs = new Date(tombstone?.deletedAt || '').getTime();
+  const checkpointAtMs = getCheckpointMediaTimestamp(checkpoint);
+  return Number.isFinite(deletedAtMs)
+    && Number.isFinite(checkpointAtMs)
+    && checkpointAtMs > 0
+    && checkpointAtMs <= deletedAtMs;
+}
+
 function isSameCheckpointMediaRevision(leftCheckpoint, rightCheckpoint) {
   if (!leftCheckpoint || !rightCheckpoint) return false;
 
@@ -6030,6 +6048,9 @@ export function AppProvider({ children }) {
       if (options.notifyOnError) notifyPatrolSyncIssue(status);
       return status;
     }
+    if (isCheckpointResetRecord(checkpoint) && !options.allowResetSync) {
+      return { syncStatus: 'reset-skipped' };
+    }
 
     const checkpointReport = createPatrolReportDomainRecord(checkpoint);
     if (!checkpointReport) return { syncStatus: 'invalid' };
@@ -6586,11 +6607,7 @@ export function AppProvider({ children }) {
             || String(checkpoint?.checkpointId || '') === String(checkpointId);
           if (!matchesCheckpoint) return checkpoint;
           // Hanya reset bila benar-benar temuan/laporan yang masih hidup secara lokal.
-          if (checkpoint?.status !== 'completed') return checkpoint;
-          // Bila tombstone punya shiftKey, jangan sentuh checkpoint dari shift berbeda.
-          if (tombstone.shiftKey && String(checkpoint?.shiftKey || '') !== String(tombstone.shiftKey)) {
-            return checkpoint;
-          }
+          if (!shouldApplyPatrolReportTombstoneToCheckpoint(checkpoint, tombstone)) return checkpoint;
           shipChanged = true;
           return resetCheckpointForShift(checkpoint, {
             shiftKey: checkpoint?.shiftKey || tombstone.shiftKey || null,
@@ -7914,6 +7931,7 @@ export function AppProvider({ children }) {
         )));
         if (resetReport) {
           void syncPatrolReportToDomain(resetReport, {
+            allowResetSync: true,
             skipMediaUpload: true,
           });
         }
@@ -9621,7 +9639,6 @@ export function AppProvider({ children }) {
         ensureArray(checkpointsByShip?.[target.shipId])
           .filter((checkpoint) => (
             checkpoint?.status === 'completed'
-            || getCheckpointPendingOrigin(checkpoint) === 'manual-reset'
           ))
           .forEach((checkpoint) => {
             void syncPatrolReportToDomain(checkpoint);

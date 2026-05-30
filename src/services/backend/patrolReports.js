@@ -202,7 +202,8 @@ async function performPatrolReportDelete({ firestoreId, checkpointId, shiftKey, 
   if (hasNaturalKey) {
     const { data, error } = await supabase
       .from(PATROL_REPORTS_TABLE).select(selectColumns)
-      .eq('ship_id', shipId).eq('checkpoint_id', checkpointId);
+      .eq('ship_id', shipId).eq('checkpoint_id', checkpointId)
+      .order('updated_at', { ascending: false });
     if (error) throw error;
     collectRows(data);
   }
@@ -215,7 +216,11 @@ async function performPatrolReportDelete({ firestoreId, checkpointId, shiftKey, 
 
   // shift_key otoritatif: ambil dari baris DB (bukan dari client).
   const firestoreRow = firestoreId ? foundRows.find((r) => String(r.id) === String(firestoreId)) : null;
-  const targetShiftKey = firestoreRow?.shift_key ?? shiftKey ?? null;
+  const naturalRowMatchingClientShift = shiftKey
+    ? foundRows.find((r) => String(r.shift_key || '') === String(shiftKey))
+    : null;
+  const authoritativeRow = firestoreRow || naturalRowMatchingClientShift || (hasNaturalKey ? foundRows[0] : null);
+  const targetShiftKey = authoritativeRow?.shift_key ?? shiftKey ?? null;
 
   // Baris yang akan dihapus: cocok firestoreId ATAU (natural-key + shift target).
   const rowsToDelete = foundRows.filter((row) => {
@@ -257,11 +262,6 @@ async function performPatrolReportDelete({ firestoreId, checkpointId, shiftKey, 
   console.info('[hapus-temuan] kriteria', { firestoreId, checkpointId, shiftKey, shipId, hasNaturalKey });
   console.info('[hapus-temuan] baris ditemukan (tanpa filter shift):', foundRows.length, foundRows);
   console.info('[hapus-temuan] shift_key target (dari DB):', targetShiftKey, '| baris dihapus:', rowsToDelete.length);
-
-  // [DIAGNOSTIK] Lihat console saat menghapus untuk mengetahui di lapisan mana penghapusan
-  // gagal. Hapus blok log ini setelah akar masalah ditemukan.
-  console.info('[hapus-temuan] kriteria', { firestoreId, checkpointId, shiftKey, shipId, shipName, hasNaturalKey });
-  console.info('[hapus-temuan] baris ditemukan di patrol_reports (SELECT):', (rows || []).length, rows);
 
   if (tombstoneMap.size > 0) {
     const { data: tombstoneData, error: tombstoneError } = await supabase
@@ -344,7 +344,7 @@ export function subscribeToPatrolReportTombstones(callback, onError) {
   const fetchRows = async () => {
     const { data, error } = await supabase
       .from(PATROL_REPORT_TOMBSTONES_TABLE)
-      .select('client_event_id, shift_key, ship_id, checkpoint_id, ship_name')
+      .select('client_event_id, shift_key, ship_id, checkpoint_id, ship_name, deleted_at')
       .order('deleted_at', { ascending: false })
       .limit(500);
     if (error) throw error;
@@ -355,6 +355,7 @@ export function subscribeToPatrolReportTombstones(callback, onError) {
         shipId: row.ship_id || null,
         checkpointId: row.checkpoint_id || null,
         shipName: row.ship_name || null,
+        deletedAt: row.deleted_at || null,
       })));
     }
   };

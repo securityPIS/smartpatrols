@@ -257,6 +257,32 @@ Perbaikan:
 Catatan: baris laporan (status/resultType/penyebab/kejadian/tindakLanjut + hitungan aman/temuan)
 tersinkron lintas-device walau disubmit offline.
 
+### Penghapusan Temuan Patroli Anti-Resurrection
+
+Gejala: admin menghapus temuan patroli, tetapi temuan muncul kembali setelah hydrate/realtime
+karena device lain masih menyimpan checkpoint `completed` secara lokal dan menulis ulang
+`patrol_reports`.
+
+Alur perbaikan:
+
+1. `handleDeleteIncident` untuk `incident.isPatrol` mereset checkpoint lokal admin dan memanggil
+   `deletePatrolReport`.
+2. `deletePatrolReport` menghapus baris `patrol_reports` dan menulis
+   `patrol_report_tombstones` dengan `shift_key`, `ship_id`, `checkpoint_id`, `ship_name`.
+3. Trigger `block_tombstoned_patrol_report` menolak re-upsert berdasarkan `client_event_id`,
+   natural key, serta temuan stale dengan checkpoint sama walau `shift_key` device berbeda
+   bila timestamp patrol lebih lama dari `deleted_at` tombstone.
+4. Listener `subscribeToPatrolReportTombstones` membaca `deleted_at`; client mereset temuan
+   lokal yang cocok, termasuk stale beda shift yang terjadi sebelum waktu hapus admin.
+5. Background sync hanya mengirim checkpoint `completed`; reset `manual-reset` tidak otomatis
+   ditulis ulang. Reset pending hanya boleh lewat jalur eksplisit `allowResetSync`.
+
+File kunci: `src/context/AppContextRuntime.jsx`, `src/services/backend/patrolReports.js`,
+`supabase/migrations/202605300007_patrol_report_tombstones.sql` sampai
+`supabase/migrations/202605300012_block_stale_tombstoned_finding_reupsert.sql`.
+
+Regresi dijaga `tests/pages/patrol-report-delete-tombstone.test.mjs`.
+
 Foto laporan offline: `healPatrolReportMedia` + efeknya (`AppContextRuntime.jsx`) menaikkan foto
 checkpoint kapal operasional yang masih lokal (`idb://`) ke Storage saat online, lalu menulis
 SEKALI ke `patrol_reports` dengan URL `https` (tanpa strip-null lebih dulu, jadi tak ada jendela
