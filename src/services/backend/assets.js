@@ -146,11 +146,20 @@ export async function deleteStorageAsset(photoUrl) {
   const objectPath = match[2];
 
   const supabase = ensureSupabaseClient();
-  await supabase.storage.from(bucket).remove([objectPath]).catch(() => {});
-  await supabase.from('media_assets').delete()
-    .eq('bucket', bucket)
-    .eq('object_path', objectPath)
-    .catch(() => {});
+  try {
+    await supabase.storage.from(bucket).remove([objectPath]);
+  } catch (error) {
+    // Best-effort: foto mungkin sudah terhapus atau tidak ada izin RLS pada storage.
+    // Jangan gagalkan caller karena hapus DB-nya prioritas.
+  }
+  try {
+    // PostgrestFilterBuilder dieksekusi saat di-await; tidak punya .catch() sendiri.
+    await supabase.from('media_assets').delete()
+      .eq('bucket', bucket)
+      .eq('object_path', objectPath);
+  } catch (error) {
+    // Best-effort: record media_assets mungkin tidak ada atau RLS menolak.
+  }
 }
 
 export { OPERATIONAL_BUCKET, REGISTRATION_BUCKET };
