@@ -49,6 +49,18 @@ jobs:
       - name: Link ke project Supabase
         run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
 
+      - name: Rekonsiliasi migrasi yang sudah di-revert (migration repair)
+        # Migrasi 202605310001 (shift_status_sync #30) & 20260531113613 (purge_tombstoned_*)
+        # sempat ter-push ke prod lalu DI-REVERT dari repo. Remote schema_migrations masih
+        # mencatat keduanya sehingga `supabase db push` berhenti: "Remote migration versions
+        # not found in local migrations directory". Tandai REVERTED agar history konsisten
+        # (hanya mengubah tabel pelacak; objek DDL sisa tak diutak-atik & sudah dinetralkan
+        # oleh migrasi 20260531120000). Idempotent: bila sudah direkonsiliasi langkah ini
+        # no-op. continue-on-error agar tak menggagalkan deploy bila tak ada yang perlu
+        # diperbaiki — `db push` di bawah tetap gerbang error sebenarnya.
+        continue-on-error: true
+        run: supabase migration repair --status reverted 202605310001 20260531113613
+
       - name: Push database migrations
         run: supabase db push
 
