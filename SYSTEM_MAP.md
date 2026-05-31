@@ -352,15 +352,25 @@ BARU > `deleted_at` SELALU lolos**, cermin guard klien beda-shift):
 Regresi dijaga `tests/pages/patrol-report-tombstone-block-stale-only.test.mjs`.
 
 > ⚠️ TINDAKAN OPERASIONAL (produksi):
-> 1. Jalankan `supabase db push` agar migrasi `20260531120000` ter-apply (memperbaiki trigger
->    & men-drop trigger purge liar). Tombstone lama tidak perlu dibersihkan — guard waktu baru
->    otomatis meloloskan laporan baru.
+> 1. Jalankan workflow **Deploy Supabase** (`.github/workflows/deploy-supabase.yml`,
+>    Actions → Run workflow). Langkah "Push database migrations" = `supabase db push`
+>    akan meng-apply migrasi `20260531120000` (perbaiki trigger + drop trigger purge liar).
+>    `db push` bersifat MAJU saja — tidak menjalankan ulang migrasi lama. Jalankan dari ref
+>    yang memuat migrasi ini (branch fix atau main setelah merge). Tombstone lama tak perlu
+>    dibersihkan — guard waktu baru otomatis meloloskan laporan baru.
 > 2. HAZARD `202605300011_cleanup_stale_temuan.sql`: berisi `delete from patrol_reports where
->    result_type='temuan'` TANPA guard — `supabase db reset` akan menghapus SEMUA temuan lagi.
->    Jangan jalankan `db reset` di prod.
-> 3. Cek versi migrasi `202605300013`: pernah ada DUA file ber-prefix sama (`_admin_delete_patrol_rpc`
->    & `_purge_*` yang di-revert). Pastikan RPC `admin_delete_patrol_report_findings` benar-benar
->    ada di prod (`select proname from pg_proc where proname='admin_delete_patrol_report_findings'`).
+>    result_type='temuan'` TANPA guard. `db push` TIDAK menjalankannya ulang (sudah ter-apply),
+>    jadi workflow aman. Tapi `supabase db reset` me-run ULANG semua migrasi dari nol →
+>    menghapus SEMUA temuan lagi. JANGAN `db reset` di prod, dan jangan tambah langkah reset
+>    di workflow.
+> 3. Migrasi purge `20260531113613_purge_tombstoned_patrol_finding_surfaces.sql` sudah
+>    di-revert dari repo. Bila SEMPAT ter-`db push` ke prod sebelum revert, versinya masih
+>    tercatat di `supabase_migrations.schema_migrations` tapi filenya tak ada lokal → `db push`
+>    bisa mengeluh "remote migration not found locally". Bila workflow gagal karena ini, jalankan
+>    sekali: `supabase migration repair --status reverted 20260531113613`, lalu push ulang.
+>    (Trigger purge-nya sendiri tetap dinetralkan oleh `drop ... if exists` di migrasi fix.)
+> 4. Opsional sanity-check RPC delete ada di prod (bukan soal versi, hanya verifikasi):
+>    `select proname from pg_proc where proname='admin_delete_patrol_report_findings';`
 
 ## Checkpoint Hilang Saat Back Online (bug fix)
 
