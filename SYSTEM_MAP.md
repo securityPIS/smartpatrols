@@ -274,21 +274,12 @@ Alur perbaikan:
    bila timestamp patrol lebih lama dari `deleted_at` tombstone.
 4. Listener `subscribeToPatrolReportTombstones` membaca `deleted_at`; client mereset temuan
    lokal yang cocok, termasuk stale beda shift yang terjadi sebelum waktu hapus admin.
-   Tombstone juga membersihkan `incidentsData`, `incidentMeta`, `selectedIncident`, dan
-   `historyEntries`, karena halaman Temuan dibentuk dari gabungan beberapa sumber UI.
-5. Migration `20260531113613_purge_tombstoned_patrol_finding_surfaces.sql` menambah
-   `incident_id` + `checkpoint_name` di tombstone, mengganti RPC delete agar mengisi kedua
-   field, lalu trigger DB menghapus baris `incidents` patrol serta membersihkan checkpoint
-   temuan dari `shift_history_entries` server-side. Ini mencegah refresh device user
-   mengambil temuan lama dari domain sekunder/history snapshot setelah `patrol_reports`
-   sudah kosong.
-6. Background sync hanya mengirim checkpoint `completed`; reset `manual-reset` tidak otomatis
+5. Background sync hanya mengirim checkpoint `completed`; reset `manual-reset` tidak otomatis
    ditulis ulang. Reset pending hanya boleh lewat jalur eksplisit `allowResetSync`.
 
 File kunci: `src/context/AppContextRuntime.jsx`, `src/services/backend/patrolReports.js`,
 `supabase/migrations/202605300007_patrol_report_tombstones.sql` sampai
-`supabase/migrations/202605300014_block_finding_reupsert_time_window.sql`, dan
-`supabase/migrations/20260531113613_purge_tombstoned_patrol_finding_surfaces.sql`.
+`supabase/migrations/202605300012_block_stale_tombstoned_finding_reupsert.sql`.
 
 Regresi dijaga `tests/pages/patrol-report-delete-tombstone.test.mjs`.
 
