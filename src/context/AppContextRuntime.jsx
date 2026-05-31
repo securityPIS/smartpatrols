@@ -2113,10 +2113,14 @@ function shouldApplyPatrolReportTombstoneToCheckpoint(checkpoint, tombstone) {
 
   const tombstoneShiftKey = String(tombstone?.shiftKey || '');
   const checkpointShiftKey = String(checkpoint?.shiftKey || '');
-  if (!tombstoneShiftKey || checkpointShiftKey === tombstoneShiftKey) return true;
+  // Tombstone dengan shift_key sama persis = penghapusan untuk shift yang sama -> reset.
+  if (tombstoneShiftKey && checkpointShiftKey === tombstoneShiftKey) return true;
 
-  // Device lama bisa memegang temuan yang sama dengan shift_key aktif berbeda. Reset hanya
-  // bila timestamp patrol lebih lama dari waktu hapus admin, supaya temuan baru tidak ikut hilang.
+  // Tombstone TANPA shift_key (natural-key dari RPC delete, shift_key=NULL) ATAU beda shift:
+  // HANYA reset bila timestamp patrol LEBIH LAMA dari waktu hapus admin, supaya laporan BARU
+  // tidak ikut hilang. Tanpa guard ini, tombstone natural (shift_key kosong) cocok TANPA BATAS
+  // WAKTU sehingga SETIAP laporan baru (aman/temuan, shift mana pun) di checkpoint yang pernah
+  // dihapus admin ikut ter-reset & lenyap -> akar "user submit laporan malah hilang".
   if (checkpoint?.resultType !== 'temuan') return false;
   const deletedAtMs = new Date(tombstone?.deletedAt || '').getTime();
   const checkpointAtMs = getCheckpointMediaTimestamp(checkpoint);

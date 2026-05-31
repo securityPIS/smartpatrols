@@ -1,6 +1,6 @@
 # SYSTEM_MAP - SmartPatrol SQL
 
-> Terakhir diperbarui: 2026-05-22.
+> Terakhir diperbarui: 2026-05-31.
 > Bahasa pemrograman: JavaScript (React 19 + Vite 8), SQL Postgres, Supabase Edge Functions (Deno).
 
 ## Project Summary
@@ -315,6 +315,52 @@ Perbaikan:
   nilai berkoma (saat flush ulang).
 
 Regresi dijaga `tests/pages/patrol-report-offline-sync.test.mjs`.
+
+### Laporan SAH Hilang Karena Anti-Resurrection Terlalu Agresif (bug fix, 2026-05-31)
+
+Gejala (dilaporkan ulang): "user sudah submit laporan malah hilang laporannya, ada yang
+tidak sinkron". Regresi: rangkaian fix anti-resurrection temuan (migrasi 7→8→12→**14**)
+makin agresif sampai membuang laporan BARU yang sah. Revert ke `219dcab` TIDAK menyentuh
+trigger ini (migrasi 7–12, 14 tetap di repo & ter-apply di DB; hanya `...13_purge_*` + shift
+sync #30 yang di-revert dari repo).
+
+Tiga sumber kehilangan (semua "diam-diam", tanpa error ke pengguna):
+
+1. **DB trigger `block_tombstoned_patrol_report` (migrasi 14, "cabang 4")**: memblokir SEMUA
+   temuan baru di `(ship_id, checkpoint_id)` selama **1 jam** setelah tombstone APA PUN, tanpa
+   cek shift_key/timestamp. `BEFORE`-trigger `RETURN NULL` membatalkan baris TANPA error →
+   klien kira submit sukses, baris tak pernah masuk DB → hilang di semua device.
+2. **Klien `shouldApplyPatrolReportTombstoneToCheckpoint`**: RPC `admin_delete_patrol_report_findings`
+   menulis tombstone "natural" `shift_key=NULL`; baris `if (!tombstoneShiftKey ...) return true`
+   me-reset SEMUA checkpoint `completed` di titik itu TANPA BATAS WAKTU → setiap titik yang
+   PERNAH dihapus admin menelan setiap laporan baru (aman/temuan, shift mana pun) selamanya.
+3. **Trigger liar `purge_tombstoned_patrol_finding_surfaces`** (file `...13_purge_*` yang
+   di-revert dari repo): bila SUDAH ter-`db push` ke produksi, masih cascade-delete
+   `incidents` + tulis ulang `shift_history_entries` setiap tombstone ditulis.
+
+Perbaikan (prinsip: **hanya blokir RE-UPSERT BASI — timestamp patrol ≤ `deleted_at`; patrol
+BARU > `deleted_at` SELALU lolos**, cermin guard klien beda-shift):
+
+- Migrasi baru `20260531120000_fix_patrol_tombstone_block_stale_only.sql`:
+  `block_tombstoned_patrol_report` hanya blok bila `v_completed_at <= t.deleted_at` untuk
+  match `client_event_id` atau natural key `(ship_id, checkpoint_id)`. TANPA blanket 1 jam,
+  TANPA penghapusan baris. `v_completed_at` null → fail-open (utamakan jangan hilang).
+  Plus `drop trigger/function if exists purge_tombstoned_patrol_finding_surfaces*` defensif.
+- Klien (`AppContextRuntime.jsx`): reset tanpa-syarat hanya saat `shift_key` cocok PERSIS;
+  tombstone natural (shift_key kosong)/beda-shift wajib lewat guard `checkpointAtMs <= deletedAtMs`.
+
+Regresi dijaga `tests/pages/patrol-report-tombstone-block-stale-only.test.mjs`.
+
+> ⚠️ TINDAKAN OPERASIONAL (produksi):
+> 1. Jalankan `supabase db push` agar migrasi `20260531120000` ter-apply (memperbaiki trigger
+>    & men-drop trigger purge liar). Tombstone lama tidak perlu dibersihkan — guard waktu baru
+>    otomatis meloloskan laporan baru.
+> 2. HAZARD `202605300011_cleanup_stale_temuan.sql`: berisi `delete from patrol_reports where
+>    result_type='temuan'` TANPA guard — `supabase db reset` akan menghapus SEMUA temuan lagi.
+>    Jangan jalankan `db reset` di prod.
+> 3. Cek versi migrasi `202605300013`: pernah ada DUA file ber-prefix sama (`_admin_delete_patrol_rpc`
+>    & `_purge_*` yang di-revert). Pastikan RPC `admin_delete_patrol_report_findings` benar-benar
+>    ada di prod (`select proname from pg_proc where proname='admin_delete_patrol_report_findings'`).
 
 ## Checkpoint Hilang Saat Back Online (bug fix)
 
