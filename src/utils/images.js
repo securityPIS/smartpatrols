@@ -31,7 +31,9 @@ export async function readImageFileAsDataUrl(file, maxEdge = 1600, quality = 0.8
       }
 
       context.drawImage(image, 0, 0, width, height);
-      return canvas.toDataURL("image/webp", quality);
+      // Encode ASINKRON via toBlob: encoding WebP berjalan di luar main thread sehingga
+      // UI tidak beku saat kompres foto besar (akar lag "setelah take foto").
+      return await canvasToCompressedDataUrl(canvas, "image/webp", quality);
     } catch (error) {
       // Fallback ini menjaga upload tetap jalan untuk format kamera tertentu
       // yang gagal dirender ulang lewat canvas/browser.
@@ -62,5 +64,50 @@ export function readFileAsDataUrl(file) {
     reader.onload = () => resolve(String(reader.result || ""));
     reader.onerror = () => reject(new Error("Gagal membaca file."));
     reader.readAsDataURL(file);
+  });
+}
+
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(reader.error || new Error("Gagal membaca blob gambar."));
+    reader.readAsDataURL(blob);
+  });
+}
+
+/*
+Encode kanvas ke data URL secara ASINKRON memakai canvas.toBlob. Berbeda dari
+canvas.toDataURL yang SINKRON dan membekukan main thread selama encoding, toBlob
+menjalankan encoding di luar main thread lalu memanggil callback — sehingga UI tetap
+responsif saat mengompres foto besar. Fallback ke toDataURL sinkron bila toBlob tidak
+tersedia atau gagal menghasilkan blob (mis. WebView lama tanpa dukungan WebP via toBlob).
+*/
+export function canvasToCompressedDataUrl(canvas, type = "image/webp", quality = 0.8) {
+  return new Promise((resolve, reject) => {
+    const fallbackToDataUrl = () => {
+      try {
+        resolve(canvas.toDataURL(type, quality));
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    if (typeof canvas.toBlob !== "function") {
+      fallbackToDataUrl();
+      return;
+    }
+
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          fallbackToDataUrl();
+          return;
+        }
+        blobToDataUrl(blob).then(resolve, fallbackToDataUrl);
+      },
+      type,
+      quality,
+    );
   });
 }

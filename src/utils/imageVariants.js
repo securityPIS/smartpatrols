@@ -7,6 +7,7 @@ Side Effects: Memakai canvas 2D untuk downscale WebP dan menulis beberapa entri 
 */
 
 import { saveImageVariantsToDB } from './imageStore';
+import { canvasToCompressedDataUrl } from './images';
 
 export const HERO_VARIANT_MAX_EDGE = 500;
 export const THUMB_VARIANT_MAX_EDGE = 64;
@@ -21,7 +22,7 @@ function loadImage(source) {
   });
 }
 
-function downscaleToDataUrl(image, maxEdge, quality) {
+async function downscaleToDataUrl(image, maxEdge, quality) {
   const longestSide = Math.max(image.naturalWidth || image.width, image.naturalHeight || image.height, 1);
   const scale = Math.min(1, maxEdge / longestSide);
   const width = Math.max(1, Math.round((image.naturalWidth || image.width) * scale));
@@ -37,7 +38,8 @@ function downscaleToDataUrl(image, maxEdge, quality) {
   }
 
   context.drawImage(image, 0, 0, width, height);
-  return canvas.toDataURL('image/webp', quality);
+  // Encode ASINKRON (toBlob) agar pembuatan varian tidak membekukan main thread.
+  return canvasToCompressedDataUrl(canvas, 'image/webp', quality);
 }
 
 /*
@@ -53,8 +55,8 @@ export async function saveImagePhotoSet(fullDataUrl) {
   let thumb = null;
   try {
     const image = await loadImage(fullDataUrl);
-    hero = downscaleToDataUrl(image, HERO_VARIANT_MAX_EDGE, VARIANT_QUALITY);
-    thumb = downscaleToDataUrl(image, THUMB_VARIANT_MAX_EDGE, VARIANT_QUALITY);
+    hero = await downscaleToDataUrl(image, HERO_VARIANT_MAX_EDGE, VARIANT_QUALITY);
+    thumb = await downscaleToDataUrl(image, THUMB_VARIANT_MAX_EDGE, VARIANT_QUALITY);
   } catch (error) {
     // Fallback ini menjaga upload tetap jalan walau varian gagal dibuat — foto penuh
     // tetap tersimpan dan dipakai untuk semua ukuran tampilan.

@@ -8185,23 +8185,52 @@ export function AppProvider({ children }) {
   const handlePatrolCameraCapture = useCallback(async (dataUrl) => {
     const captureRequest = pendingPatrolCameraCapture;
     if (!captureRequest?.id || !captureRequest?.type || !dataUrl) return;
-    const photoSet = await saveImagePhotoSet(dataUrl);
-    if (!photoSet) return;
+
+    // Buka form/preview SEKETIKA dengan foto mentah sebagai pratinjau. Pembuatan varian
+    // (full/hero/thumb di IndexedDB) yang berat di-tunda ke LATAR BELAKANG, supaya transisi
+    // kamera -> form tidak menunggu encoding. data: URL aman: dirender langsung oleh
+    // AsyncImage, dianggap local-only (di-strip dari baris pending lalu diunggah), jadi
+    // submit cepat sebelum varian selesai pun tetap benar.
+    const previewSet = { photoUrl: dataUrl, heroUrl: dataUrl, thumbUrl: dataUrl };
     if (captureRequest.intent === 'incident-progress') {
-      setNewProgress((previousProgress) => ({ ...previousProgress, ...photoSet }));
-      setPendingPatrolCameraCapture(null);
-      return;
+      setNewProgress((previousProgress) => ({ ...previousProgress, ...previewSet }));
+    } else {
+      setActiveForms({
+        [captureRequest.id]: {
+          type: captureRequest.type,
+          penyebab: '',
+          kejadian: '',
+          tindakLanjut: '',
+          ...previewSet,
+        },
+      });
     }
-    setActiveForms({
-      [captureRequest.id]: {
-        type: captureRequest.type,
-        penyebab: '',
-        kejadian: '',
-        tindakLanjut: '',
-        ...photoSet,
-      },
-    });
     setPendingPatrolCameraCapture(null);
+
+    // Latar belakang: kompres ke varian ringan (idb://) lalu GANTI pratinjau data: URL.
+    // Patch hanya bila foto yang sedang ditampilkan masih foto mentah yang sama (pengguna
+    // belum mengambil ulang / membuang form), agar tidak menimpa state yang sudah berubah.
+    void (async () => {
+      try {
+        const photoSet = await saveImagePhotoSet(dataUrl);
+        if (!photoSet) return;
+        if (captureRequest.intent === 'incident-progress') {
+          setNewProgress((previousProgress) => (
+            previousProgress?.photoUrl === dataUrl
+              ? { ...previousProgress, ...photoSet }
+              : previousProgress
+          ));
+        } else {
+          setActiveForms((previousForms) => {
+            const currentForm = previousForms?.[captureRequest.id];
+            if (!currentForm || currentForm.photoUrl !== dataUrl) return previousForms;
+            return { ...previousForms, [captureRequest.id]: { ...currentForm, ...photoSet } };
+          });
+        }
+      } catch (error) {
+        console.warn('Gagal membuat varian foto di latar belakang; memakai foto mentah.', error);
+      }
+    })();
   }, [pendingPatrolCameraCapture]);
 
   // Incident handlers
