@@ -2,8 +2,8 @@
 Tujuan: Mencegah regresi temuan patroli yang sudah dihapus admin muncul kembali.
 Caller: Node test runner saat verifikasi sinkronisasi delete temuan lintas-device.
 Dependensi: AppContextRuntime, patrolReports adapter, dan migration tombstone Supabase.
-Main Functions: Memastikan reset manual tidak di-sync ulang dari background, tombstone membawa deleted_at,
-        dan trigger DB memblokir re-upsert stale dengan shift_key berbeda.
+Main Functions: Memastikan reset manual tidak di-sync ulang dari background, tombstone membawa identitas lengkap,
+        semua permukaan UI temuan dibersihkan, dan trigger DB memblokir re-upsert stale.
 Side Effects: Tidak ada; test membaca file sumber secara read-only.
 */
 
@@ -21,6 +21,10 @@ const patrolReportsSource = readFileSync(
 );
 const migrationSource = readFileSync(
   new URL('../../supabase/migrations/202605300012_block_stale_tombstoned_finding_reupsert.sql', import.meta.url),
+  'utf8',
+);
+const purgeMigrationSource = readFileSync(
+  new URL('../../supabase/migrations/20260531113613_purge_tombstoned_patrol_finding_surfaces.sql', import.meta.url),
   'utf8',
 );
 
@@ -70,8 +74,8 @@ test('delete patrol report memakai RPC server-side atomic (bukan SELECT+DELETE c
 test('tombstone realtime membawa deleted_at untuk reset stale beda shift', () => {
   assert.match(
     patrolReportsSource,
-    /\.select\('client_event_id, shift_key, ship_id, checkpoint_id, ship_name, deleted_at'\)/,
-    'listener tombstone harus membaca deleted_at',
+    /\.select\('client_event_id, incident_id, shift_key, ship_id, checkpoint_id, checkpoint_name, ship_name, deleted_at'\)/,
+    'listener tombstone harus membaca identitas lengkap dan deleted_at',
   );
   assert.match(
     patrolReportsSource,
@@ -87,6 +91,24 @@ test('tombstone realtime membawa deleted_at untuk reset stale beda shift', () =>
     runtimeSource,
     /checkpointAtMs <= deletedAtMs/,
     'checkpoint lama sebelum waktu delete admin harus di-reset walau shift_key berbeda',
+  );
+});
+
+test('tombstone membersihkan incidentsData dan history lokal', () => {
+  assert.match(
+    runtimeSource,
+    /setIncidentsData\(\(previousIncidents\) => \{/,
+    'tombstone harus menghapus cache incidentsData patrol yang cocok',
+  );
+  assert.match(
+    runtimeSource,
+    /setHistoryEntries\(\(previousEntries\) => \{/,
+    'tombstone harus menghapus temuan dari snapshot history lokal',
+  );
+  assert.match(
+    runtimeSource,
+    /setIncidentMeta\(\(previousMeta\) => \{/,
+    'incident id yang terkena tombstone harus ditandai deleted agar tidak muncul dari merge lokal',
   );
 });
 
@@ -121,5 +143,33 @@ test('migration memblokir re-upsert temuan stale walau shift_key berbeda', () =>
     migrationSource,
     /delete from public\.patrol_reports pr[\s\S]*?using stale_tombstoned_reports stale/,
     'migration harus membersihkan baris lama yang sudah terlanjur hidup kembali',
+  );
+});
+
+test('migration membersihkan incidents dan shift_history_entries saat tombstone masuk', () => {
+  assert.match(
+    purgeMigrationSource,
+    /add column if not exists incident_id text/,
+    'tombstone DB harus menyimpan incident_id patrol finding',
+  );
+  assert.match(
+    purgeMigrationSource,
+    /add column if not exists checkpoint_name text/,
+    'tombstone DB harus menyimpan checkpoint_name untuk fallback lintas-device',
+  );
+  assert.match(
+    purgeMigrationSource,
+    /delete from public\.incidents i[\s\S]*i\.payload ->> 'isPatrol' = 'true'/,
+    'tombstone harus menghapus baris incidents patrol terkait',
+  );
+  assert.match(
+    purgeMigrationSource,
+    /update public\.shift_history_entries she[\s\S]*temuan_count = summarized\.temuan_count/,
+    'tombstone harus membersihkan snapshot history server-side dan hitung ulang temuan',
+  );
+  assert.match(
+    purgeMigrationSource,
+    /create trigger purge_tombstoned_patrol_finding_surfaces_trg/,
+    'pembersihan harus berjalan otomatis setiap tombstone insert/update',
   );
 });

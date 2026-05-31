@@ -2,7 +2,7 @@
 Tujuan: Menjadi pusat state, flow bisnis, dan sinkronisasi SmartPatrol SQL.
 Caller: Root app melalui AppProvider dan seluruh hook domain aplikasi.
 Dependensi: Seed data, adapter backend Supabase/Postgres, trusted time, helper user management, utilitas sanitasi, IndexedDB image store, dan adapter native Capacitor.
-Main Functions: Mengelola auth Supabase dengan fallback offline, onboarding approval, kapal, checkpoint patroli, incidents, history, SOS realtime in-app, cloud sync SQL, dedupe user operasional, dan retry sinkronisasi saat koneksi pulih.
+Main Functions: Mengelola auth Supabase dengan fallback offline, onboarding approval, kapal, checkpoint patroli, incidents, history, tombstone delete temuan, SOS realtime in-app, cloud sync SQL, dedupe user operasional, dan retry sinkronisasi saat koneksi pulih.
 Side Effects: Menulis state lokal/cloud SQL, memanggil Edge Function security/upload aset, menginisialisasi checklist kapal, dan memigrasikan data shift aktif.
 */
 
@@ -2113,17 +2113,93 @@ function shouldApplyPatrolReportTombstoneToCheckpoint(checkpoint, tombstone) {
 
   const tombstoneShiftKey = String(tombstone?.shiftKey || '');
   const checkpointShiftKey = String(checkpoint?.shiftKey || '');
-  if (!tombstoneShiftKey || checkpointShiftKey === tombstoneShiftKey) return true;
+  if (tombstoneShiftKey && checkpointShiftKey === tombstoneShiftKey) return true;
 
   // Device lama bisa memegang temuan yang sama dengan shift_key aktif berbeda. Reset hanya
   // bila timestamp patrol lebih lama dari waktu hapus admin, supaya temuan baru tidak ikut hilang.
   if (checkpoint?.resultType !== 'temuan') return false;
   const deletedAtMs = new Date(tombstone?.deletedAt || '').getTime();
   const checkpointAtMs = getCheckpointMediaTimestamp(checkpoint);
-  return Number.isFinite(deletedAtMs)
+  if (
+    Number.isFinite(deletedAtMs)
     && Number.isFinite(checkpointAtMs)
     && checkpointAtMs > 0
-    && checkpointAtMs <= deletedAtMs;
+    && checkpointAtMs <= deletedAtMs
+  ) {
+    return true;
+  }
+
+  // Tombstone natural-key tidak membawa shift_key. Terapkan sebagai pagar pendek
+  // untuk device stale yang baru saja re-upsert, tetapi jangan menghapus temuan baru
+  // di checkpoint yang sama pada shift berikutnya selamanya.
+  return !tombstoneShiftKey
+    && Number.isFinite(deletedAtMs)
+    && deletedAtMs > 0
+    && Date.now() - deletedAtMs <= 60 * 60 * 1000;
+}
+
+function doesPatrolReportTombstoneMatchCheckpoint(checkpoint, tombstone, context = {}) {
+  if (!checkpoint || !tombstone) return false;
+
+  const tombstoneShipId = String(tombstone.shipId || '');
+  const checkpointShipId = String(checkpoint.shipId || context.shipId || '');
+  if (tombstoneShipId && checkpointShipId && tombstoneShipId !== checkpointShipId) return false;
+
+  const tombstoneShipNameKey = createCheckpointNameKey(tombstone.shipName || '');
+  const checkpointShipNameKey = createCheckpointNameKey(checkpoint.shipName || context.shipName || '');
+  if (tombstoneShipNameKey && checkpointShipNameKey && tombstoneShipNameKey !== checkpointShipNameKey) return false;
+
+  const tombstoneCheckpointId = String(tombstone.checkpointId || '');
+  const checkpointIds = [
+    checkpoint.id,
+    checkpoint.checkpointId,
+  ].map(value => String(value || '')).filter(Boolean);
+  const matchesCheckpointId = Boolean(tombstoneCheckpointId && checkpointIds.includes(tombstoneCheckpointId));
+
+  const tombstoneCheckpointNameKey = createCheckpointNameKey(tombstone.checkpointName || '');
+  const checkpointNameKey = createCheckpointNameKey(checkpoint.checkpointName || checkpoint.name || '');
+  const matchesCheckpointName = Boolean(
+    tombstoneCheckpointNameKey
+    && checkpointNameKey
+    && tombstoneCheckpointNameKey === checkpointNameKey
+  );
+
+  return matchesCheckpointId || matchesCheckpointName;
+}
+
+function doesPatrolReportTombstoneMatchIncident(incident, tombstone) {
+  if (!incident?.isPatrol || !tombstone) return false;
+  if (tombstone.incidentId && String(incident.id || '') === String(tombstone.incidentId)) return true;
+
+  const checkpointLike = {
+    id: incident.checkpointId || incident.id,
+    checkpointId: incident.checkpointId || null,
+    checkpointName: incident.checkpointName || incident.location || '',
+    name: incident.location || incident.name || '',
+    shipId: incident.shipId || null,
+    shipName: incident.shipName || '',
+    shiftKey: incident.shiftKey || null,
+    status: 'completed',
+    resultType: 'temuan',
+    completedAt: incident.completedAt || incident.reportedAt || incident.createdAt || null,
+    occurredAtTrustedMs: incident.occurredAtTrustedMs ?? null,
+    occurredAtTrustedIso: incident.occurredAtTrustedIso || null,
+  };
+
+  return doesPatrolReportTombstoneMatchCheckpoint(checkpointLike, tombstone)
+    && shouldApplyPatrolReportTombstoneToCheckpoint(checkpointLike, tombstone);
+}
+
+function createHistoryEntryWithCheckpoints(entry, checkpoints) {
+  const summary = summarizePatrolCheckpoints(checkpoints);
+  return {
+    ...entry,
+    checkpoints,
+    summary,
+    points: summary.total,
+    issue: summary.temuan,
+    missed: summary.missed,
+  };
 }
 
 function isSameCheckpointMediaRevision(leftCheckpoint, rightCheckpoint) {
@@ -6697,29 +6773,61 @@ export function AppProvider({ children }) {
       reportsWithLocalMedia,
     ));
   }, []);
-  // Propagasi penghapusan temuan lintas-device: untuk setiap tombstone, reset checkpoint
-  // lokal yang cocok (ship_id + checkpoint_id) menjadi pending agar temuan yang sudah
-  // dihapus admin hilang dari daftar device petugas. Trigger DB mencegah re-upsert
-  // menghidupkannya lagi. Bila tombstone membawa shiftKey, batasi reset hanya untuk
-  // checkpoint di shift yang sama — agar checkpoint yang sah di-patrol ulang pada shift
-  // berikutnya tidak ikut terhapus.
+  // Propagasi penghapusan temuan lintas-device: tombstone harus membersihkan semua
+  // sumber UI temuan, bukan hanya checkpoint live.
   const applyPatrolReportTombstones = useCallback((tombstones = []) => {
-    if (!Array.isArray(tombstones) || tombstones.length === 0) return;
+    const safeTombstones = ensureArray(tombstones).filter(tombstone => (
+      tombstone?.shipId && (tombstone?.checkpointId || tombstone?.checkpointName || tombstone?.incidentId)
+    ));
+    if (safeTombstones.length === 0) return;
+
+    const currentState = localSharedStateRef.current || {};
+    const tombstonedIncidentIds = new Set(
+      safeTombstones.map(tombstone => tombstone.incidentId).filter(Boolean),
+    );
+    const collectCheckpointIncidentId = (checkpoint) => {
+      if (!checkpoint) return;
+      if (checkpoint.incidentId) tombstonedIncidentIds.add(checkpoint.incidentId);
+      const derivedIncidentId = createPatrolIncidentId(checkpoint);
+      if (derivedIncidentId) tombstonedIncidentIds.add(derivedIncidentId);
+    };
+
+    Object.values(currentState.checkpointsByShip || {}).flat().forEach((checkpoint) => {
+      if (safeTombstones.some(tombstone => (
+        doesPatrolReportTombstoneMatchCheckpoint(checkpoint, tombstone)
+        && shouldApplyPatrolReportTombstoneToCheckpoint(checkpoint, tombstone)
+      ))) {
+        collectCheckpointIncidentId(checkpoint);
+      }
+    });
+    ensureArray(currentState.historyEntries).forEach((entry) => {
+      ensureArray(entry?.checkpoints).forEach((checkpoint) => {
+        if (safeTombstones.some(tombstone => (
+          doesPatrolReportTombstoneMatchCheckpoint(checkpoint, tombstone, { shipName: entry?.ship })
+          && shouldApplyPatrolReportTombstoneToCheckpoint(checkpoint, tombstone)
+        ))) {
+          collectCheckpointIncidentId(checkpoint);
+        }
+      });
+    });
+    ensureArray(currentState.incidentsData).forEach((incident) => {
+      if (safeTombstones.some(tombstone => doesPatrolReportTombstoneMatchIncident(incident, tombstone))) {
+        tombstonedIncidentIds.add(incident.id);
+      }
+    });
+
     setCheckpointsByShip((previousState) => {
       let didChange = false;
       const nextState = { ...(previousState || {}) };
 
-      tombstones.forEach((tombstone) => {
+      safeTombstones.forEach((tombstone) => {
         const shipId = tombstone?.shipId;
-        const checkpointId = tombstone?.checkpointId;
-        if (!shipId || !checkpointId) return;
+        if (!shipId) return;
 
         const shipCheckpoints = ensureArray(nextState[shipId]);
         let shipChanged = false;
         const nextShipCheckpoints = shipCheckpoints.map((checkpoint) => {
-          const matchesCheckpoint = String(checkpoint?.id) === String(checkpointId)
-            || String(checkpoint?.checkpointId || '') === String(checkpointId);
-          if (!matchesCheckpoint) return checkpoint;
+          if (!doesPatrolReportTombstoneMatchCheckpoint(checkpoint, tombstone)) return checkpoint;
           // Hanya reset bila benar-benar temuan/laporan yang masih hidup secara lokal.
           if (!shouldApplyPatrolReportTombstoneToCheckpoint(checkpoint, tombstone)) return checkpoint;
           shipChanged = true;
@@ -6737,6 +6845,60 @@ export function AppProvider({ children }) {
 
       return didChange ? nextState : previousState;
     });
+
+    setHistoryEntries((previousEntries) => {
+      let didChange = false;
+      const nextEntries = ensureArray(previousEntries).map((entry) => {
+        const entryCheckpoints = ensureArray(entry?.checkpoints);
+        if (entryCheckpoints.length === 0) return entry;
+
+        const nextCheckpoints = entryCheckpoints.filter((checkpoint) => {
+          const shouldRemove = safeTombstones.some(tombstone => (
+            doesPatrolReportTombstoneMatchCheckpoint(checkpoint, tombstone, { shipName: entry?.ship })
+            && shouldApplyPatrolReportTombstoneToCheckpoint(checkpoint, tombstone)
+          ));
+          if (shouldRemove) didChange = true;
+          return !shouldRemove;
+        });
+
+        return nextCheckpoints.length === entryCheckpoints.length
+          ? entry
+          : createHistoryEntryWithCheckpoints(entry, nextCheckpoints);
+      });
+
+      return didChange ? sortHistoryEntries(nextEntries) : previousEntries;
+    });
+
+    setIncidentsData((previousIncidents) => {
+      const nextIncidents = ensureArray(previousIncidents).filter((incident) => (
+        !safeTombstones.some(tombstone => doesPatrolReportTombstoneMatchIncident(incident, tombstone))
+      ));
+      return nextIncidents.length === previousIncidents.length ? previousIncidents : nextIncidents;
+    });
+
+    if (tombstonedIncidentIds.size > 0) {
+      setIncidentMeta((previousMeta) => {
+        let didChange = false;
+        const nextMeta = { ...(previousMeta || {}) };
+        tombstonedIncidentIds.forEach((incidentId) => {
+          if (!incidentId) return;
+          if (nextMeta[incidentId]?.deleted === true) return;
+          nextMeta[incidentId] = {
+            ...(nextMeta[incidentId] || {}),
+            deleted: true,
+          };
+          didChange = true;
+        });
+        return didChange ? nextMeta : previousMeta;
+      });
+    }
+
+    setSelectedIncident((previousIncident) => (
+      previousIncident?.isPatrol
+      && safeTombstones.some(tombstone => doesPatrolReportTombstoneMatchIncident(previousIncident, tombstone))
+        ? null
+        : previousIncident
+    ));
   }, []);
   const getUsersByRole = useCallback((roles) => (
     usersData.filter(user => roles.includes(user.role)).map(user => user.id)
@@ -9255,6 +9417,9 @@ export function AppProvider({ children }) {
             shipId: incident.shipId,
             shipName: incident.shipName,
           });
+          // Detail/progress patrol finding bisa tersimpan di tabel incidents. Hapus juga
+          // baris itu agar device lain tidak membentuk kartu temuan dari domain sekunder.
+          void deleteIncidentReport(incidentId);
         } else {
           const deletedAt = new Date().toISOString();
           setDeletedRecords((previousDeletedRecords) => markDeletedRecord(previousDeletedRecords, 'incidents', incidentId, deletedAt));
