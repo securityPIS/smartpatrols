@@ -1,3 +1,11 @@
+/*
+Tujuan: Menyimpan dan memuat foto (termasuk varian thumbnail/hero) di IndexedDB lokal perangkat.
+Caller: Handler upload foto di AppContextRuntime, util imageVariants, dan AsyncImage saat resolve key idb://.
+Dependensi: IndexedDB browser.
+Main Functions: saveImageToDB (simpan satu foto), saveImageVariantsToDB (simpan varian full/hero/thumb), loadImageFromDB (muat), deleteOldImagesFromDB (cleanup berbasis usia).
+Side Effects: Membuka/menulis/menghapus object store IndexedDB 'smartpatrol-images'.
+*/
+
 const DB_NAME = 'smartpatrol-images';
 const STORE_NAME = 'photos';
 
@@ -52,6 +60,47 @@ export async function saveImageToDB(dataUrl) {
     return typeof dataUrl === 'string' && dataUrl.startsWith('data:')
       ? dataUrl
       : null;
+  }
+}
+
+/*
+Simpan beberapa varian satu foto (full/hero/thumb) sekaligus. Hero dan thumb disimpan di
+bawah key turunan (`${base}@hero`, `${base}@thumb`) sehingga key varian bisa diturunkan dari
+key foto penuh tanpa perlu disimpan terpisah. Mengembalikan { photoUrl, heroUrl, thumbUrl };
+hero/thumb yang tidak tersedia otomatis fallback ke key foto penuh.
+*/
+export async function saveImageVariantsToDB({ full, hero, thumb }) {
+  if (!full) return null;
+  try {
+    const db = await openDB();
+    const baseKey = `idb://img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const heroKey = `${baseKey}@hero`;
+    const thumbKey = `${baseKey}@thumb`;
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    store.put(full, baseKey);
+    if (hero) store.put(hero, heroKey);
+    if (thumb) store.put(thumb, thumbKey);
+
+    return new Promise((resolve, reject) => {
+      tx.oncomplete = () => resolve({
+        photoUrl: baseKey,
+        heroUrl: hero ? heroKey : baseKey,
+        thumbUrl: thumb ? thumbKey : baseKey,
+      });
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch (error) {
+    console.error('Failed to save image variants to IndexedDB:', error);
+    // Fallback ke data URL menjaga upload tetap dipakai saat IndexedDB diblokir browser/PWA.
+    // Varian yang gagal dibuat ikut memakai data URL penuh.
+    const fallback = typeof full === 'string' && full.startsWith('data:') ? full : null;
+    if (!fallback) return null;
+    return {
+      photoUrl: fallback,
+      heroUrl: typeof hero === 'string' && hero.startsWith('data:') ? hero : fallback,
+      thumbUrl: typeof thumb === 'string' && thumb.startsWith('data:') ? thumb : fallback,
+    };
   }
 }
 
