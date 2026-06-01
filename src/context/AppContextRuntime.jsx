@@ -4782,6 +4782,9 @@ export function AppProvider({ children }) {
   const [sessionUserId, setSessionUserId] = useState(() => loadAuthSession());
   const [firebaseAuthUser, setFirebaseAuthUser] = useState(null);
   const firebaseAuthUserRef = useRef(null);
+  // Mirror authAccessResolvedUid agar listener auth (deps []) bisa membedakan token
+  // refresh untuk UID yang SAMA (sesi sehat) dari login UID baru / cold start.
+  const authAccessResolvedUidRef = useRef('');
   const [firebaseAuthReady, setFirebaseAuthReady] = useState(() => !isFirebaseAuthEnabled);
   const [authAccessState, setAuthAccessState] = useState(null);
   const [authAccessBusy, setAuthAccessBusy] = useState(false);
@@ -10134,6 +10137,9 @@ export function AppProvider({ children }) {
     firebaseAuthUserRef.current = firebaseAuthUser;
   }, [firebaseAuthUser]);
   useEffect(() => {
+    authAccessResolvedUidRef.current = authAccessResolvedUid;
+  }, [authAccessResolvedUid]);
+  useEffect(() => {
     if (!isFirebaseAuthEnabled) {
       setFirebaseAuthReady(true);
       return () => { };
@@ -10155,14 +10161,24 @@ export function AppProvider({ children }) {
         return;
       }
 
+      const previousUid = sanitizeText(firebaseAuthUserRef.current?.uid || '', 160);
       firebaseAuthUserRef.current = nextUser;
       setFirebaseAuthUser(nextUser);
       setFirebaseAuthReady(true);
       if (nextUser) {
-        // Ada user Supabase aktif: reset resolved UID agar effect resolver
-        // memuat RBAC untuk UID baru (atau re-resolve untuk UID yang sama).
-        setAuthAccessResolvedUid('');
-        setAuthAccessBusy(true);
+        const nextUid = sanitizeText(nextUser.uid || '', 160);
+        const isSameAlreadyResolvedUid = Boolean(nextUid)
+          && nextUid === previousUid
+          && nextUid === authAccessResolvedUidRef.current;
+        // Token refresh / re-emit untuk UID yang SAMA dan sudah ter-resolve: JANGAN
+        // reset gerbang sesi. Sebelumnya setiap event (mis. TOKEN_REFRESHED saat balik
+        // dari kamera) memaksa resolvedUid='' + busy=true → layar skeleton menyala lagi
+        // di atas sesi yang sehat dan macet menunggu resolve berikutnya. Hanya login UID
+        // baru / UID yang belum ter-resolve yang perlu memuat ulang RBAC.
+        if (!isSameAlreadyResolvedUid) {
+          setAuthAccessResolvedUid('');
+          setAuthAccessBusy(true);
+        }
       } else {
         // Tidak ada user: clear access state, biarkan validator yang putuskan reset sesi.
         publicRegistrationFlowRef.current = false;
@@ -10579,13 +10595,19 @@ export function AppProvider({ children }) {
   const isAuthSessionRestoring = useMemo(() => {
     if (!sessionUserId) return false;
     if (!isFirebaseAuthEnabled) return false;
+    // Sesi hangat: sudah ada record sesi yang dapat dipakai. Re-resolve akses yang
+    // berjalan di latar belakang (token refresh saat balik dari kamera, reconnect)
+    // TIDAK boleh menutup UI dengan skeleton — itulah yang membuat aplikasi macet di
+    // layar skeleton pada submit kedua. Hanya cold start murni (sessionUserId tersimpan
+    // tapi record belum ter-hydrate) yang menahan render.
+    if (sessionUserRecord) return false;
     if (!firebaseAuthReady) return true;
     if (authBusy || authAccessBusy) return true;
     if (isWaitingForAssignedFleetSync) return true;
     const currentUid = sanitizeText(firebaseAuthUser?.uid || '', 160);
     if (currentUid && authAccessResolvedUid !== currentUid && authAccessOfflineUid !== currentUid) return true;
     return false;
-  }, [sessionUserId, firebaseAuthReady, firebaseAuthUser, authBusy, authAccessBusy, authAccessResolvedUid, authAccessOfflineUid, isWaitingForAssignedFleetSync]);
+  }, [sessionUserId, sessionUserRecord, firebaseAuthReady, firebaseAuthUser, authBusy, authAccessBusy, authAccessResolvedUid, authAccessOfflineUid, isWaitingForAssignedFleetSync]);
 
   const authValue = useMemo(() => ({
     sessionUserId,

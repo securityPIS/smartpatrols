@@ -14,6 +14,27 @@ import { enqueueOutboxMutation, registerOutboxHandler } from './outbox';
 const PENDING_REGISTRATIONS_TABLE = 'pending_registrations';
 const USER_ACCESS_TABLE = 'profiles';
 
+// Batas waktu resolve akses operasional. Tanpa ini, supabase.functions.invoke bisa
+// menggantung bermenit-menit di jaringan jelek (socket basi) sehingga gerbang sesi
+// (authAccessBusy) tidak pernah lepas dan layar skeleton macet. Gagal cepat memberi
+// kesempatan self-heal retry mengambil alih, atau fallback offline mempertahankan sesi.
+const RESOLVE_ACCESS_TIMEOUT_MS = 8000;
+
+function withRequestTimeout(promise, timeoutMs, timeoutCode) {
+  let timer = null;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      const error = new Error(timeoutCode);
+      error.code = timeoutCode;
+      reject(error);
+    }, timeoutMs);
+  });
+
+  return Promise.race([promise, timeout]).finally(() => {
+    if (timer) clearTimeout(timer);
+  });
+}
+
 function isDuplicateKeyError(error) {
   const code = String(error?.code || '');
   const message = String(error?.message || '').toLowerCase();
@@ -152,7 +173,11 @@ export function subscribeToPendingRegistrations(callback, onError) {
 }
 
 export async function resolveOperationalAccess() {
-  return invokeFunction('resolve-operational-access');
+  return withRequestTimeout(
+    invokeFunction('resolve-operational-access'),
+    RESOLVE_ACCESS_TIMEOUT_MS,
+    'resolve-operational-access-timeout',
+  );
 }
 
 export async function syncOperationalUserAccess(payload) {
