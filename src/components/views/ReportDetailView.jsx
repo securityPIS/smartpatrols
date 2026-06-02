@@ -146,15 +146,15 @@ export default function ReportDetailView({ isInline = false }) {
         <div className="px-4 py-4 border-b border-cyan-900/50 bg-[#091022] shrink-0">
           <div className="flex items-center gap-3 overflow-x-auto scrollbar-thin scrollbar-thumb-cyan-900/50">
             {galleryItems.length === 0 ? (
-              <div className="w-12 h-12 shrink-0 rounded-xl border border-dashed border-cyan-800/60 bg-[#0b1229] flex items-center justify-center text-cyan-700">
-                <Images className="w-4 h-4" />
+              <div className="w-16 h-16 shrink-0 rounded-xl border border-dashed border-cyan-800/60 bg-[#0b1229] flex items-center justify-center text-cyan-700">
+                <Images className="w-5 h-5" />
               </div>
             ) : galleryItems.map((item, index) => (
               <button
                 key={item.id || `${item.photoUrl}-${index}`}
                 type="button"
                 onClick={() => setPreviewPhoto({ url: item.photoUrl, author: item.author, time: item.date ? `${item.date} ${item.time}` : item.time })}
-                className="w-12 h-12 shrink-0 rounded-xl overflow-hidden border border-cyan-800/60 bg-[#0b1229] hover:border-cyan-500/60 transition-all group"
+                className="w-16 h-16 shrink-0 rounded-xl overflow-hidden border border-cyan-800/60 bg-[#0b1229] hover:border-cyan-500/60 transition-all group"
                 aria-label={`Lihat foto patroli ${index + 1}`}
               >
                 <AsyncImage src={item.thumbUrl} fallbackSrc={item.photoUrl} className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-300" alt={`Foto patroli ${index + 1}`} />
@@ -164,10 +164,10 @@ export default function ReportDetailView({ isInline = false }) {
               <button
                 type="button"
                 onClick={() => handleAddReportGalleryPhoto(selectedReportDetail.id)}
-                className="w-12 h-12 shrink-0 rounded-xl border border-dashed border-cyan-500/50 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 hover:border-cyan-400 transition-all flex items-center justify-center"
+                className="w-16 h-16 shrink-0 rounded-xl border border-dashed border-cyan-500/50 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 hover:border-cyan-400 transition-all flex items-center justify-center"
                 aria-label="Upload foto patroli tambahan"
               >
-                <Camera className="w-4 h-4" />
+                <Camera className="w-5 h-5" />
               </button>
             )}
           </div>
@@ -217,7 +217,7 @@ export default function ReportDetailView({ isInline = false }) {
              <div className="bg-[#0b1229] p-4 rounded-xl border border-cyan-900/50 shadow-sm">
                <div className="flex items-center justify-between gap-3 mb-3">
                  <p className="text-[10px] text-cyan-600 font-bold uppercase tracking-widest">Titik Checkpoint</p>
-                 <span className="text-[10px] px-2 py-1 border border-cyan-500/50 rounded font-bold text-cyan-400 bg-cyan-900/40 shrink-0">{isReadOnly ? 'Riwayat Shift' : 'Laporan Titik'}</span>
+                 <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border border-emerald-500 rounded-lg font-bold bg-emerald-500/15 text-emerald-300 shrink-0"><CheckCircle2 className="w-3.5 h-3.5" /> Aman</span>
                </div>
                <h2 className="text-xl font-black text-cyan-50 leading-tight flex items-start gap-2">
                  <MapPin className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5" />
