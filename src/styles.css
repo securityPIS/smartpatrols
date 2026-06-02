@@ -422,6 +422,33 @@ textarea {
   border-color: rgba(169, 61, 37, 0.58) !important;
 }
 
+/* Badge pending di tab info patroli → tampil merah saat light mode */
+.pertamina-light .summary-card-pending {
+  background-color: rgba(239, 108, 74, 0.12) !important;
+  border-color: rgba(169, 61, 37, 0.58) !important;
+}
+
+.pertamina-light .summary-card-pending .text-slate-400,
+.pertamina-light .summary-card-pending .text-slate-100\/70 {
+  color: #a93d25 !important;
+  opacity: 1 !important;
+}
+
+.pertamina-light .summary-card-pending .bg-slate-500\/10 {
+  background-color: rgba(239, 108, 74, 0.14) !important;
+  border-color: rgba(169, 61, 37, 0.4) !important;
+}
+
+/* List history (page Laporan) → permukaan terang saat light mode */
+.pertamina-light .bg-\[\#080d1f\],
+.pertamina-light .bg-\[\#070b1a\] {
+  background-color: var(--sp-card) !important;
+}
+
+.pertamina-light .divide-cyan-900\/40 > * + * {
+  border-color: var(--sp-border) !important;
+}
+
 /* Navigation and dropdowns */
 .pertamina-light .sticky.top-0 {
   background: rgba(255, 255, 255, 0.9) !important;

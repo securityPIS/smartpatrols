@@ -103,11 +103,7 @@ export default function ReportDetailView({ isInline = false }) {
            {!isReadOnly && (
              <button onClick={(e) => { e.stopPropagation(); handleDeleteReport(selectedReportDetail.id); }} className="absolute top-4 right-4 p-2 bg-rose-500/80 text-white rounded-full backdrop-blur-md border border-rose-500/50 hover:bg-rose-600 transition-colors z-10" aria-label="Hapus laporan"><Trash2 className="w-5 h-5"/></button>
            )}
-           {isAman ? (
-             <div className="absolute bottom-4 left-4 z-10">
-                <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border border-emerald-500 rounded-lg font-bold bg-emerald-500/15 text-emerald-300 backdrop-blur-md shadow-lg"><CheckCircle2 className="w-3.5 h-3.5" /> Aman</span>
-             </div>
-           ) : (
+           {!isAman && (
              <>
                <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-lg text-xs text-white/90 text-right border border-cyan-900/50 z-10 shadow-lg"><p className="font-bold text-cyan-400">{selectedReportDetail.completedBy || '-'}</p><p className="text-[10px] text-cyan-100/70">{syncDateLabel}</p><p className="text-[10px] text-cyan-100/70">{syncTimeLabel} WIB</p></div>
                <div className="absolute bottom-4 left-4 right-36 z-10">
@@ -313,10 +309,6 @@ export default function ReportDetailView({ isInline = false }) {
                )}
              </div>
 
-             <div className="bg-emerald-950/20 p-4 rounded-xl border border-emerald-900/30">
-               <p className="text-[10px] text-emerald-600 font-bold mb-1.5 flex items-center gap-1.5 uppercase tracking-widest"><CheckCircle2 className="w-3 h-3" /> Catatan</p>
-               <p className="text-sm text-emerald-50/90 leading-relaxed">{selectedReportDetail.kejadian || 'Checkpoint dilaporkan dalam kondisi aman.'}</p>
-             </div>
              <TimeAuditRecordCard
                record={selectedReportDetail}
                title="Audit Timestamp Laporan"

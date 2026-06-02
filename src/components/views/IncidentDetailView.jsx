@@ -502,7 +502,7 @@ export default function IncidentDetailView({ isInline = false }) {
                     key={item.id}
                     type="button"
                     onClick={() => setPreviewPhoto({ url: item.photoUrl, author: item.author, time: `${item.date || '-'} ${item.time || '-'}` })}
-                    className="group overflow-hidden rounded-2xl border border-cyan-800/50 bg-[#0b1229] text-left hover:border-fuchsia-500/40 transition-all"
+                    className="gallery-thumb group overflow-hidden rounded-2xl border border-cyan-800/50 bg-[#0b1229] text-left hover:border-fuchsia-500/40 transition-all"
                   >
                     <div className="aspect-square bg-[#070b19] overflow-hidden">
                       <AsyncImage src={item.thumbUrl} fallbackSrc={item.photoUrl} className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300" alt="Dokumentasi temuan" />
