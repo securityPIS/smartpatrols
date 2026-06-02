@@ -19,6 +19,7 @@ import { checkStorageQuota } from '../utils/storageQuota';
 import { assignUserToExclusiveShip, reconcileUserShipAssignments, removeUserFromShipAssignment, resolveExplicitOverride, shouldDeferPetugasFleetValidation } from '../utils/userManagement';
 import {
   addNativeNetworkStatusListener,
+  captureNativeCameraOrGallery,
   getNativeGeolocationPosition,
   getNativeNetworkStatus,
   isNativeRuntime,
@@ -8087,7 +8088,9 @@ export function AppProvider({ children }) {
   const handleAddReportGalleryPhoto = useCallback(async (reportId) => {
     if (!reportId || selectedReportDetail?.readOnly) return;
 
-    const dataUrl = await pickLocalImage();
+    const dataUrl = isNativeRuntime()
+      ? await captureNativeCameraOrGallery()
+      : await pickLocalImage();
     if (!dataUrl) return;
 
     const photoSet = await saveImagePhotoSet(dataUrl);

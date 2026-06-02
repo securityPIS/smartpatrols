@@ -65,6 +65,41 @@ export async function captureNativeCameraPhoto(options = {}) {
   }
 }
 
+export async function captureNativeCameraOrGallery(options = {}) {
+  if (!isNativeRuntime()) return null;
+
+  const {
+    height = 1600,
+    quality = 78,
+    width = 1600,
+  } = options;
+  const {
+    Camera,
+    CameraResultType,
+    CameraSource,
+  } = await getCameraModule();
+
+  try {
+    const photo = await Camera.getPhoto({
+      quality,
+      allowEditing: false,
+      correctOrientation: true,
+      resultType: CameraResultType.DataUrl,
+      source: CameraSource.Prompt,
+      saveToGallery: false,
+      width,
+      height,
+    });
+
+    return typeof photo?.dataUrl === 'string' && photo.dataUrl.startsWith('data:image/')
+      ? photo.dataUrl
+      : null;
+  } catch (error) {
+    if (isUserCancelledCamera(error)) return null;
+    throw error;
+  }
+}
+
 function getCameraModule() {
   if (!cameraModulePromise) {
     cameraModulePromise = import('@capacitor/camera');

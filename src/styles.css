@@ -460,6 +460,10 @@ textarea {
   border-radius: 999px !important;
 }
 
+.pertamina-light button.gallery-thumb {
+  border-radius: 0.75rem !important;
+}
+
 .pertamina-light .notification-list-item.rounded-2xl {
   border-radius: 1rem !important;
 }
