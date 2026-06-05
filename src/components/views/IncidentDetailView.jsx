@@ -131,7 +131,7 @@ function createIncidentMapConfig(incident, shipsData = []) {
     const gpsSourceLabel = incident?.gpsSnapshot?.source === 'device'
       ? 'GPS perangkat saat laporan dibuat'
       : incident?.gpsSnapshot?.source === 'ship'
-        ? 'Koordinat kapal saat laporan dibuat'
+        ? 'Koordinat kapal lama, bukan GPS perangkat'
         : 'Snapshot GPS laporan';
 
     return {

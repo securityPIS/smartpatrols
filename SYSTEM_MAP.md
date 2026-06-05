@@ -43,6 +43,7 @@ Register
 PatrolPage -> PatrolCameraModal -> imageStore IndexedDB
   -> AppContextRuntime.handleSubmitCheckpoint
   -> createTrustedTimestampRecord (Supabase Edge Function server-time anchor)
+  -> capturePatrolEnvironmentSnapshot (gpsSnapshot hanya GPS perangkat; shipSnapshot konteks kapal)
   -> savePatrolReport
   -> patrol_reports upsert dengan client_event_id idempotent
   -> Supabase Realtime listener merge ke checkpointsByShip

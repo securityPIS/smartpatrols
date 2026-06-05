@@ -135,9 +135,8 @@ export default function HistoryDetailView({ isInline = false, entryData = null, 
   const displayShiftLabel = entry.shift;
   const displayShiftTime = entry.time;
   const isLiveEntry = Boolean(entry.isLive);
-  const displayMapLocation = latestCompletedCheckpoint?.gpsSnapshot
-    || latestCompletedCheckpoint?.shipSnapshot
-    || displayShip;
+  const displayMapLocation = latestCompletedCheckpoint?.gpsSnapshot || null;
+  const hasDisplayMapLocation = displayMapLocation?.lat != null && displayMapLocation?.lng != null;
   const displayWeather = (
     latestCompletedCheckpoint?.weatherSnapshot
     && typeof latestCompletedCheckpoint.weatherSnapshot === 'object'
@@ -215,7 +214,15 @@ export default function HistoryDetailView({ isInline = false, entryData = null, 
         </div>
 
         <div className="w-full h-44 rounded-2xl overflow-hidden border border-cyan-800/50 relative shadow-lg">
-          <iframe width="100%" height="100%" frameBorder="0" scrolling="no" marginHeight="0" marginWidth="0" src={`https://maps.google.com/maps?q=${displayMapLocation?.lat || '-6.1021'},${displayMapLocation?.lng || '106.8833'}&hl=id&z=14&output=embed`} title="Map Location"></iframe>
+          {hasDisplayMapLocation ? (
+            <iframe width="100%" height="100%" frameBorder="0" scrolling="no" marginHeight="0" marginWidth="0" src={`https://maps.google.com/maps?q=${displayMapLocation.lat},${displayMapLocation.lng}&hl=id&z=14&output=embed`} title="GPS checkpoint patroli"></iframe>
+          ) : (
+            <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-[#070b19] px-4 text-center">
+              <MapPin className="h-6 w-6 text-slate-500" />
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-400">GPS perangkat belum tersedia</p>
+              <p className="text-[11px] text-slate-500">Peta hanya tampil bila laporan memiliki koordinat GPS asli.</p>
+            </div>
+          )}
         </div>
 
         <div className="bg-[#0b1229] rounded-2xl p-4 border border-cyan-800/50 flex items-center justify-between relative shadow-sm">

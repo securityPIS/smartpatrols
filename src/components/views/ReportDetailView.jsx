@@ -84,7 +84,7 @@ export default function ReportDetailView({ isInline = false }) {
   const hasGpsSnapshot = Boolean(gpsCoordinate);
   const mapsQuery = hasGpsSnapshot ? `${latitude},${longitude}` : '';
   const mapsHref = hasGpsSnapshot ? `https://www.google.com/maps?q=${mapsQuery}` : '#';
-  const gpsSourceLabel = gpsSnapshot?.source === 'device' ? 'GPS perangkat saat sync' : gpsSnapshot?.source === 'ship' ? 'Koordinat kapal saat sync' : 'Snapshot sync laporan';
+  const gpsSourceLabel = gpsSnapshot?.source === 'device' ? 'GPS perangkat saat sync' : gpsSnapshot?.source === 'ship' ? 'Koordinat kapal lama, bukan GPS perangkat' : 'Snapshot sync laporan';
   const galleryItems = React.useMemo(() => getReportGalleryItems(selectedReportDetail), [selectedReportDetail]);
   const canUploadGallery = selectedReportDetail.resultType === 'aman' && !isReadOnly;
   const syncDateLabel = selectedReportDetail.date || '-';

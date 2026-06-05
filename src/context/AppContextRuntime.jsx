@@ -1532,8 +1532,8 @@ function createShipLocationSnapshot(ship) {
   };
 }
 
-const PATROL_SUBMIT_GEOLOCATION_TIMEOUT_MS = 5000;
-const PATROL_SUBMIT_GEOLOCATION_MAX_AGE_MS = 30000;
+const PATROL_SUBMIT_GEOLOCATION_TIMEOUT_MS = 12000;
+const PATROL_SUBMIT_GEOLOCATION_MAX_AGE_MS = 0;
 
 function createGeolocationRequestOptions(options = {}) {
   return {
@@ -1543,24 +1543,32 @@ function createGeolocationRequestOptions(options = {}) {
   };
 }
 
+function createDeviceGeolocationSnapshot(coords, provider) {
+  const coordinatePair = normalizeSnapshotCoordinatePair(
+    coords?.latitude,
+    coords?.longitude,
+  );
+  if (!coordinatePair) return null;
+
+  return {
+    ...coordinatePair,
+    accuracy: Number.isFinite(coords?.accuracy)
+      ? Math.round(coords.accuracy)
+      : null,
+    source: 'device',
+    provider,
+  };
+}
+
 async function requestCurrentGeolocation(options = {}) {
   const geolocationOptions = createGeolocationRequestOptions(options);
 
   try {
     const nativePosition = await getNativeGeolocationPosition(geolocationOptions);
     if (nativePosition?.coords) {
-      const coordinatePair = normalizeSnapshotCoordinatePair(
-        nativePosition.coords.latitude,
-        nativePosition.coords.longitude,
-      );
-      if (!coordinatePair) return null;
-
-      return {
-        ...coordinatePair,
-        accuracy: Number.isFinite(nativePosition.coords.accuracy)
-          ? Math.round(nativePosition.coords.accuracy)
-          : null,
-      };
+      const nativeLocation = createDeviceGeolocationSnapshot(nativePosition.coords, 'native');
+      if (nativeLocation) return nativeLocation;
+      console.warn('GPS native patroli mengembalikan koordinat tidak valid, mencoba Web Geolocation');
     }
   } catch (error) {
     console.warn('GPS native patroli tidak tersedia, memakai fallback Web Geolocation', error);
@@ -1573,21 +1581,13 @@ async function requestCurrentGeolocation(options = {}) {
   return new Promise((resolve) => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const coordinatePair = normalizeSnapshotCoordinatePair(
-          position.coords.latitude,
-          position.coords.longitude,
-        );
-        if (!coordinatePair) {
+        const webLocation = createDeviceGeolocationSnapshot(position.coords, 'web');
+        if (!webLocation) {
           resolve(null);
           return;
         }
 
-        resolve({
-          ...coordinatePair,
-          accuracy: Number.isFinite(position.coords.accuracy)
-            ? Math.round(position.coords.accuracy)
-            : null,
-        });
+        resolve(webLocation);
       },
       (error) => {
         console.warn('GPS patroli tidak tersedia saat sync laporan', error);
@@ -1915,18 +1915,9 @@ async function capturePatrolEnvironmentSnapshot(ship, capturedAt = getTrustedDat
   const gpsSnapshot = deviceLocation
     ? {
       ...deviceLocation,
-      source: 'device',
       capturedAt,
     }
-    : (shipSnapshot?.lat != null && shipSnapshot?.lng != null)
-      ? {
-        lat: shipSnapshot.lat,
-        lng: shipSnapshot.lng,
-        accuracy: null,
-        source: 'ship',
-        capturedAt,
-      }
-      : null;
+    : null;
 
   const weatherSnapshot = skipWeatherFetch
     ? createFallbackWeatherSnapshot(fallbackWeather, gpsSnapshot)
@@ -4007,13 +3998,23 @@ function compactGpsSnapshotForCloudSync(snapshot) {
   const lat = normalizeSnapshotCoordinate(snapshot.lat);
   const lng = normalizeSnapshotCoordinate(snapshot.lng);
   const source = sanitizeText(snapshot.source || '', 40) || null;
+  const provider = sanitizeText(snapshot.provider || '', 40) || null;
+  const accuracy = Number.isFinite(Number(snapshot.accuracy))
+    ? Math.max(0, Math.round(Number(snapshot.accuracy)))
+    : null;
+  const capturedAt = typeof snapshot.capturedAt === 'string'
+    ? snapshot.capturedAt
+    : null;
 
-  if (lat == null && lng == null && !source) return null;
+  if (lat == null || lng == null) return null;
 
   return {
     lat,
     lng,
-    source,
+    accuracy,
+    source: source || 'device',
+    provider,
+    capturedAt,
   };
 }
 
@@ -7988,6 +7989,16 @@ export function AppProvider({ children }) {
           skipWeatherFetch: true,
         },
       );
+      if (!environmentSnapshot.gpsSnapshot) {
+        setConfirmDialog({
+          title: 'GPS perangkat belum tersedia',
+          message: 'Aktifkan layanan lokasi dan izin GPS perangkat, lalu ulangi submit. Laporan belum disimpan supaya koordinat patroli tidak tercatat sebagai dummy atau fallback kapal.',
+          confirmText: 'MENGERTI',
+          isAlert: true,
+          onConfirm: () => {},
+        });
+        return;
+      }
 
       const submittedItem = {
         ...currentCheckpoint,
