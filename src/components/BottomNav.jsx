@@ -57,7 +57,7 @@ const BottomNav = React.memo(function BottomNav() {
         <div className="relative">
           <div className="absolute inset-x-0 -top-7 flex justify-center pointer-events-none">
             <div className="pointer-events-auto">
-              <SOSButton className="!static w-16 h-16 rounded-full border-4 border-[#070b19] ring-4 ring-red-500/20" />
+              <SOSButton className="!static w-16 h-16 rounded-full border-0 ring-4 ring-red-500/20" />
             </div>
           </div>
           <div className="flex items-center px-2 pt-2 pb-1">
