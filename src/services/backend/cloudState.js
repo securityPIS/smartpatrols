@@ -2,7 +2,7 @@
 Tujuan: Menyediakan sinkronisasi state cloud SmartPatrol di atas tabel SQL normalisasi.
 Caller: AppContextRuntime untuk hydrate state, publish sinyal realtime, simpan snapshot, dan upload aset.
 Dependensi: Supabase Postgres/Realtime, adapter aset, outbox IndexedDB, dan mapping state legacy.
-Main Functions: Fetch/hydrate state dari SQL, decompose state lokal ke tabel SQL, subscribe perubahan realtime, dan signal ringan.
+Main Functions: Fetch/hydrate state dari SQL, decompose state lokal ke tabel SQL, subscribe perubahan realtime per tabel, dan signal ringan.
 Side Effects: Membaca/menulis tabel profiles, ships, patrol_reports, incidents, client_mutations, serta cache IndexedDB.
 */
 
@@ -321,34 +321,72 @@ export async function markNotificationRecipientRead(baseIds = [], userId = '') {
   if (error && !isRowLevelSecurityError(error)) throw error;
 }
 
-async function hydrateStateFromSql() {
-  const supabase = ensureSupabaseClient();
-  const [profiles, ships, reports, incidents, sosAlerts, notifications] = await Promise.all([
-    supabase.from('profiles').select('*').order('name', { ascending: true }),
-    supabase.from('ships').select('*').order('name', { ascending: true }),
+async function readCloudRows(label, query, options = {}) {
+  const { critical = false } = options;
+  const { data, error } = await query;
+  if (error) {
+    if (critical) throw error;
+    console.error(`Gagal memuat domain '${label}' saat hydrate cloud, lanjut tanpa data domain tersebut`, error);
+    return [];
+  }
+  return data || [];
+}
+
+async function fetchProfilesRows(supabase) {
+  return readCloudRows(
+    'profiles',
+    supabase.from('profiles').select('*').order('name', { ascending: true }).limit(500),
+    { critical: true },
+  );
+}
+
+async function fetchShipsRows(supabase) {
+  return readCloudRows(
+    'ships',
+    supabase.from('ships').select('*').order('name', { ascending: true }).limit(200),
+    { critical: true },
+  );
+}
+
+async function fetchPatrolReportRows(supabase) {
+  return readCloudRows(
+    'patrol_reports',
     supabase.from('patrol_reports').select('*').limit(500),
+    { critical: true },
+  );
+}
+
+async function fetchIncidentRows(supabase) {
+  return readCloudRows(
+    'incidents',
     supabase.from('incidents').select('*').order('created_at', { ascending: false }).limit(200),
+  );
+}
+
+async function fetchSosAlertRows(supabase) {
+  return readCloudRows(
+    'sos_alerts',
     supabase.from('sos_alerts').select('*').order('triggered_at', { ascending: false }).limit(20),
+  );
+}
+
+async function fetchNotificationRows(supabase) {
+  return readCloudRows(
+    'notifications',
     supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(120),
-  ]);
+  );
+}
 
-  // Domain inti — tanpa data ini state tidak bisa dibangun, jadi gagalkan hydrate
-  // agar fallback cache dipakai. Laporan patroli termasuk inti supaya admin/petugas
-  // tetap melihat laporan walau domain lain (incidents/sos/notifications) bermasalah.
-  for (const result of [profiles, ships, reports]) {
-    if (result.error) throw result.error;
-  }
-  // Domain sekunder — bila gagal (mis. RLS atau drift skema), jangan jatuhkan seluruh
-  // sinkronisasi; cukup perlakukan sebagai kosong agar laporan patroli tetap tersinkron.
-  for (const [label, result] of [['incidents', incidents], ['sos_alerts', sosAlerts], ['notifications', notifications]]) {
-    if (result.error) {
-      console.error(`Gagal memuat domain '${label}' saat hydrate cloud, lanjut tanpa data domain tersebut`, result.error);
-      result.data = [];
-    }
-  }
-
+function buildStatePayload(
+  profileRows = [],
+  shipRows = [],
+  reportRows = [],
+  incidentRows = [],
+  sosRows = [],
+  notifRows = [],
+) {
   const checkpointsByShip = {};
-  (reports.data || []).forEach((row) => {
+  reportRows.forEach((row) => {
     const shipId = row.ship_id || row.payload?.shipId;
     if (!shipId) return;
     checkpointsByShip[shipId] = checkpointsByShip[shipId] || [];
@@ -356,7 +394,7 @@ async function hydrateStateFromSql() {
   });
 
   const incidentMeta = {};
-  const incidentsData = (incidents.data || []).map((row) => {
+  const incidentsData = incidentRows.map((row) => {
     const incident = incidentRowToState(row);
     incidentMeta[incident.id] = {
       progress: row.payload?.progress || [],
@@ -365,55 +403,201 @@ async function hydrateStateFromSql() {
     return incident;
   });
 
-  const activeSosRow = (sosAlerts.data || []).find(row => row.status === 'active') || null;
+  const activeSosRow = sosRows.find(row => row.status === 'active') || null;
 
   return {
     schemaVersion: CLOUD_STATE_SCHEMA_VERSION,
     clientUpdatedAt: Date.now(),
     state: {
-      shipsData: (ships.data || []).map(shipToState),
-      usersData: (profiles.data || []).map(profileToUser),
+      shipsData: shipRows.map(shipToState),
+      usersData: profileRows.map(profileToUser),
       checkpointsByShip,
       incidentsData,
       incidentMeta,
       historyEntries: [],
-      notifications: reconstructNotificationsFromRows(notifications.data || []),
+      notifications: reconstructNotificationsFromRows(notifRows),
       activeSOSAlert: activeSosRow?.payload || null,
-      sosHistory: (sosAlerts.data || []).filter(row => row.status !== 'active').map(row => row.payload || row),
+      sosHistory: sosRows.filter(row => row.status !== 'active').map(row => row.payload || row),
       shiftStatusRecords: {},
     },
   };
+}
+
+async function hydrateStateFromSql() {
+  const supabase = ensureSupabaseClient();
+  const [profileRows, shipRows, reportRows, incidentRows, sosRows, notifRows] = await Promise.all([
+    fetchProfilesRows(supabase),
+    fetchShipsRows(supabase),
+    fetchPatrolReportRows(supabase),
+    fetchIncidentRows(supabase),
+    fetchSosAlertRows(supabase),
+    fetchNotificationRows(supabase),
+  ]);
+
+  return buildStatePayload(profileRows, shipRows, reportRows, incidentRows, sosRows, notifRows);
 }
 
 export function subscribeToCloudAppState(callback, onError) {
   if (!isCloudSyncEnabled) return () => {};
   const supabase = ensureSupabaseClient();
   let disposed = false;
+  let hasHydratedOnce = false;
+  let flushTimer = null;
+  let fetchInFlight = false;
+  let queuedFullHydrate = false;
+  const queuedTables = new Set();
 
-  const fetchState = async () => {
-    const payload = await hydrateStateFromSql();
-    await saveCacheSnapshot('cloud-state', payload);
-    if (!disposed) callback(payload);
+  const cachedRows = {
+    profiles: [],
+    ships: [],
+    patrol_reports: [],
+    incidents: [],
+    sos_alerts: [],
+    notifications: [],
   };
 
-  fetchState().catch(async (error) => {
+  const buildAndEmit = async () => {
+    const payload = buildStatePayload(
+      cachedRows.profiles,
+      cachedRows.ships,
+      cachedRows.patrol_reports,
+      cachedRows.incidents,
+      cachedRows.sos_alerts,
+      cachedRows.notifications,
+    );
+    await saveCacheSnapshot('cloud-state', payload);
+    if (!disposed) callback(payload);
+    return payload;
+  };
+
+  const hydrateAllTablesNow = async () => {
+    const [profileRows, shipRows, reportRows, incidentRows, sosRows, notifRows] = await Promise.all([
+      fetchProfilesRows(supabase),
+      fetchShipsRows(supabase),
+      fetchPatrolReportRows(supabase),
+      fetchIncidentRows(supabase),
+      fetchSosAlertRows(supabase),
+      fetchNotificationRows(supabase),
+    ]);
+
+    Object.assign(cachedRows, {
+      profiles: profileRows,
+      ships: shipRows,
+      patrol_reports: reportRows,
+      incidents: incidentRows,
+      sos_alerts: sosRows,
+      notifications: notifRows,
+    });
+    hasHydratedOnce = true;
+  };
+
+  const fetchOneTableNow = async (table) => {
+    switch (table) {
+      case 'patrol_reports':
+        cachedRows.patrol_reports = await fetchPatrolReportRows(supabase);
+        break;
+      case 'incidents':
+        cachedRows.incidents = await fetchIncidentRows(supabase);
+        break;
+      case 'sos_alerts':
+        cachedRows.sos_alerts = await fetchSosAlertRows(supabase);
+        break;
+      case 'profiles':
+        cachedRows.profiles = await fetchProfilesRows(supabase);
+        break;
+      case 'ships':
+        cachedRows.ships = await fetchShipsRows(supabase);
+        break;
+      case 'notifications':
+        cachedRows.notifications = await fetchNotificationRows(supabase);
+        break;
+      default:
+        queuedFullHydrate = true;
+        break;
+    }
+  };
+
+  const scheduleFlush = (delayMs = 100) => {
+    if (flushTimer !== null) return;
+    flushTimer = setTimeout(() => {
+      flushTimer = null;
+      flushQueuedFetch().catch(onError);
+    }, delayMs);
+  };
+
+  const flushQueuedFetch = async () => {
+    if (fetchInFlight || disposed) return;
+    fetchInFlight = true;
+    try {
+      do {
+        const shouldFullHydrate = queuedFullHydrate || !hasHydratedOnce;
+        const tables = Array.from(queuedTables);
+        queuedFullHydrate = false;
+        queuedTables.clear();
+
+        if (shouldFullHydrate) {
+          await hydrateAllTablesNow();
+        } else if (tables.length > 0) {
+          await Promise.all(tables.map(fetchOneTableNow));
+        } else {
+          return;
+        }
+
+        if (!disposed) await buildAndEmit();
+      } while (!disposed && (queuedFullHydrate || queuedTables.size > 0));
+    } finally {
+      fetchInFlight = false;
+      if (!disposed && (queuedFullHydrate || queuedTables.size > 0)) scheduleFlush(0);
+    }
+  };
+
+  const scheduleFetch = (table, options = {}) => {
+    if (options.full) queuedFullHydrate = true;
+    if (table) queuedTables.add(table);
+    scheduleFlush();
+  };
+
+  queuedFullHydrate = true;
+  flushQueuedFetch().catch(async (error) => {
     const cached = await loadCacheSnapshot('cloud-state').catch(() => null);
     if (cached && !disposed) callback(cached);
     onError?.(error);
   });
 
   const channel = supabase.channel('smartpatrol-sql-state')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'client_mutations' }, () => fetchState().catch(onError))
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'patrol_reports' }, () => fetchState().catch(onError))
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'incidents' }, () => fetchState().catch(onError))
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'sos_alerts' }, () => fetchState().catch(onError))
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => fetchState().catch(onError))
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'pending_registrations' }, () => fetchState().catch(onError))
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, () => fetchState().catch(onError))
-    .subscribe();
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'client_mutations' }, () => {
+      scheduleFetch(null, { full: true });
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'patrol_reports' }, () => {
+      scheduleFetch('patrol_reports');
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'incidents' }, () => {
+      scheduleFetch('incidents');
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'sos_alerts' }, () => {
+      scheduleFetch('sos_alerts');
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+      scheduleFetch('profiles');
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'ships' }, () => {
+      scheduleFetch('ships');
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, () => {
+      scheduleFetch('notifications');
+    })
+    .subscribe((status) => {
+      if (status === 'SUBSCRIBED' && hasHydratedOnce) {
+        scheduleFetch(null, { full: true });
+      }
+      if (status === 'CHANNEL_ERROR') {
+        onError?.(new Error('Realtime state Supabase gagal.'));
+      }
+    });
 
   return () => {
     disposed = true;
+    if (flushTimer !== null) clearTimeout(flushTimer);
     supabase.removeChannel(channel);
   };
 }

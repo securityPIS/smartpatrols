@@ -157,6 +157,40 @@ npm run build
 - `src/context/AppContext.jsx` legacy dihapus agar tidak ada import backend lama.
 - Jika schema/flow utama berubah, update file ini pada sesi yang sama.
 
+## Optimasi DB Egress Realtime (2026-06-05)
+
+Tujuan: menurunkan egress Supabase dari pola lama "full hydrate 6 tabel pada setiap
+event realtime".
+
+Perubahan utama:
+
+1. `hydrateStateFromSql` (`src/services/backend/cloudState.js`) sekarang memakai helper
+   fetch per tabel. Domain inti (`profiles`, `ships`, `patrol_reports`) tetap critical:
+   error membuat hydrate gagal agar fallback cache dipakai. Domain sekunder
+   (`incidents`, `sos_alerts`, `notifications`) tetap fallback kosong bila error agar
+   laporan patroli tidak ikut hilang.
+2. `subscribeToCloudAppState` menyimpan raw rows per tabel di closure, lalu membangun
+   payload callback dari cache tersebut. Event tabel spesifik hanya fetch tabel terkait.
+   Event `client_mutations` tetap full hydrate karena sinyalnya masih generik.
+3. `pending_registrations` tidak lagi memicu hydrate global cloud state; domain ini
+   tetap ditangani listener khusus `subscribeToPendingRegistrations` di `access.js`.
+4. Listener domain `subscribeToPatrolReports` melakukan delta merge dari `event.new`
+   / `event.old` dengan guard `shift_key`, `ship_id`, dan `ship_name`, agar event shift
+   sama dari kapal lain tidak masuk cache lokal.
+5. Listener domain `subscribeToIncidents` melakukan delta merge by `id` dan menjaga
+   sort desc + limit.
+6. Fallback polling tombstone patroli diturunkan dari 15 detik menjadi 30 detik.
+
+Regresi dijaga oleh:
+
+- `tests/pages/cloud-state-per-table-fetch.test.mjs`
+- `tests/pages/patrol-report-delta-subscription.test.mjs`
+- `tests/pages/incident-delta-subscription.test.mjs`
+
+Catatan rollout Supabase: production target baru diarahkan ke
+`https://hsquavmbeaawywpebafw.supabase.co` melalui env. Project lama
+`https://urhczzdeqqqhztgplgzs.supabase.co` tidak boleh disentuh saat deploy/migrasi.
+
 ## Sinkronisasi Laporan Patroli ke Admin & Petugas Sekapal (bug fix tervalidasi)
 
 Gejala: petugas submit laporan tapi admin (tab On Going) dan petugas lain di kapal

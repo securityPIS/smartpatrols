@@ -87,6 +87,18 @@ registerOutboxHandler('patrol_report.upsert', writePatrolReport);
 export function subscribeToPatrolReports({ shiftKey, shipId, shipName }, callback, onError) {
   const supabase = ensureSupabaseClient();
   let disposed = false;
+  let currentRows = [];
+
+  const rowBelongsToSubscription = (row = {}) => {
+    if (String(row.shift_key || '') !== String(shiftKey || '')) return false;
+    if (String(row.ship_id || '') !== String(shipId || '')) return false;
+    if (shipName && String(row.ship_name || '') !== String(shipName)) return false;
+    return true;
+  };
+
+  const emitCurrent = () => {
+    if (!disposed) callback(currentRows.map(mapRowToReport));
+  };
 
   const fetchRows = async () => {
     let query = supabase
@@ -99,7 +111,8 @@ export function subscribeToPatrolReports({ shiftKey, shipId, shipName }, callbac
     if (shipName) query = query.eq('ship_name', shipName);
     const { data, error } = await query;
     if (error) throw error;
-    if (!disposed) callback((data || []).map(mapRowToReport));
+    currentRows = data || [];
+    emitCurrent();
   };
 
   fetchRows().catch(onError);
@@ -110,8 +123,44 @@ export function subscribeToPatrolReports({ shiftKey, shipId, shipName }, callbac
       schema: 'public',
       table: PATROL_REPORTS_TABLE,
       filter: `shift_key=eq.${shiftKey}`,
-    }, () => {
-      fetchRows().catch(onError);
+    }, (event) => {
+      const nextRow = event.new || null;
+      const oldRow = event.old || null;
+      const rowId = nextRow?.id || oldRow?.id || null;
+
+      if (!rowId) {
+        fetchRows().catch(onError);
+        return;
+      }
+
+      if (event.eventType === 'DELETE') {
+        if (!rowBelongsToSubscription(oldRow)) return;
+        currentRows = currentRows.filter(row => row.id !== rowId);
+        emitCurrent();
+        return;
+      }
+
+      if (!rowBelongsToSubscription(nextRow)) {
+        const previousLength = currentRows.length;
+        currentRows = currentRows.filter(row => row.id !== rowId);
+        if (currentRows.length !== previousLength) emitCurrent();
+        return;
+      }
+
+      const index = currentRows.findIndex(row => row.id === rowId);
+      if (index >= 0) {
+        currentRows = [
+          ...currentRows.slice(0, index),
+          nextRow,
+          ...currentRows.slice(index + 1),
+        ];
+      } else if (currentRows.length < PATROL_REPORTS_LISTEN_LIMIT) {
+        currentRows = [...currentRows, nextRow];
+      } else {
+        fetchRows().catch(onError);
+        return;
+      }
+      emitCurrent();
     })
     .subscribe();
 
@@ -306,7 +355,7 @@ export function subscribeToPatrolReportTombstones(callback, onError) {
   // Poll ulang daftar tombstone secara berkala memastikan penghapusan tetap dipropagasi
   // dalam beberapa detik walau realtime mati. fetchRows idempotent (reset checkpoint yang
   // sudah pending = no-op), jadi aman dipanggil berulang.
-  const POLL_INTERVAL_MS = 15000;
+  const POLL_INTERVAL_MS = 30000;
   const pollTimer = setInterval(() => {
     if (disposed) return;
     fetchRows().catch(onError);

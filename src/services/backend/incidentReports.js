@@ -123,6 +123,15 @@ registerOutboxHandler('sos_alert.delete', async ({ sosId }) => {
 export function subscribeToIncidents(callback, onError) {
   const supabase = ensureSupabaseClient();
   let disposed = false;
+  let currentRows = [];
+
+  const emitCurrent = () => {
+    const sortedRows = [...currentRows]
+      .sort((left, right) => new Date(right.created_at || 0) - new Date(left.created_at || 0))
+      .slice(0, INCIDENTS_LISTEN_LIMIT);
+    currentRows = sortedRows;
+    if (!disposed) callback(sortedRows.map(mapRowToIncident));
+  };
 
   const fetchRows = async () => {
     const { data, error } = await supabase
@@ -131,7 +140,8 @@ export function subscribeToIncidents(callback, onError) {
       .order('created_at', { ascending: false })
       .limit(INCIDENTS_LISTEN_LIMIT);
     if (error) throw error;
-    if (!disposed) callback((data || []).map(mapRowToIncident));
+    currentRows = data || [];
+    emitCurrent();
   };
 
   fetchRows().catch(onError);
@@ -141,8 +151,33 @@ export function subscribeToIncidents(callback, onError) {
       event: '*',
       schema: 'public',
       table: INCIDENTS_TABLE,
-    }, () => {
-      fetchRows().catch(onError);
+    }, (event) => {
+      const nextRow = event.new || null;
+      const oldRow = event.old || null;
+      const rowId = nextRow?.id || oldRow?.id || null;
+
+      if (!rowId) {
+        fetchRows().catch(onError);
+        return;
+      }
+
+      if (event.eventType === 'DELETE') {
+        currentRows = currentRows.filter(row => row.id !== rowId);
+        emitCurrent();
+        return;
+      }
+
+      const index = currentRows.findIndex(row => row.id === rowId);
+      if (index >= 0) {
+        currentRows = [
+          ...currentRows.slice(0, index),
+          nextRow,
+          ...currentRows.slice(index + 1),
+        ];
+      } else {
+        currentRows = [nextRow, ...currentRows];
+      }
+      emitCurrent();
     })
     .subscribe();
 
