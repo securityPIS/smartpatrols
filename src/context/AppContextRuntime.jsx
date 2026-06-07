@@ -36,6 +36,7 @@ import {
   subscribeToFirebaseAuthChanges,
 } from '../services/backend/auth';
 import {
+  fetchCloudSyncWatermarks,
   fetchCloudAppState,
   getNotificationCloudBaseId,
   isCloudSyncEnabled,
@@ -4461,10 +4462,19 @@ function createCloudSyncSignalPayload(options = {}) {
   const actorUserId = sanitizeText(options.actorUserId || '', 120) || '';
   const shipName = sanitizeText(options.shipName || '', 80) || '';
   const instanceId = sanitizeText(options.instanceId || '', 120) || '';
+  const normalizedReason = reason.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+  const inferredDomain = options.domain
+    || (normalizedReason.includes('sos') ? 'sos_alerts' : null)
+    || (normalizedReason.includes('notif') ? 'notifications' : null)
+    || (normalizedReason.includes('incident') ? 'incidents' : null)
+    || (normalizedReason.includes('patrol') ? 'patrol_reports' : null)
+    || (normalizedReason.includes('state_sync') ? 'app_state' : null);
+  const domain = sanitizeText(inferredDomain || '', 80) || null;
 
   return {
     revision: `${reason}-${clientUpdatedAt}-${Math.random().toString(36).slice(2, 8)}`,
     reason,
+    domain,
     priority,
     clientUpdatedAt,
     actorUserId,
@@ -4472,6 +4482,41 @@ function createCloudSyncSignalPayload(options = {}) {
     instanceId,
     activeSOSAlert: compactSOSRecordForCloudSignal(options.activeSOSAlert),
   };
+}
+
+function normalizeCloudSignalDomain(value = '') {
+  return sanitizeText(value || '', 80).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+}
+
+function shouldRefreshSharedStateForSignal(signal = {}) {
+  if (signal.forceSnapshot === true) return true;
+  const domain = normalizeCloudSignalDomain(signal.domain || signal.reason || '');
+  if (!domain) return true;
+  if (
+    domain === 'app_state'
+    || domain === 'state_sync'
+    || domain === 'state_sync_urgent'
+    || domain === 'profiles'
+    || domain === 'ships'
+    || domain.includes('sos')
+    || domain.includes('notif')
+    || domain.includes('incident')
+    || domain.includes('patrol')
+  ) {
+    return false;
+  }
+  return true;
+}
+
+function haveCloudSyncWatermarksChanged(previous = {}, next = {}) {
+  if (!previous || typeof previous !== 'object') return false;
+  if (!next || typeof next !== 'object') return false;
+  return ['patrol_reports', 'incidents', 'sos_alerts', 'notifications', 'patrol_report_tombstones']
+    .some((key) => {
+      const previousValue = previous[key] || null;
+      const nextValue = next[key] || null;
+      return Boolean(previousValue || nextValue) && previousValue !== nextValue;
+    });
 }
 
 async function pickLocalImage(options = {}) {
@@ -6599,6 +6644,7 @@ export function AppProvider({ children }) {
   }, [applyPendingShiftStatusRecords]);
   const handleIncomingCloudPayloadRef = useRef(null);
   const refreshCloudSharedStateRef = useRef(null);
+  const cloudSyncWatermarksRef = useRef(null);
   const handleIncomingCloudPayload = useCallback((cloudPayload, options = {}) => {
     const shouldClearState = options.clearWhenEmpty !== false;
     const payloadState = cloudPayload?.state && typeof cloudPayload.state === 'object'
@@ -9877,7 +9923,7 @@ export function AppProvider({ children }) {
       if (expectedClientUpdatedAt > 0 && lastCloudClientUpdatedAtRef.current >= expectedClientUpdatedAt) {
         return;
       }
-      if (attempt >= 5) return;
+      if (attempt >= 1) return;
 
       const retryDelayMs = attempt === 0
         ? 100
@@ -9925,8 +9971,15 @@ export function AppProvider({ children }) {
         ));
       }
 
-      clearPendingRefresh();
-      runSignalRefresh(signal, 0);
+      if (shouldRefreshSharedStateForSignal(signal)) {
+        clearPendingRefresh();
+        runSignalRefresh(signal, 0);
+      } else {
+        logCloudSyncDebug('signal-domain-skip-full-refresh', {
+          domain: signal.domain || null,
+          reason: signal.reason || 'state-sync',
+        });
+      }
     }, (error) => {
       console.error('Gagal subscribe sinyal sinkronisasi cloud', error);
     });
@@ -9947,6 +10000,31 @@ export function AppProvider({ children }) {
         source,
         ...options,
       });
+    };
+
+    const runWatermarkCheck = async (source) => {
+      if (isDisposed || !isNavigatorOnline()) return;
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+
+      try {
+        const nextWatermarks = await fetchCloudSyncWatermarks({
+          shiftKey: currentShiftMeta?.key || null,
+          shipId: operationalShip?.id || null,
+          shipName: operationalShipName || null,
+        });
+        if (!nextWatermarks) return;
+        const previousWatermarks = cloudSyncWatermarksRef.current;
+        cloudSyncWatermarksRef.current = nextWatermarks;
+        if (!previousWatermarks) return;
+        if (!haveCloudSyncWatermarksChanged(previousWatermarks, nextWatermarks)) return;
+
+        runRefresh(`watermark-${source}`, {
+          preferServer: true,
+          clearWhenEmpty: false,
+        });
+      } catch (error) {
+        console.warn('Gagal menjalankan watchdog watermark sync cloud', error);
+      }
     };
 
     runRefresh('bootstrap', {
@@ -9976,16 +10054,14 @@ export function AppProvider({ children }) {
       });
     };
 
-    const refreshIntervalId = typeof window !== 'undefined'
+    const WATERMARK_CHECK_INTERVAL_MS = 60000;
+    const watermarkIntervalId = typeof window !== 'undefined'
       ? window.setInterval(() => {
         if (!isNavigatorOnline()) return;
         if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
 
-        runRefresh('interval', {
-          preferServer: true,
-          clearWhenEmpty: false,
-        });
-      }, 8000)
+        void runWatermarkCheck('interval');
+      }, WATERMARK_CHECK_INTERVAL_MS)
       : null;
 
     if (typeof window !== 'undefined') {
@@ -10000,8 +10076,8 @@ export function AppProvider({ children }) {
     return () => {
       isDisposed = true;
 
-      if (refreshIntervalId !== null && typeof window !== 'undefined') {
-        window.clearInterval(refreshIntervalId);
+      if (watermarkIntervalId !== null && typeof window !== 'undefined') {
+        window.clearInterval(watermarkIntervalId);
       }
 
       if (typeof window !== 'undefined') {
@@ -10013,7 +10089,7 @@ export function AppProvider({ children }) {
         document.removeEventListener('visibilitychange', handleVisibilityChange);
       }
     };
-  }, [hasOperationalCloudAccess]);
+  }, [currentShiftMeta?.key, hasOperationalCloudAccess, operationalShip?.id, operationalShipName]);
   useEffect(() => {
     if (!isCloudSyncEnabled || !isCloudWriteEnabled || !hasOperationalCloudAccess || isOffline || !cloudSyncBootstrapped) return;
 

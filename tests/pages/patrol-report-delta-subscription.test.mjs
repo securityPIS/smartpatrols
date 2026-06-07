@@ -4,7 +4,7 @@ Tujuan: Mencegah regresi delta subscription patrol_reports agar egress turun tan
 Caller: Node test runner saat verifikasi listener laporan patroli.
 Dependensi: src/services/backend/patrolReports.js.
 Main Functions: Mengunci cache baris lokal, guard shift/kapal, fallback saat event tidak lengkap,
-        dan polling tombstone 30 detik.
+        delete aman untuk old-row PK-only, dan polling tombstone 30 detik.
 Side Effects: Tidak ada; test membaca file sumber secara read-only.
 */
 
@@ -47,9 +47,10 @@ test('delta patrol merge memakai event.new/event.old dan fallback bila id tidak 
   assert.match(fn, /if \(!rowId\) \{[\s\S]*?fetchRows\(\)\.catch\(onError\)/);
 });
 
-test('delete patrol hanya menghapus row yang cocok subscription', () => {
+test('delete patrol aman untuk old-row lengkap maupun PK-only', () => {
   const fn = extractSubscribeFunction();
-  assert.match(fn, /if \(event\.eventType === 'DELETE'\) \{[\s\S]*?if \(!rowBelongsToSubscription\(oldRow\)\) return/);
+  assert.match(fn, /if \(event\.eventType === 'DELETE'\) \{[\s\S]*?oldRow\?\.shift_key && !rowBelongsToSubscription\(oldRow\)/);
+  assert.match(fn, /const previousLength = currentRows\.length/);
   assert.match(fn, /currentRows = currentRows\.filter\(row => row\.id !== rowId\)/);
 });
 

@@ -2,8 +2,8 @@
 Tujuan: Menyediakan sinkronisasi state cloud SmartPatrol di atas tabel SQL normalisasi.
 Caller: AppContextRuntime untuk hydrate state, publish sinyal realtime, simpan snapshot, dan upload aset.
 Dependensi: Supabase Postgres/Realtime, adapter aset, outbox IndexedDB, dan mapping state legacy.
-Main Functions: Fetch/hydrate state dari SQL, decompose state lokal ke tabel SQL, subscribe perubahan realtime per tabel, dan signal ringan.
-Side Effects: Membaca/menulis tabel profiles, ships, patrol_reports, incidents, client_mutations, serta cache IndexedDB.
+Main Functions: Fetch/hydrate state dari SQL, decompose state lokal ke tabel SQL, subscribe perubahan realtime per tabel, signal ringan, dan watermark recovery.
+Side Effects: Membaca/menulis tabel profiles, ships, patrol_reports, incidents, client_mutations, RPC watermark, serta cache IndexedDB.
 */
 
 import { sanitizeEmail, sanitizePhone, sanitizeText, sanitizeUrl } from '../../utils/sanitize';
@@ -16,6 +16,180 @@ const isCloudSyncAllowedByEnv = import.meta.env.VITE_ENABLE_CLOUD_SYNC !== '0';
 const isCloudWriteAllowedByEnv = import.meta.env.VITE_ENABLE_CLOUD_SYNC_WRITE !== '0';
 const isCloudSyncEnabled = Boolean(isSupabaseConfigured) && isCloudSyncAllowedByEnv;
 const isCloudWriteEnabled = isCloudSyncEnabled && isCloudWriteAllowedByEnv;
+
+const PROFILE_COLUMNS = [
+  'id',
+  'auth_uid',
+  'email',
+  'name',
+  'role',
+  'type',
+  'worker_number',
+  'status',
+  'ship_assigned',
+  'phone',
+  'dob',
+  'address',
+  'office_address',
+  'emergency_name',
+  'emergency_contact',
+  'emergency_relation',
+  'photo_url',
+  'credential_updated_at',
+  'duty_end_date',
+  'duty_status',
+  'enabled',
+  'review_state',
+  'created_at',
+  'updated_at',
+].join(',');
+
+const SHIP_COLUMNS = [
+  'id',
+  'name',
+  'type',
+  'imo_number',
+  'lat',
+  'lng',
+  'status',
+  'route',
+  'route_loading',
+  'route_discharge',
+  'cargo_type',
+  'cargo_amount',
+  'photo_url',
+  'personnel',
+  'personnel_next_month',
+  'personnel_schedules',
+  'custom_checkpoints',
+  'documents',
+  'sos_recipient_ship_ids',
+  'created_at',
+  'updated_at',
+].join(',');
+
+const PATROL_REPORT_COLUMNS = [
+  'id',
+  'client_event_id',
+  'shift_key',
+  'ship_id',
+  'checkpoint_id',
+  'ship_name',
+  'checkpoint_name',
+  'status',
+  'result_type',
+  'completed_by_user_id',
+  'completed_by',
+  'occurred_at_trusted_ms',
+  'client_updated_at_ms',
+  'server_updated_at',
+  'media_status',
+  'photo_url',
+  'payload',
+  'created_at',
+  'updated_at',
+].join(',');
+
+const INCIDENT_COLUMNS = [
+  'id',
+  'client_event_id',
+  'ship_name',
+  'status',
+  'location',
+  'reported_by',
+  'occurred_at_trusted_ms',
+  'client_updated_at_ms',
+  'server_updated_at',
+  'photo_url',
+  'payload',
+  'created_at',
+  'updated_at',
+].join(',');
+
+const SOS_ALERT_COLUMNS = [
+  'id',
+  'client_event_id',
+  'triggered_by',
+  'ship_name',
+  'lat',
+  'lng',
+  'status',
+  'triggered_at',
+  'payload',
+  'created_at',
+  'updated_at',
+].join(',');
+
+const NOTIFICATION_COLUMNS = [
+  'id',
+  'target_user_id',
+  'target_role',
+  'ship_name',
+  'type',
+  'title',
+  'body',
+  'read',
+  'tone',
+  'payload',
+  'created_at',
+  'updated_at',
+].join(',');
+
+const SIGNAL_DOMAIN_TABLES = {
+  app_state: ['profiles', 'ships'],
+  state_sync: ['profiles', 'ships'],
+  users: ['profiles'],
+  profiles: ['profiles'],
+  ships: ['ships'],
+  patrol_reports: ['patrol_reports'],
+  patrol_report: ['patrol_reports'],
+  incidents: ['incidents'],
+  incident: ['incidents'],
+  sos_alerts: ['sos_alerts'],
+  sos: ['sos_alerts'],
+  notifications: ['notifications'],
+  notification: ['notifications'],
+};
+
+const SYNC_WATERMARK_KEYS = [
+  'patrol_reports',
+  'incidents',
+  'sos_alerts',
+  'notifications',
+  'patrol_report_tombstones',
+];
+
+function normalizeSignalDomain(value = '') {
+  return sanitizeText(value || '', 80).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+}
+
+function resolveSignalTables(row = {}) {
+  const signal = row?.payload && typeof row.payload === 'object' ? row.payload : {};
+  const candidates = [
+    signal.domain,
+    signal.table,
+    signal.collection,
+    signal.reason,
+    row.mutation_type,
+  ].filter(Boolean);
+  const tables = new Set();
+
+  candidates.forEach((candidate) => {
+    const domain = normalizeSignalDomain(candidate);
+    const mappedTables = SIGNAL_DOMAIN_TABLES[domain] || [];
+    mappedTables.forEach((table) => tables.add(table));
+    if (domain.includes('sos')) tables.add('sos_alerts');
+    if (domain.includes('notif')) tables.add('notifications');
+    if (domain.includes('incident')) tables.add('incidents');
+    if (domain.includes('patrol')) tables.add('patrol_reports');
+  });
+
+  if (signal.activeSOSAlert) tables.add('sos_alerts');
+  if (Number(signal.users || 0) > 0) tables.add('profiles');
+  if (Number(signal.ships || 0) > 0) tables.add('ships');
+
+  return Array.from(tables);
+}
 
 function profileToUser(row = {}) {
   return {
@@ -335,7 +509,7 @@ async function readCloudRows(label, query, options = {}) {
 async function fetchProfilesRows(supabase) {
   return readCloudRows(
     'profiles',
-    supabase.from('profiles').select('*').order('name', { ascending: true }).limit(500),
+    supabase.from('profiles').select(PROFILE_COLUMNS).order('name', { ascending: true }).limit(500),
     { critical: true },
   );
 }
@@ -343,7 +517,7 @@ async function fetchProfilesRows(supabase) {
 async function fetchShipsRows(supabase) {
   return readCloudRows(
     'ships',
-    supabase.from('ships').select('*').order('name', { ascending: true }).limit(200),
+    supabase.from('ships').select(SHIP_COLUMNS).order('name', { ascending: true }).limit(200),
     { critical: true },
   );
 }
@@ -351,7 +525,7 @@ async function fetchShipsRows(supabase) {
 async function fetchPatrolReportRows(supabase) {
   return readCloudRows(
     'patrol_reports',
-    supabase.from('patrol_reports').select('*').limit(500),
+    supabase.from('patrol_reports').select(PATROL_REPORT_COLUMNS).limit(500),
     { critical: true },
   );
 }
@@ -359,22 +533,75 @@ async function fetchPatrolReportRows(supabase) {
 async function fetchIncidentRows(supabase) {
   return readCloudRows(
     'incidents',
-    supabase.from('incidents').select('*').order('created_at', { ascending: false }).limit(200),
+    supabase.from('incidents').select(INCIDENT_COLUMNS).order('created_at', { ascending: false }).limit(200),
   );
 }
 
 async function fetchSosAlertRows(supabase) {
   return readCloudRows(
     'sos_alerts',
-    supabase.from('sos_alerts').select('*').order('triggered_at', { ascending: false }).limit(20),
+    supabase.from('sos_alerts').select(SOS_ALERT_COLUMNS).order('triggered_at', { ascending: false }).limit(20),
   );
 }
 
 async function fetchNotificationRows(supabase) {
   return readCloudRows(
     'notifications',
-    supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(120),
+    supabase.from('notifications').select(NOTIFICATION_COLUMNS).order('created_at', { ascending: false }).limit(120),
   );
+}
+
+async function fetchLatestUpdatedAt(supabase, table, column = 'updated_at', options = {}) {
+  let query = supabase
+    .from(table)
+    .select(column)
+    .order(column, { ascending: false })
+    .limit(1);
+
+  if (options.shiftKey && table === 'patrol_reports') query = query.eq('shift_key', options.shiftKey);
+  if (options.shipId && table === 'patrol_reports') query = query.eq('ship_id', options.shipId);
+  if (options.shipName && (table === 'patrol_reports' || table === 'incidents')) query = query.eq('ship_name', options.shipName);
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return data?.[0]?.[column] || null;
+}
+
+export async function fetchCloudSyncWatermarks(options = {}) {
+  if (!isCloudSyncEnabled) return null;
+  const supabase = ensureSupabaseClient();
+  const rpcParams = {
+    p_shift_key: options.shiftKey || null,
+    p_ship_id: options.shipId || null,
+    p_ship_name: options.shipName || null,
+  };
+
+  try {
+    const { data, error } = await supabase.rpc('get_operational_sync_watermarks', rpcParams);
+    if (error) throw error;
+    return SYNC_WATERMARK_KEYS.reduce((accumulator, key) => {
+      accumulator[key] = data?.[key] || null;
+      return accumulator;
+    }, {});
+  } catch (error) {
+    // Migration watermark bisa belum ter-deploy saat frontend baru lebih dulu roll out.
+    // Fallback ini tetap ringan: hanya ambil satu timestamp terbaru per domain.
+    console.warn('Gagal memakai RPC watermark sync, fallback ke query timestamp ringan.', error);
+    const [patrolReports, incidents, sosAlerts, notifications, tombstones] = await Promise.all([
+      fetchLatestUpdatedAt(supabase, 'patrol_reports', 'updated_at', options).catch(() => null),
+      fetchLatestUpdatedAt(supabase, 'incidents', 'updated_at', options).catch(() => null),
+      fetchLatestUpdatedAt(supabase, 'sos_alerts', 'updated_at', options).catch(() => null),
+      fetchLatestUpdatedAt(supabase, 'notifications', 'updated_at', options).catch(() => null),
+      fetchLatestUpdatedAt(supabase, 'patrol_report_tombstones', 'deleted_at', options).catch(() => null),
+    ]);
+    return {
+      patrol_reports: patrolReports,
+      incidents,
+      sos_alerts: sosAlerts,
+      notifications,
+      patrol_report_tombstones: tombstones,
+    };
+  }
 }
 
 function buildStatePayload(
@@ -557,6 +784,16 @@ export function subscribeToCloudAppState(callback, onError) {
     scheduleFlush();
   };
 
+  let signalRecoveryTimer = null;
+  const scheduleSignalRecovery = () => {
+    if (signalRecoveryTimer !== null) return;
+    signalRecoveryTimer = setTimeout(() => {
+      signalRecoveryTimer = null;
+      ['profiles', 'ships', 'sos_alerts', 'notifications'].forEach(table => queuedTables.add(table));
+      scheduleFlush(0);
+    }, 30000);
+  };
+
   queuedFullHydrate = true;
   flushQueuedFetch().catch(async (error) => {
     const cached = await loadCacheSnapshot('cloud-state').catch(() => null);
@@ -565,8 +802,13 @@ export function subscribeToCloudAppState(callback, onError) {
   });
 
   const channel = supabase.channel('smartpatrol-sql-state')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'client_mutations' }, () => {
-      scheduleFetch(null, { full: true });
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'client_mutations' }, (event) => {
+      const tables = resolveSignalTables(event?.new || {});
+      if (tables.length === 0) {
+        scheduleSignalRecovery();
+        return;
+      }
+      tables.forEach((table) => scheduleFetch(table));
     })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'patrol_reports' }, () => {
       scheduleFetch('patrol_reports');
@@ -588,7 +830,7 @@ export function subscribeToCloudAppState(callback, onError) {
     })
     .subscribe((status) => {
       if (status === 'SUBSCRIBED' && hasHydratedOnce) {
-        scheduleFetch(null, { full: true });
+        ['profiles', 'ships', 'sos_alerts', 'notifications'].forEach((table) => scheduleFetch(table));
       }
       if (status === 'CHANNEL_ERROR') {
         onError?.(new Error('Realtime state Supabase gagal.'));
@@ -598,6 +840,7 @@ export function subscribeToCloudAppState(callback, onError) {
   return () => {
     disposed = true;
     if (flushTimer !== null) clearTimeout(flushTimer);
+    if (signalRecoveryTimer !== null) clearTimeout(signalRecoveryTimer);
     supabase.removeChannel(channel);
   };
 }
@@ -666,6 +909,7 @@ async function writeStateToSql(state, options = {}) {
     mutation_type: 'state-sync',
     client_updated_at_ms: Math.round(options.clientUpdatedAt || Date.now()),
     payload: {
+      domain: 'app_state',
       reason: options.reason || 'state-sync',
       users: profileRows.length,
       ships: shipRows.length,
@@ -710,6 +954,7 @@ export async function publishCloudSyncSignal(signal) {
     mutation_type: signal.reason || 'state-signal',
     client_updated_at_ms: clientUpdatedAt,
     payload: {
+      domain: signal.domain || signal.table || null,
       ...signal,
       clientUpdatedAt,
     },

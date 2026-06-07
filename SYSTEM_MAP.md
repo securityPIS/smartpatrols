@@ -187,10 +187,36 @@ Regresi dijaga oleh:
 - `tests/pages/cloud-state-per-table-fetch.test.mjs`
 - `tests/pages/patrol-report-delta-subscription.test.mjs`
 - `tests/pages/incident-delta-subscription.test.mjs`
+- `tests/pages/egress-realtime-first-source.test.mjs`
 
 Catatan rollout Supabase: production target baru diarahkan ke
 `https://hsquavmbeaawywpebafw.supabase.co` melalui env. Project lama
 `https://urhczzdeqqqhztgplgzs.supabase.co` tidak boleh disentuh saat deploy/migrasi.
+
+## Optimasi Egress Realtime-First (2026-06-07)
+
+Tujuan: menurunkan egress tanpa mengorbankan update instan laporan patroli. Prinsip
+baru: Realtime domain tetap jalur utama, sedangkan polling hanya recovery ringan.
+
+Perubahan utama:
+
+1. `client_mutations` di `cloudState.js` tidak lagi memicu full hydrate default.
+   Payload signal punya `domain`; domain yang dikenal hanya fetch tabel terkait.
+   Signal lama/tidak dikenal masuk recovery tertunda, bukan langsung 6 tabel.
+2. Channel signal kedua di `AppContextRuntime.jsx` tidak lagi memaksa full snapshot
+   untuk domain yang sudah ditangani Realtime/table listener (`patrol_reports`,
+   `incidents`, `sos_alerts`, `notifications`, `app_state`). Retry signal dibatasi
+   menjadi maksimal dua percobaan.
+3. Polling full snapshot 8 detik diganti watermark watchdog 60 detik. Watchdog
+   memanggil RPC `get_operational_sync_watermarks`; full refresh hanya terjadi bila
+   watermark domain berubah, sebagai self-heal saat Realtime terlewat.
+4. Fetch utama memakai projection eksplisit, bukan `select('*')`. `payload` masih
+   dipertahankan untuk domain yang mapper/UI lama masih membutuhkannya.
+5. Migration `20260607014119_egress_realtime_first_delta_sync.sql` menambah RPC
+   watermark, index `updated_at/deleted_at`, dan menurunkan `replica identity` hanya
+   untuk tabel yang aman (`client_mutations`, `notifications`, `sos_alerts`,
+   `incidents`). `patrol_reports`, `profiles`, dan `ships` tetap tidak diubah karena
+   sensitif untuk tombstone/delete dan akses operasional.
 
 ## Sinkronisasi Laporan Patroli ke Admin & Petugas Sekapal (bug fix tervalidasi)
 

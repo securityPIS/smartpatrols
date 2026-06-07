@@ -2,7 +2,7 @@
 Tujuan: Adapter SQL/Reatime untuk laporan checkpoint patroli.
 Caller: AppContextRuntime saat submit laporan, backfill offline, dan listener lintas-device.
 Dependensi: Supabase Postgres/Reatime dan outbox IndexedDB.
-Main Functions: Subscribe laporan per shift/kapal dan upsert laporan idempotent per checkpoint.
+Main Functions: Subscribe laporan per shift/kapal, delta merge realtime, dan upsert laporan idempotent per checkpoint.
 Side Effects: Membaca/menulis tabel patrol_reports dan mengantre mutation saat offline.
 */
 
@@ -13,6 +13,27 @@ import { deleteStorageAsset } from './assets';
 const PATROL_REPORTS_TABLE = 'patrol_reports';
 const PATROL_REPORTS_SCHEMA_VERSION = 1;
 const PATROL_REPORTS_LISTEN_LIMIT = 120;
+const PATROL_REPORT_COLUMNS = [
+  'id',
+  'client_event_id',
+  'shift_key',
+  'ship_id',
+  'checkpoint_id',
+  'ship_name',
+  'checkpoint_name',
+  'status',
+  'result_type',
+  'completed_by_user_id',
+  'completed_by',
+  'occurred_at_trusted_ms',
+  'client_updated_at_ms',
+  'server_updated_at',
+  'media_status',
+  'photo_url',
+  'payload',
+  'created_at',
+  'updated_at',
+].join(',');
 
 function createClientEventId(report = {}) {
   return [
@@ -103,7 +124,7 @@ export function subscribeToPatrolReports({ shiftKey, shipId, shipName }, callbac
   const fetchRows = async () => {
     let query = supabase
       .from(PATROL_REPORTS_TABLE)
-      .select('*')
+      .select(PATROL_REPORT_COLUMNS)
       .eq('shift_key', shiftKey)
       .eq('ship_id', shipId)
       .limit(PATROL_REPORTS_LISTEN_LIMIT);
@@ -134,9 +155,13 @@ export function subscribeToPatrolReports({ shiftKey, shipId, shipName }, callbac
       }
 
       if (event.eventType === 'DELETE') {
-        if (!rowBelongsToSubscription(oldRow)) return;
+        // Dengan REPLICA IDENTITY DEFAULT, event.old pada DELETE bisa hanya berisi PK.
+        // Hapus by id bila row memang ada di cache lokal; guard old-row tetap dipakai
+        // saat kolom shift/ship tersedia.
+        if (oldRow?.shift_key && !rowBelongsToSubscription(oldRow)) return;
+        const previousLength = currentRows.length;
         currentRows = currentRows.filter(row => row.id !== rowId);
-        emitCurrent();
+        if (currentRows.length !== previousLength || rowBelongsToSubscription(oldRow)) emitCurrent();
         return;
       }
 

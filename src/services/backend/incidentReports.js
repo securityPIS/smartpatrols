@@ -2,7 +2,7 @@
 Tujuan: Adapter SQL/Realtime untuk insiden dan update temuan SmartPatrol.
 Caller: AppContextRuntime saat submit/update/delete insiden dan listener lintas-device.
 Dependensi: Supabase Postgres/Reatime dan outbox IndexedDB.
-Main Functions: Subscribe insiden, upsert payload insiden idempotent, append progress/dokumentasi, dan delete admin.
+Main Functions: Subscribe insiden dengan delta merge, upsert payload insiden idempotent, append progress/dokumentasi, dan delete admin.
 Side Effects: Membaca/menulis tabel incidents serta mengantre mutation offline bila jaringan gagal.
 */
 
@@ -13,6 +13,21 @@ import { deleteStorageAsset } from './assets';
 const INCIDENTS_TABLE = 'incidents';
 const INCIDENTS_SCHEMA_VERSION = 1;
 const INCIDENTS_LISTEN_LIMIT = 200;
+const INCIDENT_COLUMNS = [
+  'id',
+  'client_event_id',
+  'ship_name',
+  'status',
+  'location',
+  'reported_by',
+  'occurred_at_trusted_ms',
+  'client_updated_at_ms',
+  'server_updated_at',
+  'photo_url',
+  'payload',
+  'created_at',
+  'updated_at',
+].join(',');
 
 function mapIncidentToRow(incident = {}, options = {}) {
   const clientUpdatedAt = Number.isFinite(options.clientUpdatedAt)
@@ -136,7 +151,7 @@ export function subscribeToIncidents(callback, onError) {
   const fetchRows = async () => {
     const { data, error } = await supabase
       .from(INCIDENTS_TABLE)
-      .select('*')
+      .select(INCIDENT_COLUMNS)
       .order('created_at', { ascending: false })
       .limit(INCIDENTS_LISTEN_LIMIT);
     if (error) throw error;

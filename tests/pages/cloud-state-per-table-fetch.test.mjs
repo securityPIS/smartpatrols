@@ -3,8 +3,8 @@ Tujuan: Mencegah regresi optimasi egress DB Supabase agar realtime tabel spesifi
         kembali memicu hydrate penuh 6 tabel untuk semua event.
 Caller: Node test runner saat verifikasi source sync cloud.
 Dependensi: src/services/backend/cloudState.js.
-Main Functions: Mengunci raw-row cache per tabel, full hydrate untuk signal generik,
-        dan pemisahan domain inti/sekunder.
+Main Functions: Mengunci raw-row cache per tabel, signal domain-aware tanpa full hydrate,
+        watermark recovery, dan pemisahan domain inti/sekunder.
 Side Effects: Tidak ada; test membaca file sumber secara read-only.
 */
 
@@ -28,9 +28,9 @@ function extractActiveSubscribeFunction() {
 }
 
 test('hydrate cloud memakai helper fetch per tabel dengan limit profiles dan ships', () => {
-  assert.match(source, /async function fetchProfilesRows\(supabase\)[\s\S]*?\.from\('profiles'\)[\s\S]*?\.limit\(500\)/);
-  assert.match(source, /async function fetchShipsRows\(supabase\)[\s\S]*?\.from\('ships'\)[\s\S]*?\.limit\(200\)/);
-  assert.match(source, /async function fetchPatrolReportRows\(supabase\)[\s\S]*?\.from\('patrol_reports'\)[\s\S]*?\.limit\(500\)/);
+  assert.match(source, /async function fetchProfilesRows\(supabase\)[\s\S]*?\.from\('profiles'\)\.select\(PROFILE_COLUMNS\)[\s\S]*?\.limit\(500\)/);
+  assert.match(source, /async function fetchShipsRows\(supabase\)[\s\S]*?\.from\('ships'\)\.select\(SHIP_COLUMNS\)[\s\S]*?\.limit\(200\)/);
+  assert.match(source, /async function fetchPatrolReportRows\(supabase\)[\s\S]*?\.from\('patrol_reports'\)\.select\(PATROL_REPORT_COLUMNS\)[\s\S]*?\.limit\(500\)/);
 });
 
 test('domain inti tetap critical dan domain sekunder fallback kosong', () => {
@@ -54,10 +54,19 @@ test('event tabel spesifik hanya menjadwalkan fetch tabel terkait', () => {
   assert.match(fn, /table: 'notifications' \}, \(\) => \{[\s\S]*?scheduleFetch\('notifications'\)/);
 });
 
-test('client_mutations tetap full hydrate dan pending_registrations tidak ada di channel global', () => {
+test('client_mutations domain-aware dan tidak full hydrate default', () => {
   const fn = extractActiveSubscribeFunction();
-  assert.match(fn, /table: 'client_mutations' \}, \(\) => \{[\s\S]*?scheduleFetch\(null, \{ full: true \}\)/);
+  assert.match(fn, /table: 'client_mutations' \}, \(event\) => \{[\s\S]*?resolveSignalTables\(event\?\.new \|\| \{\}\)/);
+  assert.match(fn, /tables\.forEach\(\(table\) => scheduleFetch\(table\)\)/);
+  assert.match(fn, /scheduleSignalRecovery\(\)/);
+  assert.doesNotMatch(fn, /scheduleFetch\(null, \{ full: true \}\)/);
   assert.doesNotMatch(fn, /table: 'pending_registrations'/);
+});
+
+test('watermark RPC tersedia sebagai recovery ringan', () => {
+  assert.match(source, /export async function fetchCloudSyncWatermarks\(options = \{\}\)/);
+  assert.match(source, /supabase\.rpc\('get_operational_sync_watermarks'/);
+  assert.match(source, /fetchLatestUpdatedAt\(supabase, 'patrol_reports', 'updated_at', options\)/);
 });
 
 test('fetch realtime memakai debounce dan penjaga in-flight agar tidak paralel liar', () => {
