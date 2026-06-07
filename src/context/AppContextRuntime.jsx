@@ -1175,7 +1175,7 @@ function createSOSIncidentRecord(sos) {
     source: 'sos',
     location: 'SOS Darurat',
     shipName,
-    deskripsi: `Sinyal SOS dikirim oleh ${senderName} dari kapal ${shipName}.${formattedLat !== '-' && formattedLng !== '-' ? ` Koordinat terakhir ${formattedLat}, ${formattedLng}.` : ' Koordinat terakhir belum tersedia.'}`,
+    deskripsi: `SOS dikirim oleh ${senderName} dari kapal ${shipName} perihal ${sanitizeText(sos.sosType || '', 200) || 'Kondisi darurat'}.${formattedLat !== '-' && formattedLng !== '-' ? ` Koordinat terakhir ${formattedLat}, ${formattedLng}.` : ' Koordinat terakhir belum tersedia.'}`,
     penyebab: 'Tombol SOS diaktifkan untuk meminta bantuan darurat di lapangan.',
     tindakLanjut: resolutionLabel,
     reportedBy: senderName,
@@ -5234,7 +5234,7 @@ export function AppProvider({ children }) {
     hasAppliedRoleLandingRef.current = true;
   }, [effectiveSessionUser]);
 
-  const handleSOSTrigger = useCallback((lat, lng) => {
+  const handleSOSTrigger = useCallback((lat, lng, sosType = '') => {
     if (!currentUserRecord) return;
     if (showTrustedTimeGateDialog()) return;
     const trustedTimestamp = createTrustedTimestampRecord();
@@ -5266,6 +5266,7 @@ export function AppProvider({ children }) {
       targetShipNames,
       confirmedBy: [],
       status: 'active',
+      sosType: sanitizeText(sosType || '', 200) || '',
       ...trustedTimestamp,
     };
 

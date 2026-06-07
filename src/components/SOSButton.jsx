@@ -2,6 +2,15 @@ import React, { useState } from 'react';
 import { Siren } from 'lucide-react';
 import { useSOS } from '../context/AppContextRuntime';
 
+const SOS_CATEGORIES = [
+  { label: '⚔️ Pembajakan', value: 'Kapal mengalami pembajakan butuh bantuan keamanan' },
+  { label: '🔥 Kebakaran',  value: 'Kapal mengalami kebakaran butuh bantuan pemadaman' },
+  { label: '🌊 Tenggelam',  value: 'Kapal tenggelam butuh bantuan evakuasi' },
+  { label: '💥 Ledakan',    value: 'Terjadi ledakan di kapal butuh bantuan secepatnya' },
+  { label: '🚁 Medivac',    value: 'Butuh bantuan medical evacuation untuk Petugas' },
+  { label: '❗ Lainnya',    value: 'Kondisi sangat darurat petugas belum bisa menentukan, harap PIC/ADMIN yang menghubungi petugas' },
+];
+
 export default function SOSButton({ className = '' }) {
   const { handleSOSTrigger } = useSOS();
   const [isConfirming, setIsConfirming] = useState(false);
@@ -11,21 +20,20 @@ export default function SOSButton({ className = '' }) {
     setIsConfirming(true);
   };
 
-  const handleConfirm = () => {
-    // Attempt to get GPS coordinates if available
+  const handleCategorySelect = (sosType) => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          handleSOSTrigger(position.coords.latitude, position.coords.longitude);
+          handleSOSTrigger(position.coords.latitude, position.coords.longitude, sosType);
         },
         (error) => {
-          console.warn("GPS error", error);
-          handleSOSTrigger(null, null); // fallback
+          console.warn('GPS error', error);
+          handleSOSTrigger(null, null, sosType);
         },
-        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 },
       );
     } else {
-      handleSOSTrigger(null, null);
+      handleSOSTrigger(null, null, sosType);
     }
     setIsConfirming(false);
   };
@@ -58,22 +66,27 @@ export default function SOSButton({ className = '' }) {
               </div>
               <h2 className="text-xl font-bold text-white">KONFIRMASI SOS</h2>
               <p className="text-slate-300 text-sm leading-relaxed">
-                Peringatan: Ini akan mengaktifkan <strong>alarm sirine di seluruh perangkat yang terhubung</strong>. Hanya gunakan dalam keadaan darurat sesungguhnya!
+                Peringatan: Ini akan mengaktifkan <strong>alarm sirine di seluruh perangkat yang terhubung</strong>. Pilih jenis kedaruratan:
               </p>
-              <div className="flex space-x-3 w-full pt-4">
-                <button
-                  onClick={handleCancel}
-                  className="flex-1 py-3 px-4 bg-slate-800 text-slate-200 rounded-lg font-medium hover:bg-slate-700 transition"
-                >
-                  Batal
-                </button>
-                <button
-                  onClick={handleConfirm}
-                  className="flex-1 py-3 px-4 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition flex items-center justify-center gap-2"
-                >
-                  <Siren className="w-5 h-5"/> KIRIM SOS
-                </button>
+
+              <div className="grid grid-cols-2 gap-2 w-full pt-2">
+                {SOS_CATEGORIES.map(({ label, value }) => (
+                  <button
+                    key={value}
+                    onClick={() => handleCategorySelect(value)}
+                    className="py-3 px-2 bg-red-700 text-white rounded-lg font-semibold text-sm hover:bg-red-600 active:bg-red-800 transition text-center leading-tight"
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
+
+              <button
+                onClick={handleCancel}
+                className="w-full py-3 px-4 bg-slate-800 text-slate-200 rounded-lg font-medium hover:bg-slate-700 transition"
+              >
+                Batal
+              </button>
             </div>
           </div>
         </div>

@@ -121,6 +121,13 @@ export default function SOSAlertModal() {
             <span className="text-xs text-slate-400 block uppercase tracking-wider">Lokasi / Kapal</span>
             <div className="text-lg text-white">{displaySOSAlert.shipName || 'Tidak Diketahui'}</div>
           </div>
+
+          {displaySOSAlert.sosType ? (
+            <div className="mb-3">
+              <span className="text-xs text-slate-400 block uppercase tracking-wider">Perihal</span>
+              <div className="text-sm text-red-300 font-semibold leading-snug">{displaySOSAlert.sosType}</div>
+            </div>
+          ) : null}
           
           <div className="mb-3">
             <span className="text-xs text-slate-400 block uppercase tracking-wider">Waktu Kejadian</span>
