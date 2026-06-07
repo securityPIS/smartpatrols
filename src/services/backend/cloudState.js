@@ -630,7 +630,21 @@ function buildStatePayload(
     return incident;
   });
 
-  const activeSosRow = sosRows.find(row => row.status === 'active') || null;
+  sosRows.forEach((row) => {
+    const payload = row?.payload && typeof row.payload === 'object' ? row.payload : {};
+    const sosId = row?.id || payload.id || null;
+    if (!sosId || payload.deleted !== true) return;
+    incidentMeta[sosId] = {
+      ...(incidentMeta[sosId] || {}),
+      deleted: true,
+      status: 'closed',
+    };
+  });
+
+  const activeSosRow = sosRows.find((row) => {
+    const payload = row?.payload && typeof row.payload === 'object' ? row.payload : {};
+    return row.status === 'active' && payload.deleted !== true;
+  }) || null;
 
   return {
     schemaVersion: CLOUD_STATE_SCHEMA_VERSION,

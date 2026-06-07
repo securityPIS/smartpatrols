@@ -23,6 +23,10 @@ const migrationSource = readFileSync(
   new URL('../../supabase/migrations/202605300012_block_stale_tombstoned_finding_reupsert.sql', import.meta.url),
   'utf8',
 );
+const crossSurfaceMigrationSource = readFileSync(
+  new URL('../../supabase/migrations/20260607032725_durable_sos_and_cross_surface_delete.sql', import.meta.url),
+  'utf8',
+);
 
 test('background sync tidak menulis ulang checkpoint manual-reset', () => {
   const startIndex = runtimeSource.indexOf('patrolReportSubscriptionTargets.forEach((target) => {');
@@ -70,13 +74,23 @@ test('delete patrol report memakai RPC server-side atomic (bukan SELECT+DELETE c
 test('tombstone realtime membawa deleted_at untuk reset stale beda shift', () => {
   assert.match(
     patrolReportsSource,
-    /\.select\('client_event_id, shift_key, ship_id, checkpoint_id, ship_name, deleted_at'\)/,
-    'listener tombstone harus membaca deleted_at',
+    /\.select\('client_event_id, shift_key, ship_id, checkpoint_id, ship_name, incident_id, checkpoint_name, deleted_at'\)/,
+    'listener tombstone harus membaca deleted_at dan identitas incident',
   );
   assert.match(
     patrolReportsSource,
     /deletedAt: row\.deleted_at \|\| null/,
     'deleted_at harus dimap ke client',
+  );
+  assert.match(
+    patrolReportsSource,
+    /incidentId: row\.incident_id \|\| null/,
+    'incident_id harus dimap ke client agar Page Temuan ikut bersih',
+  );
+  assert.match(
+    patrolReportsSource,
+    /checkpointName: row\.checkpoint_name \|\| null/,
+    'checkpoint_name harus dimap untuk cleanup/debug lintas surface',
   );
   assert.match(
     runtimeSource,
@@ -88,6 +102,19 @@ test('tombstone realtime membawa deleted_at untuk reset stale beda shift', () =>
     /checkpointAtMs <= deletedAtMs/,
     'checkpoint lama sebelum waktu delete admin harus di-reset walau shift_key berbeda',
   );
+});
+
+test('tombstone client membersihkan incidentMeta, incidentsData, dan history Page Temuan', () => {
+  const startIndex = runtimeSource.indexOf('const applyPatrolReportTombstones = useCallback');
+  assert.notEqual(startIndex, -1, 'applyPatrolReportTombstones harus ada');
+  const fnSlice = runtimeSource.slice(startIndex, startIndex + 5200);
+
+  assert.match(fnSlice, /const deletedIncidentIds = new Set\(tombstones\.flatMap\(getTombstoneIncidentIds\)\)/);
+  assert.match(fnSlice, /setIncidentMeta\(\(previousMeta\) => \{/);
+  assert.match(fnSlice, /deleted: true/);
+  assert.match(fnSlice, /setIncidentsData\(\(previousIncidents\) => \{/);
+  assert.match(fnSlice, /setHistoryEntries\(\(previousEntries\) => \{/);
+  assert.match(fnSlice, /shouldRemoveHistoryCheckpointForTombstone/);
 });
 
 test('listener tombstone punya polling fallback saat realtime gagal', () => {
@@ -121,5 +148,33 @@ test('migration memblokir re-upsert temuan stale walau shift_key berbeda', () =>
     migrationSource,
     /delete from public\.patrol_reports pr[\s\S]*?using stale_tombstoned_reports stale/,
     'migration harus membersihkan baris lama yang sudah terlanjur hidup kembali',
+  );
+});
+
+test('migration baru memperkaya tombstone dan cleanup surface secara terarah', () => {
+  assert.match(
+    crossSurfaceMigrationSource,
+    /add column if not exists incident_id text/,
+    'tombstone harus membawa incident_id',
+  );
+  assert.match(
+    crossSurfaceMigrationSource,
+    /add column if not exists checkpoint_name text/,
+    'tombstone harus membawa checkpoint_name',
+  );
+  assert.match(
+    crossSurfaceMigrationSource,
+    /create or replace function public\.build_patrol_incident_id/,
+    'migration harus bisa membangun id Page Temuan dari patrol report',
+  );
+  assert.match(
+    crossSurfaceMigrationSource,
+    /delete from public\.incidents[\s\S]*?where id = any\(v_incident_ids\)/,
+    'cleanup server-side harus menghapus copy incidents yang cocok',
+  );
+  assert.match(
+    crossSurfaceMigrationSource,
+    /where she\.ship_id = new\.ship_id[\s\S]*?and she\.shift_key = new\.shift_key/,
+    'history cleanup harus dibatasi ke shift tombstone, bukan blanket lintas shift',
   );
 });

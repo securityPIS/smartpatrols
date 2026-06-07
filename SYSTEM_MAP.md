@@ -58,9 +58,14 @@ Incident form/detail -> saveIncidentReport/deleteIncidentReport
   -> Supabase Realtime subscribeToIncidents
   -> offline write masuk outbox
 
-SOSButton -> activeSOSAlert lokal
-  -> cloud sync SQL + client_mutations signal
-  -> perangkat lain menerima perubahan saat app aktif via Realtime
+SOSButton -> AppContextRuntime.handleSOSTrigger
+  -> create_operational_sos_alert RPC
+  -> sos_alerts durable + notifications fan-out + client_mutations domain signal
+  -> perangkat lain hydrate/Realtime dari sos_alerts dan notifications
+
+Admin delete/close temuan/SOS
+  -> patrol_report_tombstones / incidents / sos_alerts resolved-deleted marker
+  -> client tombstone cleanup membersihkan Page Patroli, Page Temuan, dan history snapshot
 ```
 
 ### Trusted Time
@@ -217,6 +222,26 @@ Perubahan utama:
    untuk tabel yang aman (`client_mutations`, `notifications`, `sos_alerts`,
    `incidents`). `patrol_reports`, `profiles`, dan `ships` tetap tidak diubah karena
    sensitif untuk tombstone/delete dan akses operasional.
+
+## SOS Durable dan Delete Temuan Lintas View (2026-06-07)
+
+Tujuan: memastikan admin menerima SOS dari PETUGAS tanpa membuka RLS `profiles`, dan
+memastikan delete admin membersihkan Page Temuan PETUGAS dari semua sumber render.
+
+Perubahan utama:
+
+1. SOS tidak lagi hanya bergantung pada `activeSOSAlert` lokal. Client memanggil RPC
+   `create_operational_sos_alert`, lalu Supabase menulis `sos_alerts`, fan-out
+   `notifications`, dan signal domain.
+2. Penerima SOS dihitung server-side dari `profiles`/`ships`, sehingga admin tetap
+   menjadi target meskipun profil admin tidak terlihat di `usersData` PETUGAS.
+3. Close/delete SOS memakai `resolve_operational_sos_alert`; delete diberi marker
+   `deleted:true` di payload agar device lain mendapat tombstone durable.
+4. Tombstone patrol membawa `incident_id` dan `checkpoint_name`; client memakai data ini
+   untuk reset checkpoint, mark `incidentMeta.deleted`, membersihkan `incidentsData`,
+   dan menghapus snapshot history yang cocok.
+5. Listener `incidents` di AppContext mengganti domain slice dari Supabase, bukan
+   merge-only, agar DELETE manual incident tidak tertahan di cache PETUGAS.
 
 ## Sinkronisasi Laporan Patroli ke Admin & Petugas Sekapal (bug fix tervalidasi)
 

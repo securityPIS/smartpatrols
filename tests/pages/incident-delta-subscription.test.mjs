@@ -15,6 +15,10 @@ const source = readFileSync(
   new URL('../../src/services/backend/incidentReports.js', import.meta.url),
   'utf8',
 );
+const runtimeSource = readFileSync(
+  new URL('../../src/context/AppContextRuntime.jsx', import.meta.url),
+  'utf8',
+);
 
 function extractSubscribeFunction() {
   const startIndex = source.indexOf('export function subscribeToIncidents');
@@ -54,4 +58,32 @@ test('insert update incidents merge by id tanpa fetchRows rutin', () => {
   assert.match(fn, /const index = currentRows\.findIndex\(row => row\.id === rowId\)/);
   assert.match(fn, /currentRows = \[[\s\S]*?\.\.\.currentRows\.slice\(0, index\)[\s\S]*?nextRow[\s\S]*?\.\.\.currentRows\.slice\(index \+ 1\)/);
   assert.match(fn, /currentRows = \[nextRow, \.\.\.currentRows\]/);
+});
+
+test('AppContext mengganti domain slice incidents agar delete tidak tertahan di cache lokal', () => {
+  assert.match(
+    runtimeSource,
+    /const incidentDomainIdsRef = useRef\(new Set\(/,
+    'AppContext harus melacak id incident yang berasal dari domain Supabase',
+  );
+  assert.match(
+    runtimeSource,
+    /const previousDomainIds = incidentDomainIdsRef\.current/,
+    'listener harus membandingkan domain ids lama dan baru',
+  );
+  assert.match(
+    runtimeSource,
+    /incidentDomainIdsRef\.current = nextDomainIds/,
+    'listener harus memperbarui domain ids setelah callback Supabase',
+  );
+  assert.match(
+    runtimeSource,
+    /const localOnlyIncidents = prevIncidents\.filter/,
+    'listener harus memisahkan item lokal dari item domain',
+  );
+  assert.match(
+    runtimeSource,
+    /!previousDomainIds\.has\(incident\.id\)/,
+    'item domain lama yang hilang dari payload Supabase harus dibuang',
+  );
 });

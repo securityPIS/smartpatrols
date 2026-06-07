@@ -58,8 +58,11 @@ import {
 import {
   deleteIncidentReport,
   deleteSosAlert,
+  resolveSosAlert,
   saveIncidentReport,
+  saveSosAlert,
   subscribeToIncidents,
+  updateSosAlert,
 } from '../services/backend/incidentReports';
 import { subscribeToShiftHistoryEntries } from '../services/backend/shiftHistory';
 import {
@@ -1178,6 +1181,7 @@ function createSOSIncidentRecord(sos) {
     reportedBy: senderName,
     photoUrl: null,
     isSOS: true,
+    deleted: sos.deleted === true,
     readOnly: true,
     createdAt: triggeredAt,
     sosStatus: isResolved ? 'resolved' : 'active',
@@ -2121,6 +2125,55 @@ function shouldApplyPatrolReportTombstoneToCheckpoint(checkpoint, tombstone) {
     && Number.isFinite(checkpointAtMs)
     && checkpointAtMs > 0
     && checkpointAtMs <= deletedAtMs;
+}
+
+function getTombstoneIncidentIds(tombstone = {}) {
+  return Array.from(new Set([
+    sanitizeText(tombstone?.incidentId || '', 220).trim(),
+  ].filter(Boolean)));
+}
+
+function isCheckpointMatchedByPatrolTombstone(checkpoint, tombstone) {
+  if (!checkpoint || !tombstone) return false;
+  const tombstoneCheckpointId = String(tombstone.checkpointId || '');
+  if (!tombstoneCheckpointId) return false;
+
+  const matchesCheckpoint = String(checkpoint.id || '') === tombstoneCheckpointId
+    || String(checkpoint.checkpointId || '') === tombstoneCheckpointId;
+  if (!matchesCheckpoint) return false;
+
+  const tombstoneShipId = String(tombstone.shipId || '');
+  const tombstoneShipName = sanitizeText(tombstone.shipName || '', 120);
+  if (tombstoneShipId && String(checkpoint.shipId || '') !== tombstoneShipId) return false;
+  if (tombstoneShipName && sanitizeText(checkpoint.shipName || '', 120) !== tombstoneShipName) return false;
+
+  return true;
+}
+
+function shouldRemoveHistoryCheckpointForTombstone(checkpoint, tombstone) {
+  if (!isCheckpointMatchedByPatrolTombstone(checkpoint, tombstone)) return false;
+
+  const tombstoneIncidentIds = getTombstoneIncidentIds(tombstone);
+  if (tombstoneIncidentIds.includes(createPatrolIncidentId(checkpoint))) return true;
+
+  const tombstoneShiftKey = String(tombstone.shiftKey || '');
+  if (!tombstoneShiftKey) return false;
+  return String(checkpoint.shiftKey || '') === tombstoneShiftKey;
+}
+
+function isIncidentMatchedByPatrolTombstone(incident, tombstone) {
+  if (!incident || !tombstone) return false;
+
+  const incidentId = sanitizeText(incident.id || '', 220).trim();
+  if (incidentId && getTombstoneIncidentIds(tombstone).includes(incidentId)) return true;
+
+  if (!incident.isPatrol) return false;
+  return isCheckpointMatchedByPatrolTombstone({
+    id: incident.checkpointId,
+    checkpointId: incident.checkpointId,
+    shipId: incident.shipId,
+    shipName: incident.shipName,
+  }, tombstone);
 }
 
 function isSameCheckpointMediaRevision(leftCheckpoint, rightCheckpoint) {
@@ -4993,6 +5046,9 @@ export function AppProvider({ children }) {
   const patrolReportDomainUploadInFlightRef = useRef(new Set());
   const patrolReportLocalMediaRef = useRef(new Map());
   const incidentDomainUploadInFlightRef = useRef(new Set());
+  const incidentDomainIdsRef = useRef(new Set(
+    ensureArray(persistedState?.incidentsData).map((incident) => incident?.id).filter(Boolean),
+  ));
   const pendingShiftStatusRecordsRef = useRef(new Map());
   const localSharedStateRef = useRef(null);
   const activeSOSAlertRef = useRef(activeSOSAlert);
@@ -5247,15 +5303,27 @@ export function AppProvider({ children }) {
     if (nextSOSIncident) {
       setSelectedIncident(nextSOSIncident);
     }
+    void saveSosAlert(newSOS, { clientUpdatedAt: trustedTimestamp.occurredAtClientMs })
+      .then((savedSOS) => {
+        if (!savedSOS || savedSOS.id !== newSOS.id) return;
+        setActiveSOSAlert((previousAlert) => (
+          previousAlert?.id === savedSOS.id ? mergeSOSRecords(previousAlert, savedSOS) : previousAlert
+        ));
+        setSosHistory((previousHistory) => upsertSOSHistoryEntry(previousHistory, savedSOS));
+      })
+      .catch((error) => {
+        console.warn('Gagal menyimpan SOS durable', error);
+      });
     void emitCloudSyncSignal({
       reason: 'sos-active',
+      domain: 'sos_alerts',
       priority: 'urgent',
       clientUpdatedAt: Date.now(),
       activeSOSAlert: newSOS,
       shipName: senderShipName,
     });
     requestCloudSync('urgent');
-  }, [currentUserRecord, emitCloudSyncSignal, getSOSRecipientUserIds, requestCloudSync, shipsData, showTrustedTimeGateDialog]);
+  }, [currentUserRecord, emitCloudSyncSignal, getSOSRecipientUserIds, requestCloudSync, saveSosAlert, shipsData, showTrustedTimeGateDialog]);
 
   const resolveSOSActionTarget = useCallback((targetSOS = null) => {
     const targetId = typeof targetSOS === 'string'
@@ -5287,15 +5355,17 @@ export function AppProvider({ children }) {
       previousAlert?.id === updatedSOS.id ? updatedSOS : previousAlert
     ));
     setSosHistory((previousHistory) => upsertSOSHistoryEntry(previousHistory, updatedSOS));
+    void updateSosAlert(updatedSOS, { clientUpdatedAt: trustedTimestamp.occurredAtClientMs });
     void emitCloudSyncSignal({
       reason: 'sos-confirmed',
+      domain: 'sos_alerts',
       priority: 'urgent',
       clientUpdatedAt: Date.now(),
       activeSOSAlert: updatedSOS,
       shipName: updatedSOS.shipName,
     });
     requestCloudSync('urgent');
-  }, [currentUserId, emitCloudSyncSignal, requestCloudSync, resolveSOSActionTarget, showTrustedTimeGateDialog]);
+  }, [currentUserId, emitCloudSyncSignal, requestCloudSync, resolveSOSActionTarget, showTrustedTimeGateDialog, updateSosAlert]);
 
   const handleSOSAcknowledgeSelf = useCallback((targetSOS = null) => {
     const actionableSOS = resolveSOSActionTarget(targetSOS);
@@ -5321,15 +5391,17 @@ export function AppProvider({ children }) {
       previousAlert?.id === updatedSOS.id ? updatedSOS : previousAlert
     ));
     setSosHistory((previousHistory) => upsertSOSHistoryEntry(previousHistory, updatedSOS));
+    void updateSosAlert(updatedSOS, { clientUpdatedAt: trustedTimestamp.occurredAtClientMs });
     void emitCloudSyncSignal({
       reason: 'sos-acknowledged',
+      domain: 'sos_alerts',
       priority: 'urgent',
       clientUpdatedAt: Date.now(),
       activeSOSAlert: updatedSOS,
       shipName: updatedSOS.shipName,
     });
     requestCloudSync('urgent');
-  }, [currentUserId, emitCloudSyncSignal, requestCloudSync, resolveSOSActionTarget, showTrustedTimeGateDialog]);
+  }, [currentUserId, emitCloudSyncSignal, requestCloudSync, resolveSOSActionTarget, showTrustedTimeGateDialog, updateSosAlert]);
 
   const handleSOSDismiss = useCallback((targetSOS = null) => {
     const actionableSOS = resolveSOSActionTarget(targetSOS);
@@ -5355,15 +5427,17 @@ export function AppProvider({ children }) {
       previousAlert?.id === updatedSOS.id ? null : previousAlert
     ));
     setSosHistory((previousHistory) => upsertSOSHistoryEntry(previousHistory, updatedSOS));
+    void resolveSosAlert(updatedSOS.id, updatedSOS);
     void emitCloudSyncSignal({
       reason: 'sos-resolved',
+      domain: 'sos_alerts',
       priority: 'urgent',
       clientUpdatedAt: Date.now(),
       activeSOSAlert: updatedSOS,
       shipName: updatedSOS.shipName,
     });
     requestCloudSync('urgent');
-  }, [currentUserRecord, emitCloudSyncSignal, requestCloudSync, resolveSOSActionTarget, showTrustedTimeGateDialog]);
+  }, [currentUserRecord, emitCloudSyncSignal, requestCloudSync, resolveSOSActionTarget, showTrustedTimeGateDialog, resolveSosAlert]);
 
   const assignedShipForCurrentUser = useMemo(() => {
     return resolveAssignedShipForUser(currentUserRecord, shipsData);
@@ -6760,6 +6834,8 @@ export function AppProvider({ children }) {
   // berikutnya tidak ikut terhapus.
   const applyPatrolReportTombstones = useCallback((tombstones = []) => {
     if (!Array.isArray(tombstones) || tombstones.length === 0) return;
+    const deletedIncidentIds = new Set(tombstones.flatMap(getTombstoneIncidentIds));
+
     setCheckpointsByShip((previousState) => {
       let didChange = false;
       const nextState = { ...(previousState || {}) };
@@ -6791,6 +6867,50 @@ export function AppProvider({ children }) {
       });
 
       return didChange ? nextState : previousState;
+    });
+    if (deletedIncidentIds.size > 0) {
+      setIncidentMeta((previousMeta) => {
+        let didChange = false;
+        const nextMeta = { ...(previousMeta || {}) };
+        deletedIncidentIds.forEach((incidentId) => {
+          const currentMeta = nextMeta[incidentId] || {};
+          if (currentMeta.deleted === true) return;
+          nextMeta[incidentId] = {
+            ...currentMeta,
+            deleted: true,
+          };
+          didChange = true;
+        });
+        return didChange ? nextMeta : previousMeta;
+      });
+      setIncidentsData((previousIncidents) => {
+        const nextIncidents = previousIncidents.filter((incident) => (
+          !deletedIncidentIds.has(incident.id)
+          && !tombstones.some((tombstone) => isIncidentMatchedByPatrolTombstone(incident, tombstone))
+        ));
+        return nextIncidents.length === previousIncidents.length ? previousIncidents : nextIncidents;
+      });
+      setSelectedIncident((previousIncident) => (
+        previousIncident?.id && deletedIncidentIds.has(previousIncident.id) ? null : previousIncident
+      ));
+    }
+
+    setHistoryEntries((previousEntries) => {
+      let didChange = false;
+      const nextEntries = previousEntries.map((entry) => {
+        const checkpoints = ensureArray(entry.checkpoints);
+        const nextCheckpoints = checkpoints.filter((checkpoint) => (
+          !tombstones.some((tombstone) => shouldRemoveHistoryCheckpointForTombstone(checkpoint, tombstone))
+        ));
+        if (nextCheckpoints.length === checkpoints.length) return entry;
+        didChange = true;
+        return {
+          ...entry,
+          checkpoints: nextCheckpoints,
+          summary: summarizePatrolCheckpoints(nextCheckpoints),
+        };
+      });
+      return didChange ? nextEntries : previousEntries;
     });
   }, []);
   const getUsersByRole = useCallback((roles) => (
@@ -7087,7 +7207,7 @@ export function AppProvider({ children }) {
         return incidentMap;
       }, new Map()).values(),
     )
-      .filter((incident) => incidentMeta[incident.id]?.deleted !== true)
+      .filter((incident) => incident?.deleted !== true && incidentMeta[incident.id]?.deleted !== true)
       .sort((left, right) => getIncidentSortTimestamp(right) - getIncidentSortTimestamp(left))
   ), [historyPatrolIncidents, incidentMeta, incidentsData, operationalShipName, patrolIncidents, sosIncidents]);
   const visibleIncidents = useMemo(() => (
@@ -9261,6 +9381,7 @@ export function AppProvider({ children }) {
             previousAlert?.id === incidentId ? null : previousAlert
           ));
           setSosHistory((previousHistory) => upsertSOSHistoryEntry(previousHistory, resolvedSOS));
+          void resolveSosAlert(incidentId, resolvedSOS);
         }
         appendNotifications([{
           type: incident?.isSOS ? 'sos_closed' : 'incident_closed',
@@ -9292,7 +9413,7 @@ export function AppProvider({ children }) {
         requestCloudSync('urgent');
       }
     });
-  }, [activeSOSAlert, allIncidents, appendNotifications, canCloseIncident, currentUser, currentUserRole, getShipRecipients, incidentMeta, operationalShipName, requestCloudSync, selectedIncident, showTrustedTimeGateDialog, syncIncidentDetailToDomain, usersData]);
+  }, [activeSOSAlert, allIncidents, appendNotifications, canCloseIncident, currentUser, currentUserRole, getShipRecipients, incidentMeta, operationalShipName, requestCloudSync, resolveSosAlert, selectedIncident, showTrustedTimeGateDialog, syncIncidentDetailToDomain, usersData]);
   const handleDeleteIncident = useCallback((incidentId) => {
     if (!isAdmin) return;
 
@@ -9780,14 +9901,21 @@ export function AppProvider({ children }) {
     if (!isCloudSyncEnabled || !hasOperationalCloudAccess) return () => { };
 
     const unsubIncidents = subscribeToIncidents((incidentDocuments) => {
-      if (!Array.isArray(incidentDocuments) || incidentDocuments.length === 0) return;
+      if (!Array.isArray(incidentDocuments)) return;
       const {
         incidents: domainIncidents,
         incidentMeta: domainIncidentMeta,
       } = splitIncidentDomainDocuments(incidentDocuments);
+      const previousDomainIds = incidentDomainIdsRef.current;
+      const nextDomainIds = new Set(domainIncidents.map((incident) => incident.id).filter(Boolean));
+      incidentDomainIdsRef.current = nextDomainIds;
 
       setIncidentsData((prevIncidents) => {
-        const mergedIncidents = mergeIncidentsCollection(prevIncidents, domainIncidents);
+        const localOnlyIncidents = prevIncidents.filter((incident) => (
+          !previousDomainIds.has(incident.id)
+          || incident.pendingOfflineSync === true
+        ));
+        const mergedIncidents = mergeIncidentsCollection(localOnlyIncidents, domainIncidents);
         return serializeSharedStateSnapshot(mergedIncidents) === serializeSharedStateSnapshot(prevIncidents)
           ? prevIncidents
           : mergedIncidents;

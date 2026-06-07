@@ -2,8 +2,10 @@
 Tujuan: Adapter SQL/Reatime untuk laporan checkpoint patroli.
 Caller: AppContextRuntime saat submit laporan, backfill offline, dan listener lintas-device.
 Dependensi: Supabase Postgres/Reatime dan outbox IndexedDB.
-Main Functions: Subscribe laporan per shift/kapal, delta merge realtime, dan upsert laporan idempotent per checkpoint.
-Side Effects: Membaca/menulis tabel patrol_reports dan mengantre mutation saat offline.
+Main Functions: Subscribe laporan per shift/kapal, delta merge realtime, upsert laporan
+        idempotent per checkpoint, dan tombstone delete lintas surface.
+Side Effects: Membaca/menulis tabel patrol_reports/patrol_report_tombstones dan
+        mengantre mutation saat offline.
 */
 
 import { ensureSupabaseClient } from './app';
@@ -346,7 +348,7 @@ export function subscribeToPatrolReportTombstones(callback, onError) {
   const fetchRows = async () => {
     const { data, error } = await supabase
       .from(PATROL_REPORT_TOMBSTONES_TABLE)
-      .select('client_event_id, shift_key, ship_id, checkpoint_id, ship_name, deleted_at')
+      .select('client_event_id, shift_key, ship_id, checkpoint_id, ship_name, incident_id, checkpoint_name, deleted_at')
       .order('deleted_at', { ascending: false })
       .limit(500);
     if (error) throw error;
@@ -357,6 +359,8 @@ export function subscribeToPatrolReportTombstones(callback, onError) {
         shipId: row.ship_id || null,
         checkpointId: row.checkpoint_id || null,
         shipName: row.ship_name || null,
+        incidentId: row.incident_id || null,
+        checkpointName: row.checkpoint_name || null,
         deletedAt: row.deleted_at || null,
       })));
     }

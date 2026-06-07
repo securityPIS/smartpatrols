@@ -1,9 +1,11 @@
 /*
-Tujuan: Adapter SQL/Realtime untuk insiden dan update temuan SmartPatrol.
+Tujuan: Adapter SQL/Realtime untuk insiden, SOS durable, dan update temuan SmartPatrol.
 Caller: AppContextRuntime saat submit/update/delete insiden dan listener lintas-device.
 Dependensi: Supabase Postgres/Reatime dan outbox IndexedDB.
-Main Functions: Subscribe insiden dengan delta merge, upsert payload insiden idempotent, append progress/dokumentasi, dan delete admin.
-Side Effects: Membaca/menulis tabel incidents serta mengantre mutation offline bila jaringan gagal.
+Main Functions: Subscribe insiden dengan delta merge, upsert payload insiden idempotent,
+        persist/resolve SOS, append progress/dokumentasi, dan delete admin.
+Side Effects: Membaca/menulis tabel incidents, sos_alerts, notifications, serta
+        mengantre mutation offline bila jaringan gagal.
 */
 
 import { ensureSupabaseClient } from './app';
@@ -11,6 +13,7 @@ import { enqueueOutboxMutation, registerOutboxHandler } from './outbox';
 import { deleteStorageAsset } from './assets';
 
 const INCIDENTS_TABLE = 'incidents';
+const SOS_ALERTS_TABLE = 'sos_alerts';
 const INCIDENTS_SCHEMA_VERSION = 1;
 const INCIDENTS_LISTEN_LIMIT = 200;
 const INCIDENT_COLUMNS = [
@@ -73,6 +76,78 @@ function mapRowToIncident(row = {}) {
   };
 }
 
+function mapSosAlertToRow(sos = {}, options = {}) {
+  const clientUpdatedAt = Number.isFinite(options.clientUpdatedAt)
+    ? options.clientUpdatedAt
+    : Date.now();
+  const triggeredAt = sos.triggeredAt || sos.createdAt || new Date(clientUpdatedAt).toISOString();
+  const payload = {
+    ...sos,
+    updatedAt: sos.updatedAt || new Date(clientUpdatedAt).toISOString(),
+    clientUpdatedAt,
+  };
+
+  return {
+    id: String(sos.id || ''),
+    client_event_id: sos.clientEventId || sos.client_event_id || String(sos.id || ''),
+    triggered_by: sos.senderUserId || sos.triggeredBy || null,
+    ship_name: String(sos.shipName || ''),
+    lat: sos.lat === null || sos.lat === undefined ? '' : String(sos.lat),
+    lng: sos.lng === null || sos.lng === undefined ? '' : String(sos.lng),
+    status: sos.status || 'active',
+    triggered_at: triggeredAt,
+    payload,
+  };
+}
+
+async function createSosAlertDurable(sos, options = {}) {
+  const supabase = ensureSupabaseClient();
+  const row = mapSosAlertToRow(sos, options);
+  if (!row.id || !row.client_event_id) throw new Error('sos-id-required');
+
+  const { data, error } = await supabase.rpc('create_operational_sos_alert', {
+    p_sos_id: row.id,
+    p_client_event_id: row.client_event_id,
+    p_ship_name: row.ship_name,
+    p_lat: row.lat || null,
+    p_lng: row.lng || null,
+    p_payload: row.payload,
+  });
+  if (error) throw error;
+  return data?.sos || row.payload;
+}
+
+async function updateSosAlertDurable(sos, options = {}) {
+  const supabase = ensureSupabaseClient();
+  const row = mapSosAlertToRow(sos, options);
+  if (!row.id) throw new Error('sos-id-required');
+
+  const { error } = await supabase
+    .from(SOS_ALERTS_TABLE)
+    .update({
+      status: row.status,
+      payload: row.payload,
+      lat: row.lat,
+      lng: row.lng,
+    })
+    .eq('id', row.id);
+  if (error) throw error;
+  return row.payload;
+}
+
+async function resolveSosAlertDurable({ sosId, payload = {}, deleted = false } = {}) {
+  const supabase = ensureSupabaseClient();
+  if (!sosId) throw new Error('sos-id-required');
+
+  const { data, error } = await supabase.rpc('resolve_operational_sos_alert', {
+    p_sos_id: sosId,
+    p_payload: payload,
+    p_deleted: Boolean(deleted),
+  });
+  if (error) throw error;
+  return data?.sos || payload;
+}
+
 async function mergeAppendPayload(row, options = {}) {
   const appendProgressItems = Array.isArray(options.appendProgressItems)
     ? options.appendProgressItems.filter(Boolean)
@@ -129,10 +204,11 @@ registerOutboxHandler('incident.delete', async ({ incidentId }) => {
   const { error } = await supabase.from(INCIDENTS_TABLE).delete().eq('id', incidentId);
   if (error) throw error;
 });
-registerOutboxHandler('sos_alert.delete', async ({ sosId }) => {
-  const supabase = ensureSupabaseClient();
-  const { error } = await supabase.from('sos_alerts').delete().eq('id', sosId);
-  if (error) throw error;
+registerOutboxHandler('sos_alert.create', createSosAlertDurable);
+registerOutboxHandler('sos_alert.update', updateSosAlertDurable);
+registerOutboxHandler('sos_alert.resolve', resolveSosAlertDurable);
+registerOutboxHandler('sos_alert.delete', async ({ sosId, payload = {} }) => {
+  await resolveSosAlertDurable({ sosId, payload, deleted: true });
 });
 
 export function subscribeToIncidents(callback, onError) {
@@ -218,6 +294,68 @@ export async function saveIncidentReport(incident, options = {}) {
   }
 }
 
+export async function saveSosAlert(sos, options = {}) {
+  try {
+    return await createSosAlertDurable(sos, options);
+  } catch (error) {
+    console.error('Gagal menulis SOS durable ke sos_alerts, mengantre ke outbox', {
+      code: error?.code,
+      message: error?.message,
+      sosId: sos?.id || null,
+      shipName: sos?.shipName || null,
+    });
+    await enqueueOutboxMutation({
+      id: `sos-create-${sos?.id || Date.now()}`,
+      type: 'sos_alert.create',
+      payload: sos,
+    });
+    return {
+      ...sos,
+      pendingOfflineSync: true,
+    };
+  }
+}
+
+export async function updateSosAlert(sos, options = {}) {
+  try {
+    return await updateSosAlertDurable(sos, options);
+  } catch (error) {
+    await enqueueOutboxMutation({
+      id: `sos-update-${sos?.id || Date.now()}`,
+      type: 'sos_alert.update',
+      payload: sos,
+    });
+    return {
+      ...sos,
+      pendingOfflineSync: true,
+    };
+  }
+}
+
+export async function resolveSosAlert(sosId, payload = {}, options = {}) {
+  try {
+    return await resolveSosAlertDurable({
+      sosId,
+      payload,
+      deleted: Boolean(options.deleted),
+    });
+  } catch (error) {
+    await enqueueOutboxMutation({
+      id: `sos-resolve-${sosId || Date.now()}`,
+      type: 'sos_alert.resolve',
+      payload: {
+        sosId,
+        payload,
+        deleted: Boolean(options.deleted),
+      },
+    });
+    return {
+      ...payload,
+      pendingOfflineSync: true,
+    };
+  }
+}
+
 export async function deleteIncidentReport(incidentId, photoUrl = null) {
   const supabase = ensureSupabaseClient();
   try {
@@ -236,15 +374,36 @@ export async function deleteIncidentReport(incidentId, photoUrl = null) {
 
 export async function deleteSosAlert(sosId) {
   if (!sosId) return false;
-  const supabase = ensureSupabaseClient();
+  const deletedAt = new Date().toISOString();
   try {
-    const { error } = await supabase.from('sos_alerts').delete().eq('id', sosId);
-    if (error) throw error;
+    await resolveSosAlertDurable({
+      sosId,
+      payload: {
+        id: sosId,
+        status: 'resolved',
+        deleted: true,
+        deletedAt,
+        resolvedAt: deletedAt,
+        updatedAt: deletedAt,
+      },
+      deleted: true,
+    });
     return true;
   } catch (error) {
     await enqueueOutboxMutation({
+      id: `sos-delete-${sosId}`,
       type: 'sos_alert.delete',
-      payload: { sosId },
+      payload: {
+        sosId,
+        payload: {
+          id: sosId,
+          status: 'resolved',
+          deleted: true,
+          deletedAt,
+          resolvedAt: deletedAt,
+          updatedAt: deletedAt,
+        },
+      },
     });
     return false;
   }
