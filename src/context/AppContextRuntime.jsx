@@ -4498,6 +4498,7 @@ function compactSOSRecordForCloudSignal(sos = {}) {
     resolvedAt: typeof sos.resolvedAt === 'string' ? sos.resolvedAt : null,
     resolvedBy: sanitizeText(sos.resolvedBy || '', 80) || '',
     status: sanitizeText(sos.status || '', 20) || 'active',
+    sosType: sanitizeText(sos.sosType || '', 200) || '',
     confirmedBy: mergeSOSRecordArrays(sos.confirmedBy),
     targetUserIds: mergeSOSRecordArrays(sos.targetUserIds),
     targetShipIds: mergeSOSRecordArrays(sos.targetShipIds),
