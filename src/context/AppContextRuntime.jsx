@@ -2,7 +2,7 @@
 Tujuan: Menjadi pusat state, flow bisnis, dan sinkronisasi SmartPatrol SQL.
 Caller: Root app melalui AppProvider dan seluruh hook domain aplikasi.
 Dependensi: Seed data, adapter backend Supabase/Postgres, trusted time, helper user management, utilitas sanitasi, IndexedDB image store, dan adapter native Capacitor.
-Main Functions: Mengelola auth Supabase dengan fallback offline, onboarding approval, kapal, checkpoint patroli, incidents, history, SOS realtime in-app, cloud sync SQL, dedupe user operasional, dan retry sinkronisasi saat koneksi pulih.
+Main Functions: Mengelola auth Supabase dengan fallback offline, onboarding approval, kapal, checkpoint patroli, incidents, history, SOS/notifikasi realtime in-app, cloud sync SQL, dedupe user operasional, dan retry sinkronisasi saat koneksi pulih.
 Side Effects: Menulis state lokal/cloud SQL, memanggil Edge Function security/upload aset, menginisialisasi checklist kapal, dan memigrasikan data shift aktif.
 */
 
@@ -36,6 +36,7 @@ import {
   subscribeToFirebaseAuthChanges,
 } from '../services/backend/auth';
 import {
+  fetchAdminRecipientIds,
   fetchCloudSyncWatermarks,
   fetchCloudAppState,
   getNotificationCloudBaseId,
@@ -5177,6 +5178,26 @@ export function AppProvider({ children }) {
       || (isOffline && sessionUserId && sessionUserRecord)
     );
   }, [authAccessEnabled, authAccessOfflineUid, firebaseAuthUid, firebaseAuthUser, isOffline, sessionUserId, sessionUserRecord]);
+  const adminRecipientIdsRef = useRef([]);
+  useEffect(() => {
+    if (!hasOperationalCloudAccess) {
+      adminRecipientIdsRef.current = [];
+      return () => {};
+    }
+    if (isOffline) return () => {};
+
+    let disposed = false;
+    fetchAdminRecipientIds()
+      .then((adminIds) => {
+        if (!disposed) adminRecipientIdsRef.current = adminIds;
+      })
+      .catch((error) => {
+        if (!disposed) console.warn('Gagal memuat daftar admin untuk target notifikasi', error);
+      });
+    return () => {
+      disposed = true;
+    };
+  }, [hasOperationalCloudAccess, isOffline]);
   const emitCloudSyncSignal = useCallback((options = {}) => {
     if (!isCloudSyncEnabled || !isCloudWriteEnabled || !hasOperationalCloudAccess || isOffline) {
       return Promise.resolve(null);
@@ -6921,6 +6942,9 @@ export function AppProvider({ children }) {
   const getShipRecipients = useCallback((shipName, options = {}) => {
     const { includeAdmins = false, includePic = false, includePetugas = false, includeUserIds = [] } = options;
     const recipients = new Set(includeUserIds.filter(Boolean));
+    if (includeAdmins) {
+      adminRecipientIdsRef.current.forEach((adminId) => recipients.add(adminId));
+    }
     usersData.forEach((user) => {
       if (includeAdmins && user.role === ACCESS_ROLES.ADMIN) recipients.add(user.id);
       if (shipName && includePic && user.role === ACCESS_ROLES.PIC && user.shipAssigned === shipName) recipients.add(user.id);

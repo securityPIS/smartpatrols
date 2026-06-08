@@ -13,7 +13,7 @@
 | Backend | Supabase Auth, Postgres, RLS, Storage, Realtime, Edge Functions. |
 | Hosting | Vercel untuk SPA; Supabase local/cloud untuk backend. |
 | Offline | localStorage untuk state UI, IndexedDB `smartpatrol-images` untuk foto, IndexedDB `smartpatrol-sql/outbox_mutations` untuk retry mutation SQL. |
-| Push | Tidak ada FCM/push background pada fase SQL awal; SOS/notifikasi realtime hanya saat app aktif. |
+| Push | Web Push FCM untuk browser/PWA melalui `push_subscriptions`, trigger `notifications`, dan Edge Function `send-push`. |
 | Data Awal | Kosong bersih. Admin pertama dibuat lewat `npm run setup:admin`. |
 
 ## Core Flow
@@ -57,6 +57,11 @@ Incident form/detail -> saveIncidentReport/deleteIncidentReport
   -> incidents payload JSONB + kolom query utama
   -> Supabase Realtime subscribeToIncidents
   -> offline write masuk outbox
+
+Temuan patrol/incident -> AppContextRuntime.getShipRecipients
+  -> PIC/PETUGAS tetap dari usersData sekapal
+  -> ADMIN ditambah dari RPC get_admin_recipient_ids (security definer, id only)
+  -> persistNotificationRecords fan-out ke notifications per target_user_id
 
 SOSButton -> AppContextRuntime.handleSOSTrigger
   -> create_operational_sos_alert RPC
@@ -106,7 +111,7 @@ Pencabutan akun (disabled/rejected/restricted) tetap ditegakkan jalur `resolveOp
 | `src/services/backend/app.js` | Singleton Supabase browser client dan start outbox worker. |
 | `src/services/backend/auth.js` | Supabase Auth wrapper dengan nama ekspor kompatibel context lama. |
 | `src/services/backend/access.js` | Pending registration, approval/revoke/sync access via Edge Functions. |
-| `src/services/backend/cloudState.js` | Hydrate/decompose state dari/ke tabel SQL dan Realtime signal. |
+| `src/services/backend/cloudState.js` | Hydrate/decompose state dari/ke tabel SQL, Realtime signal, watermark, dan RPC id admin notifikasi. |
 | `src/services/backend/patrolReports.js` | Upsert/subscribe `patrol_reports`. |
 | `src/services/backend/incidentReports.js` | Upsert/subscribe/delete `incidents`. |
 | `src/services/backend/assets.js` | Upload Supabase Storage + signed URL. |
@@ -242,6 +247,23 @@ Perubahan utama:
    dan menghapus snapshot history yang cocok.
 5. Listener `incidents` di AppContext mengganti domain slice dari Supabase, bukan
    merge-only, agar DELETE manual incident tidak tertahan di cache PETUGAS.
+
+## Target Admin Notifikasi Temuan (2026-06-08)
+
+Tujuan: memastikan notifikasi temuan dari PETUGAS tetap menarget ADMIN walau profil
+admin tidak terlihat di `usersData` PETUGAS karena RLS `profiles`.
+
+Perubahan utama:
+
+1. Migration `202606080001_admin_notification_recipient_ids.sql` menambah RPC
+   `get_admin_recipient_ids()` dengan `SECURITY DEFINER`, hanya mengembalikan id
+   admin aktif/approved dan digerbang `has_operational_access()`.
+2. `cloudState.js` mengekspor `fetchAdminRecipientIds()` untuk mengambil id admin
+   tanpa membuka data profil/PII ke client.
+3. `AppContextRuntime.getShipRecipients` menggabungkan id admin dari RPC saat
+   `includeAdmins:true`; logika PIC tetap seperti sebelumnya, hanya PIC dengan
+   `shipAssigned === shipName`.
+4. Regresi dijaga oleh `tests/pages/incident-admin-notification-target.test.mjs`.
 
 ## Sinkronisasi Laporan Patroli ke Admin & Petugas Sekapal (bug fix tervalidasi)
 

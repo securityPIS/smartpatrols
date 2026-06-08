@@ -2,8 +2,8 @@
 Tujuan: Menyediakan sinkronisasi state cloud SmartPatrol di atas tabel SQL normalisasi.
 Caller: AppContextRuntime untuk hydrate state, publish sinyal realtime, simpan snapshot, dan upload aset.
 Dependensi: Supabase Postgres/Realtime, adapter aset, outbox IndexedDB, dan mapping state legacy.
-Main Functions: Fetch/hydrate state dari SQL, decompose state lokal ke tabel SQL, subscribe perubahan realtime per tabel, signal ringan, dan watermark recovery.
-Side Effects: Membaca/menulis tabel profiles, ships, patrol_reports, incidents, client_mutations, RPC watermark, serta cache IndexedDB.
+Main Functions: Fetch/hydrate state dari SQL, decompose state lokal ke tabel SQL, subscribe perubahan realtime per tabel, signal ringan, RPC penerima admin, dan watermark recovery.
+Side Effects: Membaca/menulis tabel profiles, ships, patrol_reports, incidents, client_mutations, RPC admin/watermark, serta cache IndexedDB.
 */
 
 import { sanitizeEmail, sanitizePhone, sanitizeText, sanitizeUrl } from '../../utils/sanitize';
@@ -602,6 +602,21 @@ export async function fetchCloudSyncWatermarks(options = {}) {
       patrol_report_tombstones: tombstones,
     };
   }
+}
+
+export async function fetchAdminRecipientIds() {
+  if (!isCloudSyncEnabled) return [];
+  const supabase = ensureSupabaseClient();
+  const { data, error } = await supabase.rpc('get_admin_recipient_ids');
+  if (error) {
+    console.warn('Gagal memuat penerima admin notifikasi', error);
+    return [];
+  }
+  return Array.from(new Set(
+    (Array.isArray(data) ? data : [])
+      .map((row) => (typeof row === 'string' ? row : row?.get_admin_recipient_ids))
+      .filter(Boolean),
+  ));
 }
 
 function buildStatePayload(
