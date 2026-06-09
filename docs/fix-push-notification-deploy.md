@@ -26,7 +26,7 @@ Buka: **GitHub → repo `smartpatrols` → Settings → Secrets and variables �
 
 | Secret | Cara mendapatkan |
 |---|---|
-| `FCM_SERVICE_ACCOUNT` | Firebase Console → Project **smartpatrolnew** → **Project Settings → Service accounts → Generate new private key** → download file JSON → buka file → salin **seluruh isi** (dari `{` sampai `}` termasuk) → paste sebagai nilai secret. **Jangan potong.** |
+| `FCM_SERVICE_ACCOUNT` | Firebase Console → Project **smartpatrols-353d8** → **Project Settings → Service accounts → Generate new private key** → download file JSON → buka file → salin **seluruh isi** (dari `{` sampai `}` termasuk) → paste sebagai nilai secret. **Jangan potong.** Pastikan `"project_id": "smartpatrols-353d8"` di dalam JSON-nya — harus cocok dengan config client. |
 | `APP_URL` | URL produksi aplikasi Anda, mis. `https://smartpatrol.example.com`. Dipakai sebagai deep-link saat notifikasi diklik. |
 
 > **Penting tentang `FCM_SERVICE_ACCOUNT`:** Secret ini harus berisi JSON yang valid dan lengkap dengan field `client_email`, `private_key`, dan `project_id`. Nilai yang terpotong atau mengandung "smart-quote" (`"` bukan `"`) akan menyebabkan error `FCM_SERVICE_ACCOUNT bukan JSON valid` di log `send-push` dan `sent: 0`.

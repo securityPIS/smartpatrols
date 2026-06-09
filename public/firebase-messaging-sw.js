@@ -16,12 +16,12 @@ importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js
 importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js');
 
 firebase.initializeApp({
-  apiKey: 'AIzaSyD327bjyYQ8oakcO1ESZfhRYOF1KoV5-yQ',
-  authDomain: 'smartpatrolnew.firebaseapp.com',
-  projectId: 'smartpatrolnew',
-  storageBucket: 'smartpatrolnew.firebasestorage.app',
-  messagingSenderId: '956798120421',
-  appId: '1:956798120421:web:48332b21980e09ac027f0c',
+  apiKey: 'AIzaSyCN6QI5urtUj7vfqk2onUiAk2bSiNGv7QA',
+  authDomain: 'smartpatrols-353d8.firebaseapp.com',
+  projectId: 'smartpatrols-353d8',
+  storageBucket: 'smartpatrols-353d8.firebasestorage.app',
+  messagingSenderId: '97721371432',
+  appId: '1:97721371432:web:00b3f3ccfa8cfb0786de1d',
 });
 
 const messaging = firebase.messaging();
