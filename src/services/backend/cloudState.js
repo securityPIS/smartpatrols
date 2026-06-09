@@ -444,8 +444,17 @@ function reconstructNotificationsFromRows(rows = []) {
     let group = groups.get(baseId);
     if (!group) {
       const { targetUserIds: _ignoreTargets, readByUserIds: _ignoreReads, ...baseRest } = payload;
+      // Jatuh-balik ke kolom baris bila payload tidak membawa field inti (mis. baris
+      // yang ditulis manual/di luar app dengan payload kosong). Mencegah notifikasi
+      // rusak (type/title/message undefined) yang dapat meng-crash NotificationsPage.
       group = {
-        base: { ...baseRest, id: baseId },
+        base: {
+          ...baseRest,
+          id: baseId,
+          type: baseRest.type || row?.type || 'general',
+          title: baseRest.title || row?.title || 'Notifikasi Sistem',
+          message: baseRest.message ?? (row?.body || ''),
+        },
         targetUserIds: new Set(),
         readByUserIds: new Set(),
         createdAt: payload.createdAt || row?.created_at || new Date().toISOString(),

@@ -86,7 +86,7 @@ const NotificationsPage = React.memo(function NotificationsPage() {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest ${getNotificationToneClass(notification.type)}`}>
-                    {notification.type.replaceAll('_', ' ')}
+                    {(notification.type || 'umum').replaceAll('_', ' ')}
                   </span>
                   <p className="mt-2 text-sm font-bold text-cyan-50">{notification.title}</p>
                   <p className="mt-1 text-xs text-slate-400 leading-relaxed whitespace-pre-line">{notification.message}</p>
