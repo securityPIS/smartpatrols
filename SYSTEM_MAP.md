@@ -547,6 +547,16 @@ membaca `custom_checkpoints`, tidak lagi `ship_checkpoints`, dan match-by-name t
 **Status: TERVERIFIKASI di produksi (2026-05-29). Notifikasi cron (checkpoint pending,
 checkpoint pending summary, shift wrap-up) kembali masuk di in-app maupun push.**
 
+Update 2026-06-12: `shift_wrap_up` sempat kembali terlihat "tidak masuk" sebagai
+background push pada device PETUGAS, walau cron, row `notifications`, trigger
+`dispatch_push_after_insert`, dan `private.app_config` aktif. Akar masalahnya berbeda
+dari bug `ship_checkpoints`: fungsi `notify_shift_wrapup` hanya menarget ADMIN summary
+dan PIC per kapal, sementara token produksi `push_subscriptions` yang aktif berada pada
+PETUGAS. Migration `20260612042244_include_petugas_shift_wrapup_recipients.sql`
+me-replace `notify_shift_wrapup` agar fan-out per-kapal mencakup `PIC` dan
+`PETUGAS` aktif sekapal. Admin summary tetap dipertahankan, jadwal cron tidak berubah,
+dan idempotency `insert_notification_fanout` tetap mencegah duplikasi.
+
 > ⚠️ ATURAN UNTUK FUNGSI/CRON SQL APA PUN YANG MENYANGKUT CHECKPOINT:
 > JANGAN PERNAH membaca dari tabel `ship_checkpoints` — tabel itu **selalu kosong** di
 > produksi (tidak ada satu pun jalur tulis di `src/`/`scripts/`). Sumber kebenaran definisi
