@@ -14,6 +14,7 @@ const cloudStateSource = readFileSync(new URL('../../src/services/backend/cloudS
 const appContextSource = readFileSync(new URL('../../src/context/AppContextRuntime.jsx', import.meta.url), 'utf8');
 const syncAccessSource = readFileSync(new URL('../../supabase/functions/sync-operational-access/index.ts', import.meta.url), 'utf8');
 const registrationMigrationSource = readFileSync(new URL('../../supabase/migrations/202605250001_fix_registration_profile_sync.sql', import.meta.url), 'utf8');
+const pendingUpdatePolicySource = readFileSync(new URL('../../supabase/migrations/202605250002_fix_rls_policies_and_triggers.sql', import.meta.url), 'utf8');
 
 test('pending registration payload tetap membuang field sensitif dan approval field liar', () => {
   const payload = buildPendingRegistrationPayload({
@@ -85,16 +86,16 @@ test('registrasi publik membawa metadata khusus untuk trigger onboarding Supabas
   );
 });
 
-test('pending registration client insert aman terhadap duplikasi dari trigger auth', () => {
+test('pending registration client upsert mempertahankan photo_url di atas stub trigger', () => {
   assert.match(
     accessSource,
-    /\.from\(PENDING_REGISTRATIONS_TABLE\)[\s\S]*\.insert\(payload\)/,
-    'client harus memakai insert biasa agar tidak membutuhkan UPDATE policy pending_registrations',
+    /\.from\(PENDING_REGISTRATIONS_TABLE\)[\s\S]*\.upsert\(payload,\s*\{\s*onConflict:\s*'uid'\s*\}\)/,
+    'client harus memakai upsert agar photo_url/photo_path tidak hilang saat trigger auth sudah membuat stub tanpa foto',
   );
   assert.match(
-    accessSource,
-    /isDuplicateKeyError\(error\)/,
-    'duplicate dari trigger auth harus dianggap idempotent, bukan gagal registrasi',
+    pendingUpdatePolicySource,
+    /create policy "pending_owner_update" on public\.pending_registrations[\s\S]*uid = auth\.uid\(\)::text and status = 'pending'/,
+    'upsert client bergantung pada RLS pending_owner_update agar pemilik bisa melengkapi barisnya sendiri',
   );
 });
 

@@ -35,12 +35,6 @@ function withRequestTimeout(promise, timeoutMs, timeoutCode) {
   });
 }
 
-function isDuplicateKeyError(error) {
-  const code = String(error?.code || '');
-  const message = String(error?.message || '').toLowerCase();
-  return code === '23505' || message.includes('duplicate key');
-}
-
 function mapPendingRegistration(row = {}) {
   return {
     id: sanitizeText(row.id || row.uid || '', 160) || '',
@@ -108,15 +102,14 @@ export async function createPendingRegistration(registration) {
   };
 
   try {
+    // Trigger auth.users AFTER INSERT (create_pending_registration_from_auth_user)
+    // sudah membuat baris stub saat signUp TANPA photo_url, karena foto baru di-upload
+    // setelah signUp (butuh uid). Insert biasa akan kena duplicate key pada PK uid lalu
+    // foto hilang. Pakai upsert agar photo_url/photo_path milik pendaftar ikut tersimpan;
+    // RLS pending_owner_update (uid = auth.uid() and status = 'pending') mengizinkan ini.
     const { error } = await supabase
       .from(PENDING_REGISTRATIONS_TABLE)
-      .insert(payload);
-    if (isDuplicateKeyError(error)) {
-      return {
-        ...registration,
-        status: 'pending',
-      };
-    }
+      .upsert(payload, { onConflict: 'uid' });
     if (error) throw error;
   } catch (error) {
     await enqueueOutboxMutation({
@@ -136,8 +129,7 @@ registerOutboxHandler('pending_registration.upsert', async (payload) => {
   const supabase = ensureSupabaseClient();
   const { error } = await supabase
     .from(PENDING_REGISTRATIONS_TABLE)
-    .insert(payload);
-  if (isDuplicateKeyError(error)) return;
+    .upsert(payload, { onConflict: 'uid' });
   if (error) throw error;
 });
 
