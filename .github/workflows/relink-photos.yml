@@ -80,8 +80,10 @@ jobs:
           # yang belum ada di Node 20 sehingga createClient langsung melempar error.
           node-version: 22
 
-      - name: Install dependencies
-        run: npm install --no-audit --no-fund
+      - name: Install dependency yang dibutuhkan skrip
+        # Skrip hanya butuh @supabase/supabase-js. Install paket tunggal ini saja agar cepat
+        # dan menghindari postinstall berat (vite/capacitor/dll) yang bisa menggantung di runner.
+        run: npm install --no-save --no-audit --no-fund @supabase/supabase-js@^2.86.0
 
       - name: Jalankan relink foto
         env:
