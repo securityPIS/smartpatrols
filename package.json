@@ -11,7 +11,8 @@
     "supabase:start": "supabase start",
     "supabase:reset": "supabase db reset",
     "supabase:functions": "supabase functions serve",
-    "setup:admin": "node scripts/setup-admin.mjs"
+    "setup:admin": "node scripts/setup-admin.mjs",
+    "relink:photos": "node scripts/relink-user-photos.mjs"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.3.1",
