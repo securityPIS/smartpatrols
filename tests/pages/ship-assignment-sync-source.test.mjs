@@ -1,8 +1,8 @@
 /*
 Tujuan: Mengunci source assignment kru agar tidak lagi tersapu state-sync stale.
 Caller: Node test runner.
-Dependensi: File source AppContextRuntime, cloudState, access, smartpatrol Edge helper, dan migration RPC assignment.
-Main Functions: Validasi statis RPC atomik, client assignment path, dan skip no-op state-sync.
+Dependensi: File source AppContextRuntime, cloudState, access, smartpatrol Edge helper, dan migration assignment.
+Main Functions: Validasi statis RPC atomik, guard DB assignment, client assignment path, dan skip no-op state-sync.
 Side Effects: Tidak ada; test hanya membaca source.
 */
 
@@ -15,6 +15,7 @@ const accessSource = readFileSync(new URL('../../src/services/backend/access.js'
 const cloudStateSource = readFileSync(new URL('../../src/services/backend/cloudState.js', import.meta.url), 'utf8');
 const edgeSharedSource = readFileSync(new URL('../../supabase/functions/_shared/smartpatrol.ts', import.meta.url), 'utf8');
 const migrationSource = readFileSync(new URL('../../supabase/migrations/20260617151542_atomic_ship_personnel_assignment.sql', import.meta.url), 'utf8');
+const guardMigrationSource = readFileSync(new URL('../../supabase/migrations/20260617153122_guard_ship_assignment_state_sync.sql', import.meta.url), 'utf8');
 
 test('admin assignment RPC updates profile and ship in one guarded database function', () => {
   assert.match(migrationSource, /create or replace function public\.admin_set_ship_personnel_assignment/);
@@ -22,6 +23,14 @@ test('admin assignment RPC updates profile and ship in one guarded database func
   assert.match(migrationSource, /update public\.ships[\s\S]*personnel = to_jsonb\(v_current_ids\)/);
   assert.match(migrationSource, /update public\.profiles[\s\S]*ship_assigned = v_next_ship_assigned[\s\S]*status = v_next_status/);
   assert.match(migrationSource, /insert into public\.client_mutations/);
+});
+
+test('database guard prevents stale state sync from wiping assignment columns', () => {
+  assert.match(guardMigrationSource, /create or replace function public\.guard_profile_assignment_columns/);
+  assert.match(guardMigrationSource, /create trigger guard_profile_assignment_columns/);
+  assert.match(guardMigrationSource, /create or replace function public\.guard_ship_assignment_columns/);
+  assert.match(guardMigrationSource, /new\.personnel := old\.personnel;[\s\S]*new\.personnel_next_month := old\.personnel_next_month;[\s\S]*new\.personnel_schedules := old\.personnel_schedules;/);
+  assert.match(guardMigrationSource, /perform set_config\('smartpatrol\.assignment_write', 'on', true\);/);
 });
 
 test('client assignment handlers call atomic RPC before local mutation', () => {

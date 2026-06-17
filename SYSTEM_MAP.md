@@ -43,6 +43,7 @@ Admin assignment kru
   -> RPC admin_set_ship_personnel_assignment
   -> transaksi tunggal update ships.personnel/personnel_next_month/personnel_schedules
      + profiles.ship_assigned/status/enabled + audit_events + client_mutations signal
+  -> trigger guard DB menolak state-sync lama yang mencoba mengubah kolom assignment
   -> Realtime/hydrate memperbarui device lain
 ```
 
@@ -130,6 +131,7 @@ settle window yang dibatalkan otomatis jika snapshot Realtime berikutnya kembali
 | `src/services/time/trustedTime.js` | Trusted time anchor memakai Supabase Edge Function. |
 | `supabase/migrations/202605220001_init_smartpatrol_sql.sql` | Schema Postgres, RLS, Storage policies, Realtime publication. |
 | `supabase/migrations/20260617151542_atomic_ship_personnel_assignment.sql` | RPC admin atomik untuk assignment kru kapal agar `profiles` dan `ships` tidak beda state. |
+| `supabase/migrations/20260617153122_guard_ship_assignment_state_sync.sql` | Trigger guard agar state-sync lama tidak bisa mengosongkan kolom assignment; RPC assignment memakai flag transaksi internal. |
 | `supabase/functions/*` | Edge Functions server-time, access, approval, revoke, upload URL, provision user. |
 | `scripts/setup-admin.mjs` | Bootstrap admin pertama via service role. |
 | `vercel.json` | Header keamanan dan SPA rewrite untuk Vercel. |
@@ -201,6 +203,9 @@ Perubahan utama:
    tetap `off-duty`.
 4. Saat cloud sync aktif tetapi admin sedang offline/gagal RPC, assignment tidak
    diterapkan secara lokal agar snapshot offline tidak menimpa data assignment valid.
+5. Migration `20260617153122_guard_ship_assignment_state_sync.sql` menambah guard
+   server-side: update langsung ke `ships.personnel*` dan wipe `profiles.ship_assigned`
+   ditahan kecuali berasal dari RPC atomik yang memasang flag transaksi internal.
 
 Regresi dijaga oleh `tests/pages/ship-assignment-sync-source.test.mjs`.
 
