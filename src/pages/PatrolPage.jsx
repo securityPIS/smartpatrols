@@ -286,7 +286,7 @@ const PatrolPage = React.memo(function PatrolPage() {
       >
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-0.5">
-            <p className={`font-bold ${meta.itemTextClass}`}>{item.name}</p>
+            <p className={`font-bold text-sm sm:text-base ${meta.itemTextClass}`}>{item.name}</p>
             {item.isTemporaryShiftNode && (
               <span className="text-[9px] uppercase tracking-widest text-yellow-300 border border-yellow-500/40 px-1.5 py-0.5 rounded">
                 Tambahan Shift
@@ -463,37 +463,37 @@ const PatrolPage = React.memo(function PatrolPage() {
 
                     return (
                       <div key={item.id} className="p-3 bg-[#0b1229] border border-cyan-800/50 rounded-xl transition-all hover:border-cyan-500/30">
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <p className="font-bold text-white truncate">{item.name}</p>
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <p className="font-bold text-white truncate text-sm sm:text-base">{item.name}</p>
                             {item.isTemporaryShiftNode && (
                               <span className="shrink-0 text-[9px] uppercase tracking-widest text-yellow-300 border border-yellow-500/40 px-1.5 py-0.5 rounded">
                                 Tambahan Shift
                               </span>
                             )}
                           </div>
-                          <div className="flex gap-2 shrink-0">
+                          <div className="flex gap-1.5 sm:gap-2 shrink-0">
                             <button
                               onClick={() => handleActionClick(item.id, 'aman')}
                               disabled={isCheckpointLocked}
-                              className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs transition-colors shadow-sm ${
+                              className={`flex-1 sm:flex-initial flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl font-bold text-[11px] sm:text-xs transition-colors shadow-sm ${
                                 isCheckpointLocked
                                   ? 'cursor-not-allowed border border-slate-800 bg-slate-900 text-slate-500'
                                   : 'bg-[#070b19] hover:bg-emerald-950/30 border border-emerald-900/50 hover:border-emerald-500/50 text-emerald-100'
                               }`}
                             >
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> AMAN
+                              <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400" /> AMAN
                             </button>
                             <button
                               onClick={() => handleActionClick(item.id, 'temuan')}
                               disabled={isCheckpointLocked}
-                              className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs transition-colors shadow-sm ${
+                              className={`flex-1 sm:flex-initial flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl font-bold text-[11px] sm:text-xs transition-colors shadow-sm ${
                                 isCheckpointLocked
                                   ? 'cursor-not-allowed border border-slate-800 bg-slate-900 text-slate-500'
                                   : 'bg-[#070b19] hover:bg-yellow-950/30 border border-yellow-900/50 hover:border-yellow-500/50 text-yellow-100'
                               }`}
                             >
-                              <AlertTriangle className="w-3.5 h-3.5 text-yellow-400" /> TEMUAN
+                              <AlertTriangle className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-yellow-400" /> TEMUAN
                             </button>
                           </div>
                         </div>
