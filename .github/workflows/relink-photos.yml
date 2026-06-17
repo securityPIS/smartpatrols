@@ -1,0 +1,106 @@
+# Relink foto profil user lama yang byte-nya masih ada di Supabase Storage.
+# Menjalankan scripts/relink-user-photos.mjs dengan service-role key dari GitHub Secrets,
+# supaya key tidak pernah keluar dari lingkungan CI (tidak perlu ada di laptop / sesi chat).
+#
+# Trigger: manual lewat tab Actions -> "Relink Foto User" -> "Run workflow".
+#
+# WAJIB di-set sekali di GitHub: Settings -> Secrets and variables -> Actions -> New repository secret
+#   SUPABASE_SERVICE_ROLE_KEY : Service role key (Dashboard -> Project Settings -> API -> service_role)
+#   SUPABASE_PROJECT_REF      : Project ref (sudah dipakai workflow Deploy Supabase) ATAU
+#   SUPABASE_URL              : URL penuh https://<ref>.supabase.co (opsional bila PROJECT_REF ada)
+#
+# CATATAN KEAMANAN: service_role mem-bypass seluruh RLS. Workflow ini hanya menulis kolom
+# profiles.photo_url (dan menyegarkan media_assets) untuk object avatar yang memang sudah ada.
+
+name: Relink Foto User
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Mode jalan"
+        type: choice
+        required: true
+        default: dry-run
+        options:
+          - dry-run
+          - apply
+      email:
+        description: "Batasi ke satu email (kosongkan untuk semua user)"
+        type: string
+        required: false
+        default: ""
+      force:
+        description: "Re-sign juga foto yang URL-nya sudah http"
+        type: boolean
+        required: false
+        default: false
+      ttl_days:
+        description: "TTL signed URL baru (hari)"
+        type: string
+        required: false
+        default: "30"
+
+jobs:
+  relink:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Tentukan SUPABASE_URL
+        # Bila SUPABASE_URL tidak di-set, susun dari SUPABASE_PROJECT_REF (URL bersifat publik).
+        run: |
+          if [ -z "$SUPABASE_URL" ] && [ -n "$SUPABASE_PROJECT_REF" ]; then
+            echo "SUPABASE_URL=https://${SUPABASE_PROJECT_REF}.supabase.co" >> "$GITHUB_ENV"
+          fi
+
+      - name: Validasi secrets tersedia
+        run: |
+          missing=0
+          if [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "::error::Secret SUPABASE_SERVICE_ROLE_KEY belum di-set di GitHub repo secrets."
+            missing=1
+          fi
+          if [ -z "$SUPABASE_URL" ]; then
+            echo "::error::SUPABASE_URL/SUPABASE_PROJECT_REF belum tersedia sebagai secret."
+            missing=1
+          fi
+          [ "$missing" -eq 0 ] || exit 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Jalankan relink foto
+        env:
+          MODE: ${{ inputs.mode }}
+          EMAIL: ${{ inputs.email }}
+          FORCE: ${{ inputs.force }}
+          TTL_DAYS: ${{ inputs.ttl_days }}
+        # Input dirakit lewat env + array argumen agar aman dari command injection.
+        run: |
+          args=()
+          [ "$MODE" = "apply" ] && args+=("--apply")
+          [ -n "$EMAIL" ] && args+=("--email=$EMAIL")
+          [ "$FORCE" = "true" ] && args+=("--force")
+          [ -n "$TTL_DAYS" ] && args+=("--ttl-days=$TTL_DAYS")
+          echo "Menjalankan (mode=$MODE): node scripts/relink-user-photos.mjs ${args[*]}"
+          node scripts/relink-user-photos.mjs "${args[@]}"
+
+      - name: Selesai
+        run: |
+          if [ "${{ inputs.mode }}" = "apply" ]; then
+            echo "Relink selesai (APPLY). Periksa log langkah sebelumnya untuk ringkasan."
+          else
+            echo "Relink selesai (DRY-RUN). Jalankan ulang dengan mode=apply untuk menulis perubahan."
+          fi
