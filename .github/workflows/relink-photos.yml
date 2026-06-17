@@ -76,7 +76,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # Node 22+ wajib: @supabase/supabase-js (realtime-js) butuh WebSocket native global,
+          # yang belum ada di Node 20 sehingga createClient langsung melempar error.
+          node-version: 22
 
       - name: Install dependencies
         run: npm install --no-audit --no-fund
