@@ -279,9 +279,21 @@ function normalizeShipCheckpointDefinitions(checkpoints = []) {
 }
 
 function initializeShipCheckpointDefinitions(checkpoints = []) {
+  // Key nama default yang berlaku saat ini.
+  const currentDefaultNameKeys = new Set(
+    defaultLocationOptions.map(name => createCheckpointNameKey(name)),
+  );
+  // Buang sisa checkpoint default LAMA (isDefault: true) yang sudah tidak ada di daftar
+  // default sekarang, mis. "Haluan"/"Deck"/"Sekoci" setelah daftar default diganti. Titik
+  // tambahan admin (isDefault: false) selalu dipertahankan. Hasil patroli completed/missed
+  // tidak ikut hilang karena disimpan terpisah & direkonstruksi sebagai "orphan".
+  const retainedCheckpoints = (Array.isArray(checkpoints) ? checkpoints : []).filter((checkpoint) => {
+    if (!checkpoint?.isDefault) return true;
+    return currentDefaultNameKeys.has(createCheckpointNameKey(checkpoint?.name || ''));
+  });
   return normalizeShipCheckpointDefinitions([
     ...createDefaultShipCheckpoints(),
-    ...(Array.isArray(checkpoints) ? checkpoints : []),
+    ...retainedCheckpoints,
   ]);
 }
 
