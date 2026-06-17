@@ -8778,6 +8778,42 @@ export function AppProvider({ children }) {
     }
   }, []);
   const handleUserPhotoUpload = useCallback(async () => { const dataUrl = await pickLocalImage(); if (!dataUrl) return; const url = await saveImageToDB(dataUrl); if (url) setUserFormData(prev => ({ ...prev, photoUrl: url })); }, []);
+  // Ubah foto profil lokal (idb://) menjadi URL Supabase Storage durabel yang terikat pada
+  // auth_uid user, memakai bucket registration-assets (domain 'registration'). Dengan domain
+  // ini, cron resign-expiring-assets otomatis memperbarui profiles.photo_url WHERE auth_uid =
+  // owner_id saat signed URL mendekati kedaluwarsa — pola identik dengan onboarding publik.
+  // Tanpa ini foto user yang dibuat/diubah admin hanya hidup sebagai key IndexedDB lokal di
+  // perangkat admin dan tidak pernah sampai ke profiles.photo_url (avatar hilang lintas-device).
+  // Poster avatar (data: URL) dan URL http yang sudah durabel dibiarkan apa adanya.
+  // Mengembalikan { photoUrl, syncPhotoUrl, failed }: photoUrl untuk record lokal/blob,
+  // syncPhotoUrl untuk dikirim ke profiles (kosong bila bukan URL durabel), failed bila upload gagal.
+  const resolveDurableUserPhotoUrl = useCallback(async (photoUrl, authUid) => {
+    const safeAuthUid = sanitizeText(authUid || '', 160);
+    if (typeof photoUrl !== 'string' || !photoUrl) {
+      return { photoUrl: photoUrl || null, syncPhotoUrl: '', failed: false };
+    }
+    if (photoUrl.startsWith('http://') || photoUrl.startsWith('https://')) {
+      // Sudah URL durabel (mis. edit tanpa ganti foto) — pertahankan dan ikut sinkronkan.
+      return { photoUrl, syncPhotoUrl: photoUrl, failed: false };
+    }
+    if (!photoUrl.startsWith('idb://')) {
+      // Poster avatar inline (data:) atau bentuk lain: jangan diunggah, jangan disinkron ke profiles.
+      return { photoUrl, syncPhotoUrl: '', failed: false };
+    }
+    if (!safeAuthUid) {
+      // Tanpa auth_uid foto tak bisa diikat ke profiles; biarkan blob shared-state yang menanganinya.
+      return { photoUrl, syncPhotoUrl: '', failed: false };
+    }
+    try {
+      const uploaded = await uploadRegistrationPhotoAsset({ uid: safeAuthUid, photoUrl });
+      const durableUrl = sanitizeUrl(uploaded?.photoUrl || '') || '';
+      if (!durableUrl) return { photoUrl, syncPhotoUrl: '', failed: true };
+      return { photoUrl: durableUrl, syncPhotoUrl: durableUrl, failed: false };
+    } catch (error) {
+      console.error('Gagal mengunggah foto profil user ke storage', error);
+      return { photoUrl, syncPhotoUrl: '', failed: true };
+    }
+  }, []);
   const handleSaveUser = useCallback(async () => {
     if (!isAdmin) return;
 
@@ -8858,7 +8894,16 @@ export function AppProvider({ children }) {
       shipAssigned: null,
       ...userMutationMeta,
     };
-    const nextUserRecord = normalizeUserRecord(newUser, usersData.length);
+    let nextUserRecord = normalizeUserRecord(newUser, usersData.length);
+    // Unggah foto lokal jadi URL durabel sebelum sinkron, agar foto tersimpan ke profiles.photo_url
+    // dan muncul lintas-perangkat (bukan hanya key idb:// di perangkat admin pembuat).
+    const savedUserPhoto = await resolveDurableUserPhotoUrl(nextUserRecord.photoUrl, nextUserRecord.firebaseUid);
+    if (savedUserPhoto.photoUrl !== nextUserRecord.photoUrl) {
+      nextUserRecord = { ...nextUserRecord, photoUrl: savedUserPhoto.photoUrl };
+    }
+    if (savedUserPhoto.failed) {
+      setUserFormNotice('Foto profil belum terunggah ke cloud dan akan disinkronkan otomatis saat koneksi membaik.');
+    }
     if (nextUserRecord.firebaseUid) {
       try {
         await syncOperationalUserAccess({
@@ -8870,6 +8915,7 @@ export function AppProvider({ children }) {
           shipAssigned: nextUserRecord.shipAssigned || '',
           type: nextUserRecord.type,
           workerNumber: nextUserRecord.workerNumber || '',
+          photoUrl: savedUserPhoto.syncPhotoUrl,
           legacyUserId: nextUserRecord.id,
         });
       } catch (error) {
@@ -8881,7 +8927,7 @@ export function AppProvider({ children }) {
     setShowUserForm(false);
     setUserFormData(createUserFormState());
     setSelectedUser(nextUserRecord);
-  }, [clearUserManagementFeedback, isAdmin, userFormData, usersData]);
+  }, [clearUserManagementFeedback, isAdmin, resolveDurableUserPhotoUrl, userFormData, usersData]);
   const handleUpdateUser = useCallback(async () => {
     if (!selectedUser?.id) return;
     clearUserManagementFeedback();
@@ -8963,7 +9009,7 @@ export function AppProvider({ children }) {
       ? (wantsInactive ? 'disabled' : (nextShipAssigned ? 'active' : 'off-duty'))
       : (wantsInactive ? 'disabled' : 'active');
     const userMutationMeta = createLocalEntityUpdateMeta();
-    const previewUser = normalizeUserRecord({
+    let previewUser = normalizeUserRecord({
       ...(currentRecord || {}),
       ...selectedUser,
       name: safeName,
@@ -8988,6 +9034,15 @@ export function AppProvider({ children }) {
       ...userMutationMeta,
     }, selectedUserIndex);
 
+    // Unggah foto lokal jadi URL durabel sebelum sinkron agar profiles.photo_url ikut terisi
+    // dan avatar tampil lintas-perangkat, bukan hanya sebagai key idb:// lokal.
+    const savedUserPhoto = await resolveDurableUserPhotoUrl(previewUser.photoUrl, previewUser.firebaseUid);
+    if (savedUserPhoto.photoUrl !== previewUser.photoUrl) {
+      previewUser = { ...previewUser, photoUrl: savedUserPhoto.photoUrl };
+    }
+    if (savedUserPhoto.failed) {
+      setUserFormNotice('Foto profil belum terunggah ke cloud dan akan disinkronkan otomatis saat koneksi membaik.');
+    }
     if (previewUser.firebaseUid) {
       try {
         await syncOperationalUserAccess({
@@ -8999,6 +9054,7 @@ export function AppProvider({ children }) {
           shipAssigned: previewUser.shipAssigned || '',
           type: previewUser.type,
           workerNumber: previewUser.workerNumber || '',
+          photoUrl: savedUserPhoto.syncPhotoUrl,
           legacyUserId: previewUser.id,
         });
       } catch (error) {
@@ -9029,7 +9085,7 @@ export function AppProvider({ children }) {
     }
     setSelectedUser({ ...previewUser, password: '' });
     setUserFormNotice((previousNotice) => previousNotice || 'Perubahan profil berhasil disimpan.');
-  }, [clearUserManagementFeedback, currentUserRecord, isAdmin, selectedUser, sessionUserId, usersData]);
+  }, [clearUserManagementFeedback, currentUserRecord, isAdmin, resolveDurableUserPhotoUrl, selectedUser, sessionUserId, usersData]);
   const handleDeleteUser = useCallback((id) => {
     if (!isAdmin) return;
     const targetUser = usersData.find(u => u.id === id);
@@ -9847,6 +9903,10 @@ export function AppProvider({ children }) {
         photoUrl: '',
         photoPath: '',
       };
+      // Tandai bila pendaftar memilih foto tetapi gagal terunggah (mis. sinyal jelek/putus di
+      // tengah proses) supaya tidak hilang senyap — pendaftaran tetap lanjut, tapi pendaftar
+      // diberi tahu agar bisa minta admin melengkapi foto setelah akun diaktifkan.
+      let photoUploadFailed = false;
 
       if (authForm.photoUrl && hasRegistrationSession) {
         try {
@@ -9854,8 +9914,10 @@ export function AppProvider({ children }) {
             uid: credential.user.uid,
             photoUrl: authForm.photoUrl,
           });
+          if (!uploadedPhoto.photoUrl) photoUploadFailed = true;
         } catch (photoError) {
           console.error('Gagal upload foto registrasi ke storage onboarding', photoError);
+          photoUploadFailed = true;
         }
       }
 
@@ -9879,10 +9941,14 @@ export function AppProvider({ children }) {
       setCurrentPage('home');
       setNotificationReturnPage('home');
       setAuthForm(createAuthFormState({ email: safeEmail }));
-      setAuthNotice('Registrasi berhasil dikirim. Silakan tunggu approval admin sebelum akun diaktifkan.');
+      setAuthNotice(photoUploadFailed
+        ? 'Registrasi berhasil dikirim, tetapi foto gagal diunggah. Silakan minta admin melengkapi foto setelah akun diaktifkan.'
+        : 'Registrasi berhasil dikirim. Silakan tunggu approval admin sebelum akun diaktifkan.');
       setConfirmDialog({
         title: 'Registrasi Berhasil',
-        message: 'Akun Anda sudah terdaftar di antrean onboarding SmartPatrol. Silakan tunggu approval admin sebelum login operasional dijalankan.',
+        message: photoUploadFailed
+          ? 'Akun Anda sudah terdaftar di antrean onboarding SmartPatrol, tetapi foto profil gagal diunggah (kemungkinan koneksi terputus). Akun tetap bisa diproses admin; foto dapat dilengkapi admin setelah akun diaktifkan.'
+          : 'Akun Anda sudah terdaftar di antrean onboarding SmartPatrol. Silakan tunggu approval admin sebelum login operasional dijalankan.',
         confirmText: 'MENGERTI',
         isAlert: true,
         onConfirm: () => { },

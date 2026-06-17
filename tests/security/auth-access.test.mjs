@@ -15,6 +15,7 @@ const appContextSource = readFileSync(new URL('../../src/context/AppContextRunti
 const syncAccessSource = readFileSync(new URL('../../supabase/functions/sync-operational-access/index.ts', import.meta.url), 'utf8');
 const registrationMigrationSource = readFileSync(new URL('../../supabase/migrations/202605250001_fix_registration_profile_sync.sql', import.meta.url), 'utf8');
 const pendingUpdatePolicySource = readFileSync(new URL('../../supabase/migrations/202605250002_fix_rls_policies_and_triggers.sql', import.meta.url), 'utf8');
+const sharedEdgeSource = readFileSync(new URL('../../supabase/functions/_shared/smartpatrol.ts', import.meta.url), 'utf8');
 
 test('pending registration payload tetap membuang field sensitif dan approval field liar', () => {
   const payload = buildPendingRegistrationPayload({
@@ -96,6 +97,34 @@ test('pending registration client upsert mempertahankan photo_url di atas stub t
     pendingUpdatePolicySource,
     /create policy "pending_owner_update" on public\.pending_registrations[\s\S]*uid = auth\.uid\(\)::text and status = 'pending'/,
     'upsert client bergantung pada RLS pending_owner_update agar pemilik bisa melengkapi barisnya sendiri',
+  );
+});
+
+test('foto user admin diunggah ke storage durabel lalu disinkronkan ke profiles.photo_url', () => {
+  // Foto profil yang baru dipilih masih berupa key idb:// lokal. Harus diunggah jadi URL
+  // durabel terikat auth_uid (lewat uploadRegistrationPhotoAsset, domain registration) sebelum
+  // sinkron, agar profiles.photo_url terisi dan avatar muncul lintas-perangkat.
+  assert.match(
+    appContextSource,
+    /const resolveDurableUserPhotoUrl = useCallback\(async \(photoUrl, authUid\) => \{[\s\S]*?uploadRegistrationPhotoAsset\(\{ uid: safeAuthUid, photoUrl \}\)/,
+    'helper foto user harus mengunggah idb:// ke storage durabel terikat auth_uid sebelum sinkron',
+  );
+  assert.match(
+    appContextSource,
+    /await syncOperationalUserAccess\(\{[\s\S]*?photoUrl: savedUserPhoto\.syncPhotoUrl,[\s\S]*?\}\);/,
+    'sinkron akses user admin harus menyertakan photoUrl agar profiles.photo_url terisi',
+  );
+  // Jalur outbox offline menulis profiles langsung; photo_url wajib ikut agar avatar tak hilang.
+  assert.match(
+    accessSource,
+    /photo_url:\s*sanitizeUrl\(payload\.photoUrl\s*\|\|\s*payload\.photo_url\s*\|\|\s*''\)\s*\|\|\s*null/,
+    'payload outbox profile.upsert harus membawa photo_url durabel',
+  );
+  // buildProfileRow (helper Edge Function) sudah menulis photo_url dari payload; pastikan kontrak ini tetap ada.
+  assert.match(
+    sharedEdgeSource.replace(/\s+/g, ' '),
+    /photo_url: sanitizeString\(payload\.photoUrl \|\| payload\.photo_url/,
+    'buildProfileRow harus tetap menulis photo_url dari payload sync',
   );
 });
 

@@ -71,6 +71,9 @@ function mapOperationalProfilePayload(payload = {}) {
     ship_assigned: shipAssigned,
     type: sanitizeText(payload.type || 'BUJP', 20) || 'BUJP',
     worker_number: sanitizeText(payload.workerNumber || '', 40) || '',
+    // Foto profil ikut disinkronkan agar avatar tidak hilang saat sinkron jatuh ke jalur outbox
+    // offline (upsert profiles langsung). Hanya URL durabel yang lolos sanitizeUrl yang ditulis.
+    photo_url: sanitizeUrl(payload.photoUrl || payload.photo_url || '') || null,
     review_state: sanitizeText(payload.reviewState || 'approved', 20).toLowerCase(),
     enabled: payload.enabled !== undefined ? Boolean(payload.enabled) : calculatedEnabled,
     source: sanitizeText(payload.source || 'manual', 40) || 'manual',
