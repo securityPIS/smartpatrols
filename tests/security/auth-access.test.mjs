@@ -18,11 +18,13 @@ const pendingUpdatePolicySource = readFileSync(new URL('../../supabase/migration
 const sharedEdgeSource = readFileSync(new URL('../../supabase/functions/_shared/smartpatrol.ts', import.meta.url), 'utf8');
 
 test('pending registration payload tetap membuang field sensitif dan approval field liar', () => {
+  const longSignedPhotoUrl = `https://hsquavmbeaawywpebafw.supabase.co/storage/v1/object/sign/registration-assets/uid-public-1/profile/avatar-1770000000000.webp?token=${'a'.repeat(520)}`;
   const payload = buildPendingRegistrationPayload({
     uid: 'uid-public-1',
     email: 'PUBLIC@EXAMPLE.COM',
     name: '  Petugas Baru  ',
     phone: '0812-3456-7890',
+    photoUrl: longSignedPhotoUrl,
     role: ACCESS_ROLES.ADMIN,
     shipAssigned: 'MT MENGGALA',
     status: 'pending',
@@ -33,6 +35,7 @@ test('pending registration payload tetap membuang field sensitif dan approval fi
   assert.equal(payload.email, 'public@example.com');
   assert.equal(payload.name, 'Petugas Baru');
   assert.equal(payload.phone, '081234567890');
+  assert.equal(payload.photoUrl, longSignedPhotoUrl);
   assert.equal(payload.status, 'pending');
   assert.equal(payload.reviewNote, 'should-not-stick');
   assert.equal(Object.hasOwn(payload, 'role'), false);
@@ -123,8 +126,26 @@ test('foto user admin diunggah ke storage durabel lalu disinkronkan ke profiles.
   // buildProfileRow (helper Edge Function) sudah menulis photo_url dari payload; pastikan kontrak ini tetap ada.
   assert.match(
     sharedEdgeSource.replace(/\s+/g, ' '),
-    /photo_url: sanitizeString\(payload\.photoUrl \|\| payload\.photo_url/,
+    /photo_url: sanitizePhotoUrl\(payload\.photoUrl \|\| payload\.photo_url/,
     'buildProfileRow harus tetap menulis photo_url dari payload sync',
+  );
+});
+
+test('edge access tidak memotong signed URL foto profil Supabase', () => {
+  assert.match(
+    sharedEdgeSource,
+    /const MAX_PHOTO_URL_LENGTH = 4096;/,
+    'signed URL Supabase Storage bisa lebih dari 500 karakter, jadi batas foto harus longgar',
+  );
+  assert.match(
+    sharedEdgeSource.replace(/\s+/g, ' '),
+    /photoUrl: sanitizePhotoUrl\(profile\.photo_url\) \|\| null/,
+    'resolve access harus mengembalikan photo_url penuh tanpa memotong token signed URL',
+  );
+  assert.doesNotMatch(
+    sharedEdgeSource,
+    /photo_(?:url|Url)[\s\S]{0,80}sanitizeString\([^)]*,\s*500\)/,
+    'photo_url tidak boleh lagi memakai sanitizer 500 karakter karena memotong JWT Storage',
   );
 });
 

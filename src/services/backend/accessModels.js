@@ -18,6 +18,8 @@ export const ACCESS_STATUSES = Object.freeze({
   DISABLED: 'disabled',
 });
 
+const MAX_PHOTO_URL_LENGTH = 4096;
+
 function sanitizeString(value, maxLength = 120) {
   if (typeof value !== 'string') return '';
   return value
@@ -68,7 +70,7 @@ export function buildPendingRegistrationPayload(payload = {}) {
     email: sanitizeEmailValue(payload.email),
     name: sanitizeString(payload.name, 80) || 'User Baru',
     phone: sanitizePhoneValue(payload.phone),
-    photoUrl: sanitizeString(payload.photoUrl, 500),
+    photoUrl: sanitizeString(payload.photoUrl, MAX_PHOTO_URL_LENGTH),
     photoPath: sanitizeString(payload.photoPath, 240),
     type: sanitizeString(payload.type, 20) || 'BUJP',
     workerNumber: sanitizeString(payload.workerNumber, 40),

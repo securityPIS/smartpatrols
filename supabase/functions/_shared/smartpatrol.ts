@@ -59,6 +59,20 @@ export function sanitizeString(value: unknown, maxLength = 120) {
   return value.replace(/[\u0000-\u001f\u007f<>]/g, ' ').trim().slice(0, maxLength);
 }
 
+const MAX_PHOTO_URL_LENGTH = 4096;
+
+export function sanitizePhotoUrl(value: unknown) {
+  const url = sanitizeString(value, MAX_PHOTO_URL_LENGTH);
+  if (!url) return '';
+  if (url.startsWith('data:image/')) return url;
+  if (url.startsWith('idb://')) return url;
+  try {
+    return new URL(url).protocol === 'https:' ? url : '';
+  } catch {
+    return '';
+  }
+}
+
 export function sanitizeEmail(value: unknown) {
   return sanitizeString(value, 160).toLowerCase();
 }
@@ -147,7 +161,7 @@ export function profileToAccess(profile: Record<string, unknown>) {
     shipAssigned: sanitizeString(profile.ship_assigned, 80) || null,
     type: sanitizeString(profile.type, 20) || 'BUJP',
     workerNumber: sanitizeString(profile.worker_number, 40),
-    photoUrl: sanitizeString(profile.photo_url, 500) || null,
+    photoUrl: sanitizePhotoUrl(profile.photo_url) || null,
     legacyUserId: sanitizeString(profile.id, 160) || null,
     reviewState: sanitizeString(profile.review_state, 20).toLowerCase() || 'approved',
     enabled: Boolean(profile.enabled),
@@ -173,7 +187,7 @@ export function buildProfileRow(payload: Record<string, unknown>, fallback: Reco
     ship_assigned: shipAssigned || null,
     type: sanitizeString(payload.type || fallback.type || 'BUJP', 20) || 'BUJP',
     worker_number: sanitizeString(payload.workerNumber || payload.worker_number || fallback.workerNumber || fallback.worker_number, 40),
-    photo_url: sanitizeString(payload.photoUrl || payload.photo_url || fallback.photoUrl || fallback.photo_url, 500) || null,
+    photo_url: sanitizePhotoUrl(payload.photoUrl || payload.photo_url || fallback.photoUrl || fallback.photo_url) || null,
     review_state: sanitizeString(payload.reviewState || payload.review_state || fallback.reviewState || fallback.review_state || 'approved', 20).toLowerCase(),
     enabled: computeEnabled(role, status, shipAssigned),
     source: sanitizeString(payload.source || fallback.source || 'manual', 40) || 'manual',
