@@ -15,7 +15,7 @@ const source = readFileSync(new URL('../../src/context/AppContextRuntime.jsx', i
 test('handleUpdateUser stamps profile changes with local mutation metadata', () => {
   assert.match(
     source,
-    /const\s+userMutationMeta\s*=\s*createLocalEntityUpdateMeta\(\);[\s\S]*const\s+previewUser\s*=\s*normalizeUserRecord\(\{[\s\S]*\.\.\.userMutationMeta,/,
+    /const\s+userMutationMeta\s*=\s*createLocalEntityUpdateMeta\(\);[\s\S]*(?:const|let)\s+previewUser\s*=\s*normalizeUserRecord\(\{[\s\S]*\.\.\.userMutationMeta,/,
     'profile updates must carry updatedAt metadata so role changes win cloud merges',
   );
 });

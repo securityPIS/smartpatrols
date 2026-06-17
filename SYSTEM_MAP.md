@@ -35,6 +35,15 @@ Register
   -> pending_registrations insert idempotent bila sesi registrasi tersedia
   -> Admin approval via approve-pending-registration
   -> profiles upsert role/status/ship assignment
+
+Admin assignment kru
+  -> ShipsPage tab Kru
+  -> AppContextRuntime.handleConfirmAssign / handleTogglePersonnel
+  -> services/backend/access.syncShipPersonnelAssignment
+  -> RPC admin_set_ship_personnel_assignment
+  -> transaksi tunggal update ships.personnel/personnel_next_month/personnel_schedules
+     + profiles.ship_assigned/status/enabled + audit_events + client_mutations signal
+  -> Realtime/hydrate memperbarui device lain
 ```
 
 ### Patrol Checkpoint
@@ -120,6 +129,7 @@ settle window yang dibatalkan otomatis jika snapshot Realtime berikutnya kembali
 | `src/services/backend/outbox.js` | IndexedDB outbox mutation retry. |
 | `src/services/time/trustedTime.js` | Trusted time anchor memakai Supabase Edge Function. |
 | `supabase/migrations/202605220001_init_smartpatrol_sql.sql` | Schema Postgres, RLS, Storage policies, Realtime publication. |
+| `supabase/migrations/20260617151542_atomic_ship_personnel_assignment.sql` | RPC admin atomik untuk assignment kru kapal agar `profiles` dan `ships` tidak beda state. |
 | `supabase/functions/*` | Edge Functions server-time, access, approval, revoke, upload URL, provision user. |
 | `scripts/setup-admin.mjs` | Bootstrap admin pertama via service role. |
 | `vercel.json` | Header keamanan dan SPA rewrite untuk Vercel. |
@@ -169,6 +179,30 @@ npm run build
 - `setupNativePushNotifications` sekarang no-op agar Android tidak meminta izin push dan tidak mendaftarkan token.
 - `src/context/AppContext.jsx` legacy dihapus agar tidak ada import backend lama.
 - Jika schema/flow utama berubah, update file ini pada sesi yang sama.
+
+## Assignment Kru Atomik dan Anti State-Sync Storm (2026-06-17)
+
+Tujuan: mencegah bug admin assign PETUGAS ke kapal lalu kru tersapu menjadi nol dan
+PETUGAS kembali `off-duty`.
+
+Perubahan utama:
+
+1. Assignment kru tidak lagi bergantung pada dua write terpisah (`profiles` via Edge
+   Function dan `ships` via full snapshot). Handler admin kini memanggil RPC
+   `admin_set_ship_personnel_assignment` yang mengubah `ships.personnel`,
+   `ships.personnel_next_month`, `ships.personnel_schedules`, serta
+   `profiles.ship_assigned/status/enabled` dalam satu transaksi.
+2. `src/services/backend/cloudState.js` membandingkan row existing sebelum upsert
+   `profiles`/`ships`. Bila tidak ada perubahan bermakna, writer tidak menyentuh row
+   dan tidak menulis `client_mutations`, sehingga `updated_at` tidak memicu loop
+   Realtime -> hydrate -> write ulang.
+3. Normalisasi runtime/client/Edge Function menyamakan aturan: `PETUGAS` dengan
+   `shipAssigned` dianggap `active` kecuali statusnya `disabled`; tanpa assignment
+   tetap `off-duty`.
+4. Saat cloud sync aktif tetapi admin sedang offline/gagal RPC, assignment tidak
+   diterapkan secara lokal agar snapshot offline tidak menimpa data assignment valid.
+
+Regresi dijaga oleh `tests/pages/ship-assignment-sync-source.test.mjs`.
 
 ## Optimasi DB Egress Realtime (2026-06-05)
 

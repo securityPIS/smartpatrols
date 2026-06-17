@@ -57,8 +57,13 @@ function mapPendingRegistration(row = {}) {
 
 function mapOperationalProfilePayload(payload = {}) {
   const role = sanitizeText(payload.role || 'PETUGAS', 20).toUpperCase();
-  const status = sanitizeText(payload.status || 'off-duty', 20).toLowerCase();
   const shipAssigned = sanitizeText(payload.shipAssigned || payload.ship_assigned || '', 80) || null;
+  const requestedStatus = sanitizeText(payload.status || 'off-duty', 20).toLowerCase();
+  const status = requestedStatus === 'disabled'
+    ? 'disabled'
+    : (role === 'PETUGAS'
+      ? (shipAssigned ? 'active' : 'off-duty')
+      : (requestedStatus === 'off-duty' ? 'off-duty' : 'active'));
   const calculatedEnabled = status !== 'disabled' && (role !== 'PETUGAS' || Boolean(shipAssigned));
 
   return {
@@ -186,6 +191,31 @@ export async function syncOperationalUserAccess(payload) {
     });
     throw error;
   }
+}
+
+export async function syncShipPersonnelAssignment(payload = {}) {
+  const supabase = ensureSupabaseClient();
+  const profileId = sanitizeText(payload.profileId || payload.userId || '', 160);
+  const shipId = sanitizeText(payload.shipId || '', 160) || null;
+  const scheduleKind = sanitizeText(payload.scheduleKind || 'current', 20).toLowerCase() === 'next'
+    ? 'next'
+    : 'current';
+
+  if (!profileId) throw new Error('ship-assignment-profile-required');
+  if (payload.assign !== false && !shipId) throw new Error('ship-assignment-ship-required');
+
+  const { data, error } = await supabase.rpc('admin_set_ship_personnel_assignment', {
+    p_profile_id: profileId,
+    p_ship_id: shipId,
+    p_schedule_kind: scheduleKind,
+    p_assign: payload.assign !== false,
+    p_start_date: sanitizeText(payload.startDate || '', 20) || null,
+    p_end_date: sanitizeText(payload.endDate || '', 20) || null,
+    p_is_tbc: Boolean(payload.isTBC),
+  });
+
+  if (error) throw error;
+  return data || null;
 }
 
 registerOutboxHandler('profile.upsert', async (payload) => {

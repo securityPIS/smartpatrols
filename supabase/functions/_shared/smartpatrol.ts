@@ -87,7 +87,7 @@ export function normalizeStatus(value: unknown, role = 'PETUGAS', shipAssigned =
   if (status === 'disabled') return 'disabled';
   if (role === 'ADMIN' || role === 'PIC') return status === 'off-duty' ? 'off-duty' : 'active';
   if (!shipAssigned) return 'off-duty';
-  return status === 'active' ? 'active' : 'off-duty';
+  return 'active';
 }
 
 export function computeEnabled(role: string, status: string, shipAssigned = '') {

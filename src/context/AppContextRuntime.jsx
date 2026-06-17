@@ -74,6 +74,7 @@ import {
   revokeOperationalUserAccess,
   subscribeToPendingRegistrations,
   syncOperationalUserAccess,
+  syncShipPersonnelAssignment,
   uploadRegistrationPhotoAsset,
 } from '../services/backend/access';
 import {
@@ -3148,6 +3149,9 @@ function normalizeUserRecord(user, index = 0) {
   const fallbackStatus = role === ACCESS_ROLES.PETUGAS ? (shipAssigned ? 'active' : 'off-duty') : 'active';
   const statusSource = resolveExplicitOverride(user, seedUser, 'status', '');
   const status = sanitizeText(statusSource || fallbackStatus, 20).toLowerCase() || fallbackStatus;
+  const resolvedStatus = role === ACCESS_ROLES.PETUGAS
+    ? (status === 'disabled' ? 'disabled' : (shipAssigned ? 'active' : 'off-duty'))
+    : status;
   return {
     ...seedUser,
     ...user,
@@ -3156,7 +3160,7 @@ function normalizeUserRecord(user, index = 0) {
     role,
     type: sanitizeText(user?.type || seedUser?.type || 'BUJP', 20) || 'BUJP',
     workerNumber: sanitizeText(user?.workerNumber || seedUser?.workerNumber || '', 40),
-    status: role === ACCESS_ROLES.PETUGAS && !shipAssigned && status !== 'disabled' ? 'off-duty' : status,
+    status: resolvedStatus,
     shipAssigned,
     email: safeEmail,
     password: '',
@@ -8559,6 +8563,44 @@ export function AppProvider({ children }) {
       return false;
     }
   }, [hasOperationalCloudAccess, isAdmin]);
+  const persistShipPersonnelAssignment = useCallback(async (payload = {}) => {
+    if (!isAdmin || !isCloudSyncEnabled || !isCloudWriteEnabled || !hasOperationalCloudAccess || !isFirebaseAuthEnabled) {
+      return { ok: true, remote: false };
+    }
+    if (isOffline) {
+      setConfirmDialog({
+        title: 'Koneksi Dibutuhkan',
+        message: 'Perubahan assignment kru harus tersimpan ke Supabase secara atomik. Coba lagi saat koneksi stabil.',
+        confirmText: 'MENGERTI',
+        isAlert: true,
+        onConfirm: () => { },
+      });
+      return { ok: false, remote: true };
+    }
+
+    try {
+      await syncShipPersonnelAssignment(payload);
+      return { ok: true, remote: true };
+    } catch (error) {
+      console.error('Gagal sinkronisasi assignment kru kapal', error);
+      setConfirmDialog({
+        title: 'Assignment Gagal',
+        message: 'Penugasan kru belum tersimpan ke Supabase. Data lokal tidak diubah agar tidak menimpa assignment valid.',
+        confirmText: 'MENGERTI',
+        isAlert: true,
+        onConfirm: () => { },
+      });
+      return { ok: false, remote: true };
+    }
+  }, [
+    hasOperationalCloudAccess,
+    isAdmin,
+    isCloudSyncEnabled,
+    isCloudWriteEnabled,
+    isFirebaseAuthEnabled,
+    isOffline,
+    setConfirmDialog,
+  ]);
   const updateUserRecordLocally = useCallback((userId, updates) => {
     if (!userId) return;
     const mutationMeta = createLocalEntityUpdateMeta();
@@ -8578,6 +8620,14 @@ export function AppProvider({ children }) {
     const isAssigned = targetArray.includes(userId);
     const targetUser = usersData.find(u => u.id === userId) || null;
     if (isAssigned) {
+      const assignmentWrite = await persistShipPersonnelAssignment({
+        profileId: userId,
+        shipId: activeShip.id,
+        scheduleKind: scheduleMonth === 'current' ? 'current' : 'next',
+        assign: false,
+      });
+      if (!assignmentWrite.ok) return;
+
       const mutationMeta = createLocalEntityUpdateMeta();
       const removalResult = removeUserFromShipAssignment(shipsData, {
         userId,
@@ -8592,19 +8642,21 @@ export function AppProvider({ children }) {
           shipAssigned: remainingShipName || null,
           status: remainingShipName ? 'active' : 'off-duty',
         });
-        requestCloudSync('urgent');
-        await syncManagedUserOperationalAccess(targetUser, {
-          shipAssigned: remainingShipName,
-          status: remainingShipName ? 'active' : 'off-duty',
-        });
+        if (!assignmentWrite.remote) {
+          requestCloudSync('urgent');
+          await syncManagedUserOperationalAccess(targetUser, {
+            shipAssigned: remainingShipName,
+            status: remainingShipName ? 'active' : 'off-duty',
+          });
+        }
       } else {
-        requestCloudSync('urgent');
+        if (!assignmentWrite.remote) requestCloudSync('urgent');
       }
     } else {
       setAssignPopupData({ userId, name: targetUser?.name, role: targetUser?.role, scheduleType: scheduleMonth });
       setShowAssignPopup(true);
     }
-  }, [activeShip, isAdmin, requestCloudSync, scheduleMonth, shipsData, syncManagedUserOperationalAccess, updateUserRecordLocally, usersData]);
+  }, [activeShip, isAdmin, persistShipPersonnelAssignment, requestCloudSync, scheduleMonth, shipsData, syncManagedUserOperationalAccess, updateUserRecordLocally, usersData]);
 
   const handleConfirmAssign = useCallback(async (userId, startDate, endDate, isTBC) => {
     if (!isAdmin || !activeShip || !assignPopupData) return;
@@ -8622,6 +8674,17 @@ export function AppProvider({ children }) {
     } else if (startDate && startDate <= todayStr) {
       finalScheduleType = 'current';
     }
+
+    const assignmentWrite = await persistShipPersonnelAssignment({
+      profileId: userId,
+      shipId: activeShip.id,
+      scheduleKind: finalScheduleType === 'current' ? 'current' : 'next',
+      assign: true,
+      startDate,
+      endDate,
+      isTBC,
+    });
+    if (!assignmentWrite.ok) return;
 
     const mutationMeta = createLocalEntityUpdateMeta();
     setShipsData(assignUserToExclusiveShip(shipsData, {
@@ -8641,11 +8704,13 @@ export function AppProvider({ children }) {
         shipAssigned: activeShip.name,
         status: 'active',
       });
-      requestCloudSync('urgent');
-      await syncManagedUserOperationalAccess(targetUser, {
-        shipAssigned: activeShip.name,
-        status: 'active',
-      });
+      if (!assignmentWrite.remote) {
+        requestCloudSync('urgent');
+        await syncManagedUserOperationalAccess(targetUser, {
+          shipAssigned: activeShip.name,
+          status: 'active',
+        });
+      }
     } else {
       if (targetUser?.status !== 'active') {
         updateUserRecordLocally(userId, {
@@ -8653,12 +8718,12 @@ export function AppProvider({ children }) {
           status: 'off-duty',
         });
       }
-      requestCloudSync('urgent');
+      if (!assignmentWrite.remote) requestCloudSync('urgent');
     }
 
     setShowAssignPopup(false);
     setAssignPopupData(null);
-  }, [activeShip, assignPopupData, isAdmin, requestCloudSync, shipsData, syncManagedUserOperationalAccess, updateUserRecordLocally, usersData]);
+  }, [activeShip, assignPopupData, isAdmin, persistShipPersonnelAssignment, requestCloudSync, shipsData, syncManagedUserOperationalAccess, updateUserRecordLocally, usersData]);
   const handleAddShipCp = useCallback(() => {
     if (!isAdmin || !activeShip) return;
     const safeName = sanitizeText(newShipCp.name, 80);

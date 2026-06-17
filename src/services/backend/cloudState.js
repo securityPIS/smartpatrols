@@ -271,14 +271,23 @@ function incidentRowToState(row = {}) {
 }
 
 function userToProfileRow(user = {}) {
+  const role = sanitizeText(user.role || 'PETUGAS', 20).toUpperCase();
+  const shipAssigned = sanitizeText(user.shipAssigned || '', 80) || null;
+  const requestedStatus = sanitizeText(user.status || 'off-duty', 20).toLowerCase();
+  const status = requestedStatus === 'disabled'
+    ? 'disabled'
+    : (role === 'PETUGAS'
+      ? (shipAssigned ? 'active' : 'off-duty')
+      : (requestedStatus === 'off-duty' ? 'off-duty' : 'active'));
+
   return {
     id: String(user.id || user.firebaseUid || ''),
     auth_uid: user.firebaseUid || null,
     email: sanitizeEmail(user.email || ''),
     name: sanitizeText(user.name || '', 80) || 'Personil',
-    role: sanitizeText(user.role || 'PETUGAS', 20).toUpperCase(),
-    status: sanitizeText(user.status || 'off-duty', 20).toLowerCase(),
-    ship_assigned: sanitizeText(user.shipAssigned || '', 80) || null,
+    role,
+    status,
+    ship_assigned: shipAssigned,
     type: sanitizeText(user.type || 'BUJP', 20) || 'BUJP',
     worker_number: sanitizeText(user.workerNumber || '', 40),
     phone: sanitizePhone(user.phone || ''),
@@ -289,7 +298,7 @@ function userToProfileRow(user = {}) {
     emergency_contact: sanitizePhone(user.emergencyContact || ''),
     emergency_relation: sanitizeText(user.emergencyRelation || '', 40),
     photo_url: sanitizeUrl(user.photoUrl || '') || null,
-    enabled: user.status !== 'disabled',
+    enabled: status !== 'disabled' && (role !== 'PETUGAS' || Boolean(shipAssigned)),
     review_state: 'approved',
   };
 }
@@ -370,6 +379,95 @@ function shipToRow(ship = {}) {
     documents: Array.isArray(ship.documents) ? ship.documents : [],
     sos_recipient_ship_ids: Array.isArray(ship.sosRecipientShipIds) ? ship.sosRecipientShipIds : [],
   };
+}
+
+const PROFILE_ROW_COMPARE_COLUMNS = [
+  'id',
+  'auth_uid',
+  'email',
+  'name',
+  'role',
+  'status',
+  'review_state',
+  'enabled',
+  'ship_assigned',
+  'type',
+  'worker_number',
+  'phone',
+  'dob',
+  'address',
+  'office_address',
+  'emergency_name',
+  'emergency_contact',
+  'emergency_relation',
+  'photo_url',
+].join(',');
+
+const SHIP_ROW_COMPARE_COLUMNS = [
+  'id',
+  'name',
+  'type',
+  'imo_number',
+  'lat',
+  'lng',
+  'status',
+  'route',
+  'route_loading',
+  'route_discharge',
+  'cargo_type',
+  'cargo_amount',
+  'photo_url',
+  'personnel',
+  'personnel_next_month',
+  'personnel_schedules',
+  'custom_checkpoints',
+  'documents',
+  'sos_recipient_ship_ids',
+].join(',');
+
+const PROFILE_MUTATION_KEYS = PROFILE_ROW_COMPARE_COLUMNS.split(',');
+const SHIP_MUTATION_KEYS = SHIP_ROW_COMPARE_COLUMNS.split(',');
+
+function normalizeComparableDbValue(value) {
+  if (value === undefined) return null;
+  if (Array.isArray(value)) return value.map(normalizeComparableDbValue);
+  if (value && typeof value === 'object') {
+    return Object.keys(value)
+      .sort()
+      .reduce((collection, key) => {
+        collection[key] = normalizeComparableDbValue(value[key]);
+        return collection;
+      }, {});
+  }
+  return value;
+}
+
+function stringifyComparableDbValue(value) {
+  return JSON.stringify(normalizeComparableDbValue(value));
+}
+
+function areDbRowsEquivalent(nextRow = {}, existingRow = {}, keys = []) {
+  return keys.every((key) => (
+    stringifyComparableDbValue(nextRow[key]) === stringifyComparableDbValue(existingRow[key])
+  ));
+}
+
+async function filterChangedRowsById(supabase, table, rows = [], columns = '', keys = []) {
+  const safeRows = Array.isArray(rows) ? rows.filter(row => row?.id) : [];
+  if (safeRows.length === 0) return [];
+
+  const ids = Array.from(new Set(safeRows.map(row => row.id).filter(Boolean)));
+  const { data, error } = await supabase
+    .from(table)
+    .select(columns)
+    .in('id', ids);
+  if (error) throw error;
+
+  const existingById = new Map((data || []).map(row => [String(row.id), row]));
+  return safeRows.filter((row) => {
+    const existing = existingById.get(String(row.id));
+    return !existing || !areDbRowsEquivalent(row, existing, keys);
+  });
 }
 
 function isRowLevelSecurityError(error) {
@@ -931,15 +1029,39 @@ async function writeStateToSql(state, options = {}) {
   const shipRows = Array.isArray(state.shipsData)
     ? state.shipsData.map(shipToRow).filter(row => row.id)
     : [];
+  let changedProfileRows = [];
+  let changedShipRows = [];
 
   if (profileRows.length > 0) {
     const reconciledProfileRows = await reconcileProfileRowIds(supabase, profileRows);
-    const { error } = await supabase.from('profiles').upsert(reconciledProfileRows, { onConflict: 'id' });
+    changedProfileRows = await filterChangedRowsById(
+      supabase,
+      'profiles',
+      reconciledProfileRows,
+      PROFILE_ROW_COMPARE_COLUMNS,
+      PROFILE_MUTATION_KEYS,
+    );
+    const { error } = changedProfileRows.length > 0
+      ? await supabase.from('profiles').upsert(changedProfileRows, { onConflict: 'id' })
+      : { error: null };
     if (error && !String(error.message || '').toLowerCase().includes('row-level security')) throw error;
   }
   if (shipRows.length > 0) {
-    const { error } = await supabase.from('ships').upsert(shipRows, { onConflict: 'id' });
+    changedShipRows = await filterChangedRowsById(
+      supabase,
+      'ships',
+      shipRows,
+      SHIP_ROW_COMPARE_COLUMNS,
+      SHIP_MUTATION_KEYS,
+    );
+    const { error } = changedShipRows.length > 0
+      ? await supabase.from('ships').upsert(changedShipRows, { onConflict: 'id' })
+      : { error: null };
     if (error && !String(error.message || '').toLowerCase().includes('row-level security')) throw error;
+  }
+
+  if (changedProfileRows.length === 0 && changedShipRows.length === 0) {
+    return state;
   }
 
   await supabase.from('client_mutations').insert({
@@ -949,8 +1071,8 @@ async function writeStateToSql(state, options = {}) {
     payload: {
       domain: 'app_state',
       reason: options.reason || 'state-sync',
-      users: profileRows.length,
-      ships: shipRows.length,
+      users: changedProfileRows.length,
+      ships: changedShipRows.length,
     },
   }).throwOnError();
 
