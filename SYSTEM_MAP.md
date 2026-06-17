@@ -1,6 +1,6 @@
 # SYSTEM_MAP - SmartPatrol SQL
 
-> Terakhir diperbarui: 2026-05-31.
+> Terakhir diperbarui: 2026-06-17.
 > Bahasa pemrograman: JavaScript (React 19 + Vite 8), SQL Postgres, Supabase Edge Functions (Deno).
 
 ## Project Summary
@@ -101,7 +101,9 @@ offline — SELALU transien (tidak bergantung `navigator.onLine`, karena "intern
 ≠ "radio terputus": `navigator.onLine` bisa tetap `true` tanpa data). Ini mencegah petugas
 ketendang login saat menekan tombol "Sync Laporan" / submit patroli di jaringan buruk.
 Pencabutan akun (disabled/rejected/restricted) tetap ditegakkan jalur `resolveOperationalAccess`
-→ `handleLogout` saat benar-benar online, bukan oleh listener auth.
+ke delayed session-validation logout (settle 5 detik) saat benar-benar online, bukan oleh
+listener auth. Validator data-driven seperti PETUGAS off-duty/tanpa kapal juga memakai
+settle window yang dibatalkan otomatis jika snapshot Realtime berikutnya kembali valid.
 
 ## Important Files
 

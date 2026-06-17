@@ -2,7 +2,7 @@
 Tujuan: Menjaga integritas state user dan penugasan kapal pada modul admin.
 Caller: AppContextRuntime dan test regresi manajemen user.
 Dependensi: Tidak ada dependensi eksternal.
-Main Functions: Assignment eksklusif user lintas kapal, unassign terarah, pembacaan override eksplisit, dan guard bootstrap armada.
+Main Functions: Assignment eksklusif user lintas kapal, unassign terarah, pembacaan override eksplisit, dan guard validasi armada saat bootstrap/resync.
 Side Effects: Tidak ada; semua helper bersifat pure function.
 */
 
@@ -164,6 +164,7 @@ export function shouldDeferPetugasFleetValidation({
   isOffline = false,
   user = null,
   assignedShip = null,
+  shipsLoaded = true,
 } = {}) {
   const role = String(user?.role || '').toUpperCase();
   const status = String(user?.status || '').toLowerCase();
@@ -171,12 +172,12 @@ export function shouldDeferPetugasFleetValidation({
 
   return Boolean(
     isCloudSyncEnabled
-    && !cloudSyncBootstrapped
     && !isOffline
     && role === PETUGAS_ROLE
     && status === 'active'
     && shipAssigned
     && !assignedShip
+    && (!cloudSyncBootstrapped || !shipsLoaded)
   );
 }
 

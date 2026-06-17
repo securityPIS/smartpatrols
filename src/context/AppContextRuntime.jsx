@@ -2,7 +2,7 @@
 Tujuan: Menjadi pusat state, flow bisnis, dan sinkronisasi SmartPatrol SQL.
 Caller: Root app melalui AppProvider dan seluruh hook domain aplikasi.
 Dependensi: Seed data, adapter backend Supabase/Postgres, trusted time, helper user management, utilitas sanitasi, IndexedDB image store, dan adapter native Capacitor.
-Main Functions: Mengelola auth Supabase dengan fallback offline, onboarding approval, kapal, checkpoint patroli, incidents, history, SOS/notifikasi realtime in-app, cloud sync SQL, dedupe user operasional, dan retry sinkronisasi saat koneksi pulih.
+Main Functions: Mengelola auth Supabase dengan fallback offline, validasi sesi tertunda, onboarding approval, kapal, checkpoint patroli, incidents, history, SOS/notifikasi realtime in-app, cloud sync SQL, dedupe user operasional, dan retry sinkronisasi saat koneksi pulih.
 Side Effects: Menulis state lokal/cloud SQL, memanggil Edge Function security/upload aset, menginisialisasi checklist kapal, dan memigrasikan data shift aktif.
 */
 
@@ -98,6 +98,7 @@ const ACCESS_ROLES = {
 
 const ACCESS_ROLE_VALUES = Object.values(ACCESS_ROLES);
 const AUTH_SESSION_KEY = 'smartpatrol.auth.local.v1';
+const SESSION_VALIDATION_LOGOUT_DELAY_MS = 5000;
 const APP_TIME_ZONE = 'Asia/Jakarta';
 const APP_TIME_ZONE_UTC_OFFSET_HOURS = 7;
 const SHIFT_NOTIFICATION_DEBUG_KEY = 'smartpatrol.debug.shiftNotifications';
@@ -4939,6 +4940,7 @@ export function AppProvider({ children }) {
   // agar authAccessState (sumber shipAssigned/status) sembuh sendiri tanpa refresh manual.
   const [authAccessResolveNonce, setAuthAccessResolveNonce] = useState(0);
   const authAccessRetryRef = useRef({ attempts: 0, timer: null });
+  const sessionValidationLogoutRef = useRef({ timer: null, key: '' });
 
   // Crew migration effect
   useEffect(() => {
@@ -5483,7 +5485,8 @@ export function AppProvider({ children }) {
     isOffline,
     user: currentUserRecord,
     assignedShip: assignedShipForCurrentUser,
-  }), [assignedShipForCurrentUser, cloudSyncBootstrapped, currentUserRecord, isOffline]);
+    shipsLoaded: shipsData.length > 0,
+  }), [assignedShipForCurrentUser, cloudSyncBootstrapped, currentUserRecord, isOffline, shipsData.length]);
   const operationalShip = useMemo(() => {
     if (currentUserRecord?.role === ACCESS_ROLES.ADMIN) return null;
     if (shipsData.length === 0) return null;
@@ -9688,6 +9691,27 @@ export function AppProvider({ children }) {
     }
     resetAuthSession(message);
   }, [firebaseAuthUser, resetAuthSession]);
+  const clearPendingSessionValidationLogout = useCallback(() => {
+    const pendingLogout = sessionValidationLogoutRef.current;
+    if (pendingLogout.timer) {
+      clearTimeout(pendingLogout.timer);
+    }
+    sessionValidationLogoutRef.current = { timer: null, key: '' };
+  }, []);
+  const scheduleSessionValidationLogout = useCallback(({ key, message }) => {
+    const safeKey = sanitizeText(key || '', 500);
+    if (!safeKey) return;
+    const pendingLogout = sessionValidationLogoutRef.current;
+    if (pendingLogout.timer && pendingLogout.key === safeKey) return;
+
+    clearPendingSessionValidationLogout();
+    const timer = setTimeout(() => {
+      sessionValidationLogoutRef.current = { timer: null, key: '' };
+      handleLogout(message);
+    }, SESSION_VALIDATION_LOGOUT_DELAY_MS);
+    sessionValidationLogoutRef.current = { timer, key: safeKey };
+  }, [clearPendingSessionValidationLogout, handleLogout]);
+  useEffect(() => clearPendingSessionValidationLogout, [clearPendingSessionValidationLogout]);
   const finalizeAuthorizedLogin = useCallback((resolvedUser) => {
     const landingPage = getDefaultPageForRole(resolvedUser.role);
     setSessionUserId(resolvedUser.id);
@@ -10623,59 +10647,103 @@ export function AppProvider({ children }) {
     if (registrationNotifications.length > 0) appendNotifications(registrationNotifications);
   }, [appendNotifications, getUsersByRole, isAdmin, pendingRegistrations]);
   useEffect(() => {
-    if (!sessionUserId) return;
+    if (!sessionUserId) {
+      clearPendingSessionValidationLogout();
+      return;
+    }
     const activeUser = currentUserRecord || usersData.find(user => user.id === sessionUserId);
     if (!activeUser) {
+      clearPendingSessionValidationLogout();
       resetAuthSession('Sesi login tidak lagi valid.');
       return;
     }
 
+    const currentUid = sanitizeText(firebaseAuthUser?.uid || '', 160);
+    const validationBaseKey = [
+      sessionUserId,
+      currentUid,
+      authAccessStatus,
+      sanitizeText(activeUser.role || '', 20),
+      sanitizeText(activeUser.status || '', 20),
+      sanitizeText(activeUser.shipAssigned || '', 80),
+      sanitizeText(assignedShipForCurrentUser?.id || '', 120),
+      sanitizeText(assignedShipForCurrentUser?.name || '', 80),
+    ].join('|');
+
     if (isFirebaseAuthEnabled) {
-      if (!firebaseAuthReady || authBusy || authAccessBusy) return;
+      if (!firebaseAuthReady || authBusy || authAccessBusy) {
+        clearPendingSessionValidationLogout();
+        return;
+      }
       if (!firebaseAuthUser || !authAccessEnabled) {
         if (isOffline && activeUser) {
           const offlineUid = sanitizeText(activeUser?.firebaseUid || '', 160);
           if (offlineUid && authAccessOfflineUid !== offlineUid) {
             setAuthAccessOfflineUid(offlineUid);
           }
+          clearPendingSessionValidationLogout();
           return;
         }
         // Reset HANYA saat jawaban akses DEFINITIF (resolvedUid === currentUid). Resolusi
         // gagal jaringan (authAccessOfflineUid di-set) atau masih pending JANGAN memicu
         // logout — mencegah tendangan saat koneksi baru pulih (reconnect).
-        const currentUid = sanitizeText(firebaseAuthUser?.uid || '', 160);
-        if (authAccessResolvedUid !== currentUid) return;
+        if (authAccessResolvedUid !== currentUid) {
+          clearPendingSessionValidationLogout();
+          return;
+        }
+        clearPendingSessionValidationLogout();
         resetAuthSession('Sesi cloud Anda telah berakhir. Silakan login kembali.');
         return;
       }
       if (authAccessStatus === 'restricted') {
-        handleLogout('Akses operasional Anda sedang nonaktif. Hubungi admin untuk assignment ulang.');
+        scheduleSessionValidationLogout({
+          key: `access:${validationBaseKey}`,
+          message: 'Akses operasional Anda sedang nonaktif. Hubungi admin untuk assignment ulang.',
+        });
         return;
       }
       if (authAccessStatus === 'rejected') {
-        handleLogout('Registrasi Anda ditolak admin operasional.');
+        scheduleSessionValidationLogout({
+          key: `access:${validationBaseKey}`,
+          message: 'Registrasi Anda ditolak admin operasional.',
+        });
         return;
       }
       if (authAccessStatus === 'pending') {
-        handleLogout('Registrasi Anda masih menunggu approval admin.');
+        scheduleSessionValidationLogout({
+          key: `access:${validationBaseKey}`,
+          message: 'Registrasi Anda masih menunggu approval admin.',
+        });
         return;
       }
     }
 
     if (!canUserAccessApplication(activeUser)) {
-      handleLogout('Petugas off-duty atau tanpa penugasan kapal tidak bisa tetap login.');
+      scheduleSessionValidationLogout({
+        key: `user-access:${validationBaseKey}`,
+        message: 'Petugas off-duty atau tanpa penugasan kapal tidak bisa tetap login.',
+      });
       return;
     }
     if (isWaitingForAssignedFleetSync) {
+      clearPendingSessionValidationLogout();
       return;
     }
     // Armada belum termuat (mis. window hydrate saat baru reconnect): assignedShip bisa
     // sesaat null walau petugas masih terdaftar. Jangan kick — tunggu ships terisi.
-    if (!shipsData?.length) return;
-    if (activeUser.role === ACCESS_ROLES.PETUGAS && !assignedShipForCurrentUser) {
-      handleLogout('Petugas yang tidak lagi terdaftar di armada aktif tidak bisa tetap login.');
+    if (!shipsData?.length) {
+      clearPendingSessionValidationLogout();
+      return;
     }
-  }, [assignedShipForCurrentUser, authAccessBusy, authAccessEnabled, authAccessOfflineUid, authAccessStatus, authBusy, currentUserRecord, firebaseAuthReady, firebaseAuthUser, handleLogout, isOffline, isWaitingForAssignedFleetSync, resetAuthSession, sessionUserId, shipsData, usersData]);
+    if (activeUser.role === ACCESS_ROLES.PETUGAS && !assignedShipForCurrentUser) {
+      scheduleSessionValidationLogout({
+        key: `fleet:${validationBaseKey}`,
+        message: 'Petugas yang tidak lagi terdaftar di armada aktif tidak bisa tetap login.',
+      });
+      return;
+    }
+    clearPendingSessionValidationLogout();
+  }, [assignedShipForCurrentUser, authAccessBusy, authAccessEnabled, authAccessOfflineUid, authAccessResolvedUid, authAccessStatus, authBusy, clearPendingSessionValidationLogout, currentUserRecord, firebaseAuthReady, firebaseAuthUser, isOffline, isWaitingForAssignedFleetSync, resetAuthSession, scheduleSessionValidationLogout, sessionUserId, shipsData, usersData]);
   useEffect(() => { if (!currentUserRecord) return; if (!isAdmin && (currentPage === 'users' || currentPage === 'ships' || currentPage === 'daily-report')) { setCurrentPage('home'); setActiveShipId(null); setShowShipForm(false); setShowShipDocForm(false); setShowUserForm(false); setSelectedUser(null); } }, [currentPage, currentUserRecord, isAdmin]);
   useEffect(() => { if (activeShipId) return; setShowShipDocForm(false); }, [activeShipId]);
   useEffect(() => {

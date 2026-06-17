@@ -2,7 +2,7 @@
 Tujuan: Menjaga integritas state user saat admin mengubah penugasan kapal dan akses operasional.
 Caller: Node test runner untuk regresi manajemen user.
 Dependensi: src/utils/userManagement.js.
-Main Functions: Menguji assignment eksklusif lintas kapal, override kosong untuk unassign, dan guard bootstrap armada.
+Main Functions: Menguji assignment eksklusif lintas kapal, override kosong untuk unassign, dan guard bootstrap/resync armada.
 Side Effects: Tidak ada; test memakai data dummy in-memory.
 */
 
@@ -168,4 +168,24 @@ test('shouldDeferPetugasFleetValidation stops deferring after bootstrap or off-d
     user: { id: 'u21', role: 'PETUGAS', shipAssigned: '', status: 'off-duty' },
     assignedShip: null,
   }), false);
+});
+
+test('shouldDeferPetugasFleetValidation waits for live resync when ships snapshot is not loaded', () => {
+  assert.equal(shouldDeferPetugasFleetValidation({
+    isCloudSyncEnabled: true,
+    cloudSyncBootstrapped: true,
+    isOffline: false,
+    shipsLoaded: false,
+    user: { id: 'u22', role: 'PETUGAS', shipAssigned: 'MT BARU', status: 'active' },
+    assignedShip: null,
+  }), true, 'petugas aktif jangan dilogout saat snapshot kapal belum termuat ulang');
+
+  assert.equal(shouldDeferPetugasFleetValidation({
+    isCloudSyncEnabled: true,
+    cloudSyncBootstrapped: true,
+    isOffline: false,
+    shipsLoaded: true,
+    user: { id: 'u22', role: 'PETUGAS', shipAssigned: 'MT BARU', status: 'active' },
+    assignedShip: null,
+  }), false, 'setelah ships loaded, validator runtime yang memutuskan lewat settle timer');
 });

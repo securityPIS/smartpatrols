@@ -181,7 +181,7 @@ test('validator sesi hanya reset saat resolusi akses DEFINITIF (anti tendangan r
   // untuk UID aktif. Resolusi gagal jaringan (authAccessOfflineUid di-set) saat baru pulih
   // koneksi TIDAK boleh memicu reset — itulah penyebab logout "saat back online".
   const definitiveGuards = appContextSource.match(
-    /if \(authAccessResolvedUid !== currentUid\) return;\s*\n\s*resetAuthSession\('Sesi cloud Anda telah berakhir/g,
+    /if \(authAccessResolvedUid !== currentUid\)(?: \{[\s\S]{0,160}?return;\s*\n\s*\}| return;)\s*\n\s*(?:clearPendingSessionValidationLogout\(\);\s*\n\s*)?resetAuthSession\('Sesi cloud Anda telah berakhir/g,
   ) || [];
   assert.equal(
     definitiveGuards.length,
@@ -195,8 +195,41 @@ test('validator sesi hanya reset saat resolusi akses DEFINITIF (anti tendangan r
   );
   assert.match(
     appContextSource,
-    /if \(!shipsData\?\.length\) return;/,
+    /if \(!shipsData\?\.length\) \{\s*clearPendingSessionValidationLogout\(\);\s*return;/,
     'validasi armada petugas harus ditunda saat ships belum termuat agar tidak kick di window reconnect',
+  );
+});
+
+test('validator sesi menunda hard logout dari status operasional yang bisa transient', () => {
+  assert.match(
+    appContextSource,
+    /const SESSION_VALIDATION_LOGOUT_DELAY_MS = 5000;/,
+    'hard logout dari validator sesi harus memakai settle window 5 detik',
+  );
+  assert.match(
+    appContextSource,
+    /const sessionValidationLogoutRef = useRef\(\{ timer: null, key: '' \}\);/,
+    'validator sesi harus menyimpan pending logout dalam ref agar bisa dibatalkan saat state pulih',
+  );
+  assert.match(
+    appContextSource,
+    /const scheduleSessionValidationLogout = useCallback\(\(\{ key, message \}\) => \{[\s\S]*?setTimeout\(\(\) => \{[\s\S]*?handleLogout\(message\);[\s\S]*?SESSION_VALIDATION_LOGOUT_DELAY_MS/,
+    'hard logout harus dijadwalkan, bukan dipanggil langsung dari kondisi transient',
+  );
+  assert.doesNotMatch(
+    appContextSource,
+    /if \(authAccessStatus === 'restricted'\) \{\s*handleLogout\(/,
+    'restricted dari resolver tidak boleh langsung hard signOut tanpa settle',
+  );
+  assert.doesNotMatch(
+    appContextSource,
+    /if \(!canUserAccessApplication\(activeUser\)\) \{\s*handleLogout\(/,
+    'status user data-driven tidak boleh langsung hard signOut tanpa settle',
+  );
+  assert.match(
+    appContextSource,
+    /if \(activeUser\.role === ACCESS_ROLES\.PETUGAS && !assignedShipForCurrentUser\) \{[\s\S]*?scheduleSessionValidationLogout\(\{[\s\S]*?key: `fleet:\$\{validationBaseKey\}`/,
+    'validasi armada PETUGAS harus dijadwalkan agar snapshot realtime yang transient bisa pulih',
   );
 });
 
