@@ -493,6 +493,15 @@ function isNavigatorOnline() {
   return navigator.onLine !== false;
 }
 
+// Status penolakan akses yang DEFINITIF dari resolve-operational-access. Hanya status ini
+// (bukan respons kosong/ambigu akibat jaringan flaky) yang boleh memicu logout sesi.
+const DEFINITIVE_ACCESS_DENIAL_STATUSES = new Set(['pending', 'rejected', 'restricted', 'disabled']);
+function isDefinitiveAccessDenial(accessResult) {
+  if (!accessResult || typeof accessResult !== 'object') return false;
+  const status = String(accessResult.status || '').trim().toLowerCase();
+  return DEFINITIVE_ACCESS_DENIAL_STATUSES.has(status);
+}
+
 // --- UTILITY FUNCTIONS ---
 function getJakartaDateParts(date = new Date()) {
   // Reuses module-level cached formatter — avoids recreating Intl instance on every call
@@ -1554,6 +1563,8 @@ function createShipLocationSnapshot(ship) {
 
 const PATROL_SUBMIT_GEOLOCATION_TIMEOUT_MS = 12000;
 const PATROL_SUBMIT_GEOLOCATION_MAX_AGE_MS = 0;
+// Interval retrier penempelan koordinat untuk laporan yang tersimpan tanpa GPS perangkat.
+const PATROL_PENDING_GPS_RETRY_INTERVAL_MS = 30000;
 
 function createGeolocationRequestOptions(options = {}) {
   return {
@@ -4256,6 +4267,9 @@ function createPatrolReportDomainRecord(checkpoint = {}, options = {}) {
     tindakLanjut: sanitizeMultilineText(checkpoint.tindakLanjut || '', 280),
     shipSnapshot: normalizedCheckpoint.shipSnapshot || null,
     gpsSnapshot: normalizedCheckpoint.gpsSnapshot || null,
+    // Tanda laporan tersimpan tanpa GPS perangkat; koordinat menyusul saat fix tersedia.
+    // Device lain memakai ini untuk menampilkan "koordinat menyusul" alih-alih GPS kosong.
+    gpsPending: normalizedCheckpoint.gpsSnapshot ? false : Boolean(checkpoint.gpsPending),
     weatherSnapshot: normalizedCheckpoint.weatherSnapshot || null,
     ...compactTimeAuditFieldsForCloudSync(checkpoint),
   };
@@ -4916,6 +4930,9 @@ export function AppProvider({ children }) {
   // Core data
   const [activeShiftKey, setActiveShiftKey] = useState(() => initialShiftState.activeShiftKey);
   const [checkpointsByShip, setCheckpointsByShip] = useState(() => initialShiftState.checkpointsByShip);
+  // Mirror checkpointsByShip untuk dibaca retrier GPS (di luar render) tanpa stale closure.
+  const checkpointsByShipRef = useRef(checkpointsByShip);
+  checkpointsByShipRef.current = checkpointsByShip;
   const [shipsData, setShipsData] = useState(() => initialShipsCollection);
   const [usersData, setUsersData] = useState(() => initialUsersCollection);
   const [incidentsData, setIncidentsData] = useState(() => persistedState?.incidentsData || []);
@@ -4945,6 +4962,11 @@ export function AppProvider({ children }) {
   const [authAccessResolveNonce, setAuthAccessResolveNonce] = useState(0);
   const authAccessRetryRef = useRef({ attempts: 0, timer: null });
   const sessionValidationLogoutRef = useRef({ timer: null, key: '' });
+  // Laporan patroli yang tersimpan TANPA GPS perangkat (gpsPending). Retrier latar
+  // belakang mencoba ambil fix GPS lalu menempelkan koordinat + re-sync. Key = media key
+  // (`shiftKey|shipId|checkpointId`) berisi metadata target agar bisa update lintas ship.
+  const pendingGpsReportsRef = useRef(new Map());
+  const pendingGpsRetryTimerRef = useRef(null);
 
   // Crew migration effect
   useEffect(() => {
@@ -8160,6 +8182,110 @@ export function AppProvider({ children }) {
     if (isIncident) setIncidentForm(prev => ({ ...prev, ...photoSet }));
     else setActiveForms(prev => ({ ...prev, [id]: { ...prev[id], ...photoSet } }));
   }, [activeForms]);
+  // Penempel koordinat untuk laporan yang tersimpan tanpa GPS (gpsPending). Mencoba ambil
+  // fix GPS perangkat; bila berhasil, koordinat ditempel ke checkpoint terkait (lintas ship
+  // via shipId) lalu di-re-sync ke cloud. Tidak ada fix → diam, retry pada siklus berikut.
+  const runPendingGpsAttachment = useCallback(async () => {
+    if (pendingGpsReportsRef.current.size === 0) return;
+    const deviceLocation = await requestCurrentGeolocation({
+      enableHighAccuracy: true,
+      timeout: PATROL_SUBMIT_GEOLOCATION_TIMEOUT_MS,
+      maximumAge: PATROL_SUBMIT_GEOLOCATION_MAX_AGE_MS,
+    });
+    if (!deviceLocation) return;
+
+    const gpsSnapshot = { ...deviceLocation, capturedAt: getTrustedDate().toISOString() };
+    const targets = Array.from(pendingGpsReportsRef.current.values());
+    const attachedReports = [];
+    const currentState = checkpointsByShipRef.current || {};
+
+    targets.forEach(({ shiftKey, shipId, checkpointId }) => {
+      const shipCheckpoints = currentState[shipId];
+      if (!Array.isArray(shipCheckpoints)) return;
+      const matchedCheckpoint = shipCheckpoints.find((checkpoint) => (
+        String(checkpoint?.id) === String(checkpointId)
+      ));
+      // Sudah tidak pending (mis. ditimpa record cloud) → buang dari antrean, jangan timpa.
+      if (!matchedCheckpoint || !matchedCheckpoint.gpsPending) {
+        pendingGpsReportsRef.current.delete(`${shiftKey}|${shipId}|${checkpointId}`);
+        return;
+      }
+      const nextCheckpoint = { ...matchedCheckpoint, gpsSnapshot, gpsPending: false };
+      attachedReports.push({ shipId, checkpointId, report: nextCheckpoint });
+      pendingGpsReportsRef.current.delete(`${shiftKey}|${shipId}|${checkpointId}`);
+    });
+
+    if (attachedReports.length === 0) return;
+
+    setCheckpointsByShip((previousState) => {
+      const nextState = { ...previousState };
+      let changed = false;
+      attachedReports.forEach(({ shipId, checkpointId, report }) => {
+        const shipCheckpoints = nextState[shipId];
+        if (!Array.isArray(shipCheckpoints)) return;
+        nextState[shipId] = shipCheckpoints.map((checkpoint) => (
+          String(checkpoint?.id) === String(checkpointId) ? report : checkpoint
+        ));
+        changed = true;
+      });
+      return changed ? nextState : previousState;
+    });
+
+    attachedReports.forEach(({ report }) => {
+      void syncPatrolReportToDomain(report);
+    });
+    requestCloudSync('urgent');
+  }, [requestCloudSync, syncPatrolReportToDomain]);
+  // Ref ke versi terbaru agar loop interval (dibuat sekali) tak memakai closure basi.
+  const runPendingGpsAttachmentRef = useRef(runPendingGpsAttachment);
+  runPendingGpsAttachmentRef.current = runPendingGpsAttachment;
+  // Pastikan loop retrier berjalan selama antrean masih berisi; loop menghentikan diri
+  // saat antrean kosong. Aman dipanggil berulang — tidak menumpuk interval ganda.
+  const startPendingGpsRetryLoop = useCallback(() => {
+    if (pendingGpsRetryTimerRef.current) return;
+    pendingGpsRetryTimerRef.current = setInterval(() => {
+      if (pendingGpsReportsRef.current.size === 0) {
+        clearInterval(pendingGpsRetryTimerRef.current);
+        pendingGpsRetryTimerRef.current = null;
+        return;
+      }
+      void runPendingGpsAttachmentRef.current?.();
+    }, PATROL_PENDING_GPS_RETRY_INTERVAL_MS);
+  }, []);
+  const enqueuePendingGpsReport = useCallback((report) => {
+    const shiftKey = sanitizeText(report?.shiftKey || '', 160);
+    const shipId = sanitizeText(report?.shipId || operationalShip?.id || '', 160);
+    const checkpointId = sanitizeText(report?.checkpointId || report?.id || '', 160);
+    if (!shiftKey || !shipId || !checkpointId) return;
+    pendingGpsReportsRef.current.set(`${shiftKey}|${shipId}|${checkpointId}`, { shiftKey, shipId, checkpointId });
+    // Coba langsung sekali, lalu pastikan loop berkala aktif untuk percobaan berikutnya.
+    void runPendingGpsAttachment();
+    startPendingGpsRetryLoop();
+  }, [operationalShip?.id, runPendingGpsAttachment, startPendingGpsRetryLoop]);
+  // Pulihkan antrean GPS yang masih pending dari state tersimpan (mis. setelah restart app),
+  // lalu hidupkan loop retrier. Bersihkan interval saat unmount.
+  useEffect(() => {
+    Object.entries(checkpointsByShipRef.current || {}).forEach(([shipKey, shipCheckpoints]) => {
+      ensureArray(shipCheckpoints).forEach((checkpoint) => {
+        if (!checkpoint?.gpsPending || checkpoint?.gpsSnapshot) return;
+        const shiftKey = sanitizeText(checkpoint?.shiftKey || '', 160);
+        const shipId = sanitizeText(checkpoint?.shipId || shipKey || '', 160);
+        const checkpointId = sanitizeText(checkpoint?.checkpointId || checkpoint?.id || '', 160);
+        if (!shiftKey || !shipId || !checkpointId) return;
+        pendingGpsReportsRef.current.set(`${shiftKey}|${shipId}|${checkpointId}`, { shiftKey, shipId, checkpointId });
+      });
+    });
+    if (pendingGpsReportsRef.current.size > 0) {
+      void runPendingGpsAttachmentRef.current?.();
+      startPendingGpsRetryLoop();
+    }
+    return () => {
+      if (pendingGpsRetryTimerRef.current) {
+        clearInterval(pendingGpsRetryTimerRef.current);
+        pendingGpsRetryTimerRef.current = null;
+      }
+    };
+  }, [startPendingGpsRetryLoop]);
   const handleSubmitPatrol = useCallback(async (id) => {
     if (!currentUserRecord || !operationalShip) return;
     if (showTrustedTimeGateDialog()) return;
@@ -8200,16 +8326,12 @@ export function AppProvider({ children }) {
           skipWeatherFetch: true,
         },
       );
-      if (!environmentSnapshot.gpsSnapshot) {
-        setConfirmDialog({
-          title: 'GPS perangkat belum tersedia',
-          message: 'Aktifkan layanan lokasi dan izin GPS perangkat, lalu ulangi submit. Laporan belum disimpan supaya koordinat patroli tidak tercatat sebagai dummy atau fallback kapal.',
-          confirmText: 'MENGERTI',
-          isAlert: true,
-          onConfirm: () => {},
-        });
-        return;
-      }
+      // GPS perangkat tidak tersedia (lokasi mati / izin / belum dapat fix). JANGAN blokir
+      // submit: simpan laporan offline dengan gpsSnapshot=null + tanda gpsPending. Koordinat
+      // TIDAK pernah diisi dari shipSnapshot (anti-dummy/fallback kapal tetap berlaku) — slot
+      // koordinat jujur kosong sampai retrier latar belakang mendapat fix GPS lalu menempel
+      // & re-sync. Submit tetap masuk checkpoint lokal + outbox dan ter-sync saat online.
+      const hasDeviceGps = Boolean(environmentSnapshot.gpsSnapshot);
 
       const submittedItem = {
         ...currentCheckpoint,
@@ -8228,6 +8350,7 @@ export function AppProvider({ children }) {
         shipName: operationalShipName,
         shipSnapshot: environmentSnapshot.shipSnapshot,
         gpsSnapshot: environmentSnapshot.gpsSnapshot,
+        gpsPending: !hasDeviceGps,
         weatherSnapshot: environmentSnapshot.weatherSnapshot,
         photoUrl: formState.photoUrl,
         heroUrl: formState.heroUrl || formState.photoUrl,
@@ -8271,10 +8394,24 @@ export function AppProvider({ children }) {
       // (RLS/izin/offline) — penting karena di HP Console tak bisa dibuka.
       void syncPatrolReportToDomain(submittedItem, { notifyOnError: true });
       requestCloudSync('urgent');
+
+      // GPS belum ada: antrekan untuk penempelan koordinat di latar belakang + beri tahu
+      // pengguna laporan SUDAH tersimpan (non-blokir). Saat fix GPS didapat, retrier menempel
+      // koordinat & re-sync otomatis tanpa perlu submit ulang.
+      if (!hasDeviceGps) {
+        enqueuePendingGpsReport(submittedItem);
+        setConfirmDialog({
+          title: 'Laporan tersimpan, koordinat menyusul',
+          message: 'GPS perangkat belum aktif, jadi koordinat patroli belum tercatat. Laporan SUDAH disimpan dan akan tersinkron otomatis. Aktifkan layanan lokasi/izin GPS — koordinat akan menyusul sendiri begitu lokasi tersedia.',
+          confirmText: 'MENGERTI',
+          isAlert: true,
+          onConfirm: () => {},
+        });
+      }
     } finally {
       setSubmittingPatrolId(previousId => (previousId === id ? null : previousId));
     }
-  }, [activeForms, appendNotifications, checkpoints, currentShiftMeta.key, currentUser, currentUserRecord, currentUserRole, getShipRecipients, isCurrentShiftStatusCompleted, operationalShip, operationalShipName, requestCloudSync, showTrustedTimeGateDialog, submittingPatrolId, syncPatrolReportToDomain, updateOperationalShipCheckpoints, weatherInfo]);
+  }, [activeForms, appendNotifications, checkpoints, currentShiftMeta.key, currentUser, currentUserRecord, currentUserRole, enqueuePendingGpsReport, getShipRecipients, isCurrentShiftStatusCompleted, operationalShip, operationalShipName, requestCloudSync, showTrustedTimeGateDialog, submittingPatrolId, syncPatrolReportToDomain, updateOperationalShipCheckpoints, weatherInfo]);
   const handleDeleteReport = useCallback((id) => {
     setConfirmDialog({
       title: 'Hapus Laporan',
@@ -10630,11 +10767,19 @@ export function AppProvider({ children }) {
             profile: accessResult.profile,
             authUser: firebaseAuthUser,
           }));
-        } else {
-          // Access denied or pending — tetap set resolved agar validator bisa putuskan logout.
+        } else if (isDefinitiveAccessDenial(accessResult)) {
+          // Penolakan EKSPLISIT (pending/rejected/restricted/disabled) — jawaban definitif,
+          // set resolved agar validator bisa putuskan logout sesuai status.
           setAuthAccessState(accessResult || null);
           setAuthAccessResolvedUid(currentUid);
           setAuthAccessOfflineUid('');
+        } else {
+          // Respons sukses TAPI tanpa access & tanpa status penolakan yang dikenal: kemungkinan
+          // jaringan flaky / proxy mengembalikan body kosong saat sinyal data mati walau radio
+          // menyala (navigator.onLine tetap true). JANGAN anggap definitif → perlakukan seperti
+          // gagal jaringan: fallback offline, jangan set resolvedUid, supaya sesi patroli tidak
+          // ditendang oleh logout liar. Re-resolve berikutnya pada jaringan bersih yang putuskan.
+          setAuthAccessOfflineUid(currentUid);
         }
       })
       .catch((error) => {

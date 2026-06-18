@@ -137,6 +137,8 @@ export default function HistoryDetailView({ isInline = false, entryData = null, 
   const isLiveEntry = Boolean(entry.isLive);
   const displayMapLocation = latestCompletedCheckpoint?.gpsSnapshot || null;
   const hasDisplayMapLocation = displayMapLocation?.lat != null && displayMapLocation?.lng != null;
+  // Laporan tersimpan tanpa GPS perangkat: koordinat akan menyusul otomatis saat fix tersedia.
+  const isMapLocationPending = !hasDisplayMapLocation && Boolean(latestCompletedCheckpoint?.gpsPending);
   const displayWeather = (
     latestCompletedCheckpoint?.weatherSnapshot
     && typeof latestCompletedCheckpoint.weatherSnapshot === 'object'
@@ -218,9 +220,15 @@ export default function HistoryDetailView({ isInline = false, entryData = null, 
             <iframe width="100%" height="100%" frameBorder="0" scrolling="no" marginHeight="0" marginWidth="0" src={`https://maps.google.com/maps?q=${displayMapLocation.lat},${displayMapLocation.lng}&hl=id&z=14&output=embed`} title="GPS checkpoint patroli"></iframe>
           ) : (
             <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-[#070b19] px-4 text-center">
-              <MapPin className="h-6 w-6 text-slate-500" />
-              <p className="text-xs font-bold uppercase tracking-widest text-slate-400">GPS perangkat belum tersedia</p>
-              <p className="text-[11px] text-slate-500">Peta hanya tampil bila laporan memiliki koordinat GPS asli.</p>
+              <MapPin className={`h-6 w-6 ${isMapLocationPending ? 'text-amber-400 animate-pulse' : 'text-slate-500'}`} />
+              <p className={`text-xs font-bold uppercase tracking-widest ${isMapLocationPending ? 'text-amber-300' : 'text-slate-400'}`}>
+                {isMapLocationPending ? 'Koordinat GPS menyusul' : 'GPS perangkat belum tersedia'}
+              </p>
+              <p className="text-[11px] text-slate-500">
+                {isMapLocationPending
+                  ? 'Laporan tersimpan tanpa GPS. Koordinat menyusul otomatis saat lokasi perangkat aktif.'
+                  : 'Peta hanya tampil bila laporan memiliki koordinat GPS asli.'}
+              </p>
             </div>
           )}
         </div>

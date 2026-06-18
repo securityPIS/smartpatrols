@@ -52,14 +52,34 @@ test('capturePatrolEnvironmentSnapshot tidak mengisi gpsSnapshot dari shipSnapsh
   assert.doesNotMatch(fn, /gpsSnapshot[\s\S]*?shipSnapshot\?\.lat/);
 });
 
-test('handleSubmitPatrol menolak simpan laporan tanpa GPS perangkat', () => {
+test('handleSubmitPatrol menyimpan laporan tanpa GPS sebagai gpsPending (non-blokir)', () => {
   const fn = extractRuntimeSlice(
     'const handleSubmitPatrol = useCallback',
     'const handleDeleteReport = useCallback',
   );
 
-  assert.match(fn, /if \(!environmentSnapshot\.gpsSnapshot\) \{/);
-  assert.match(fn, /Laporan belum disimpan supaya koordinat patroli tidak tercatat sebagai dummy atau fallback kapal/);
+  // Tidak lagi memblokir submit saat GPS perangkat kosong.
+  assert.doesNotMatch(fn, /Laporan belum disimpan supaya koordinat patroli tidak tercatat/);
+  // Laporan tetap disimpan dengan tanda gpsPending + diantrekan untuk penempelan koordinat.
+  assert.match(fn, /const hasDeviceGps = Boolean\(environmentSnapshot\.gpsSnapshot\)/);
+  assert.match(fn, /gpsPending: !hasDeviceGps/);
+  assert.match(fn, /enqueuePendingGpsReport\(submittedItem\)/);
+  assert.match(fn, /koordinat menyusul/i);
+  // gpsSnapshot tetap dari environmentSnapshot (device-only), bukan shipSnapshot.
+  assert.match(fn, /gpsSnapshot: environmentSnapshot\.gpsSnapshot/);
+});
+
+test('runPendingGpsAttachment menempel koordinat device-only lalu re-sync', () => {
+  const fn = extractRuntimeSlice(
+    'const runPendingGpsAttachment = useCallback',
+    'const enqueuePendingGpsReport = useCallback',
+  );
+
+  assert.match(fn, /requestCurrentGeolocation/);
+  assert.match(fn, /gpsPending: false/);
+  assert.match(fn, /syncPatrolReportToDomain\(report\)/);
+  // Penempelan koordinat tidak boleh memakai shipSnapshot sebagai sumber.
+  assert.doesNotMatch(fn, /shipSnapshot/);
 });
 
 test('payload cloud GPS menolak koordinat parsial dan mempertahankan metadata perangkat', () => {

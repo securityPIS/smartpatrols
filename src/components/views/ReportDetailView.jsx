@@ -82,6 +82,8 @@ export default function ReportDetailView({ isInline = false }) {
   const latitude = gpsCoordinate?.lat ?? null;
   const longitude = gpsCoordinate?.lng ?? null;
   const hasGpsSnapshot = Boolean(gpsCoordinate);
+  // Laporan tersimpan tanpa GPS perangkat: koordinat menyusul otomatis saat lokasi aktif.
+  const isGpsPending = !hasGpsSnapshot && Boolean(selectedReportDetail.gpsPending);
   const mapsQuery = hasGpsSnapshot ? `${latitude},${longitude}` : '';
   const mapsHref = hasGpsSnapshot ? `https://www.google.com/maps?q=${mapsQuery}` : '#';
   const gpsSourceLabel = gpsSnapshot?.source === 'device' ? 'GPS perangkat saat sync' : gpsSnapshot?.source === 'ship' ? 'Koordinat kapal lama, bukan GPS perangkat' : 'Snapshot sync laporan';
@@ -266,9 +268,15 @@ export default function ReportDetailView({ isInline = false }) {
                    </div>
                  </>
                ) : (
-                 <div className="rounded-xl border border-dashed border-cyan-800/50 p-4 text-center">
-                   <p className="text-[10px] text-cyan-600 font-bold uppercase tracking-widest mb-1">GPS Lokasi</p>
-                   <p className="text-sm text-cyan-200">Data GPS belum terekam saat sync laporan.</p>
+                 <div className={`rounded-xl border border-dashed p-4 text-center ${isGpsPending ? 'border-amber-500/50' : 'border-cyan-800/50'}`}>
+                   <p className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${isGpsPending ? 'text-amber-400' : 'text-cyan-600'}`}>
+                     {isGpsPending ? 'Koordinat GPS Menyusul' : 'GPS Lokasi'}
+                   </p>
+                   <p className={`text-sm ${isGpsPending ? 'text-amber-200' : 'text-cyan-200'}`}>
+                     {isGpsPending
+                       ? 'Laporan tersimpan tanpa GPS. Koordinat menyusul otomatis saat lokasi perangkat aktif.'
+                       : 'Data GPS belum terekam saat sync laporan.'}
+                   </p>
                  </div>
                )}
              </div>
