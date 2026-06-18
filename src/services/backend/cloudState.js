@@ -452,6 +452,41 @@ function areDbRowsEquivalent(nextRow = {}, existingRow = {}, keys = []) {
   ));
 }
 
+function getSignedUrlTokenSignatureLength(url = '') {
+  const token = String(url || '').split('token=')[1] || '';
+  return token.split('.')[2]?.length || 0;
+}
+
+function isSupabaseSignedStorageUrl(url = '') {
+  return /^https:\/\/[^/]+\.supabase\.co\/storage\/v1\/object\/sign\//i.test(String(url || ''));
+}
+
+function isLikelyCompleteSignedStorageUrl(url = '') {
+  if (!isSupabaseSignedStorageUrl(url)) return false;
+  return getSignedUrlTokenSignatureLength(url) >= 43;
+}
+
+function shouldPreserveExistingProfilePhotoUrl(nextUrl = '', existingUrl = '') {
+  if (!existingUrl || !isLikelyCompleteSignedStorageUrl(existingUrl)) return false;
+  if (!nextUrl) return true;
+  if (nextUrl.startsWith('idb://')) return true;
+  if (nextUrl.startsWith('data:image/')) return true;
+  if (isSupabaseSignedStorageUrl(nextUrl) && getSignedUrlTokenSignatureLength(nextUrl) < 43) return true;
+  return false;
+}
+
+function mergeRowForSafeUpsert(table, nextRow = {}, existingRow = {}) {
+  if (table !== 'profiles') return nextRow;
+  const nextPhotoUrl = sanitizeUrl(nextRow.photo_url || '') || '';
+  const existingPhotoUrl = sanitizeUrl(existingRow.photo_url || '') || '';
+  if (!shouldPreserveExistingProfilePhotoUrl(nextPhotoUrl, existingPhotoUrl)) return nextRow;
+
+  return {
+    ...nextRow,
+    photo_url: existingRow.photo_url,
+  };
+}
+
 async function filterChangedRowsById(supabase, table, rows = [], columns = '', keys = []) {
   const safeRows = Array.isArray(rows) ? rows.filter(row => row?.id) : [];
   if (safeRows.length === 0) return [];
@@ -464,7 +499,10 @@ async function filterChangedRowsById(supabase, table, rows = [], columns = '', k
   if (error) throw error;
 
   const existingById = new Map((data || []).map(row => [String(row.id), row]));
-  return safeRows.filter((row) => {
+  return safeRows.map((row) => {
+    const existing = existingById.get(String(row.id));
+    return existing ? mergeRowForSafeUpsert(table, row, existing) : row;
+  }).filter((row) => {
     const existing = existingById.get(String(row.id));
     return !existing || !areDbRowsEquivalent(row, existing, keys);
   });

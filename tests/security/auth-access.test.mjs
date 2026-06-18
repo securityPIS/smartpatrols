@@ -14,6 +14,8 @@ const cloudStateSource = readFileSync(new URL('../../src/services/backend/cloudS
 const appContextSource = readFileSync(new URL('../../src/context/AppContextRuntime.jsx', import.meta.url), 'utf8');
 const syncAccessSource = readFileSync(new URL('../../supabase/functions/sync-operational-access/index.ts', import.meta.url), 'utf8');
 const registrationMigrationSource = readFileSync(new URL('../../supabase/migrations/202605250001_fix_registration_profile_sync.sql', import.meta.url), 'utf8');
+const photoRepairMigrationSource = readFileSync(new URL('../../supabase/migrations/20260618024500_repair_truncated_profile_photo_urls.sql', import.meta.url), 'utf8');
+const photoGuardMigrationSource = readFileSync(new URL('../../supabase/migrations/20260618031500_guard_profile_photo_url_overwrite.sql', import.meta.url), 'utf8');
 const pendingUpdatePolicySource = readFileSync(new URL('../../supabase/migrations/202605250002_fix_rls_policies_and_triggers.sql', import.meta.url), 'utf8');
 const sharedEdgeSource = readFileSync(new URL('../../supabase/functions/_shared/smartpatrol.ts', import.meta.url), 'utf8');
 
@@ -146,6 +148,57 @@ test('edge access tidak memotong signed URL foto profil Supabase', () => {
     sharedEdgeSource,
     /photo_(?:url|Url)[\s\S]{0,80}sanitizeString\([^)]*,\s*500\)/,
     'photo_url tidak boleh lagi memakai sanitizer 500 karakter karena memotong JWT Storage',
+  );
+});
+
+test('migration repair avatar tidak memotong trigger photo_url dan memulihkan token terpotong', () => {
+  assert.match(
+    photoRepairMigrationSource,
+    /metadata->>'photo_url'[\s\S]*?,\s*4096\)/,
+    'trigger onboarding terbaru harus menerima signed URL panjang agar tidak memotong token Storage',
+  );
+  assert.doesNotMatch(
+    photoRepairMigrationSource,
+    /metadata->>'photo_url'[\s\S]*?,\s*500\)/,
+    'migration repair tidak boleh memakai batas 500 karakter untuk photo_url',
+  );
+  assert.match(
+    photoRepairMigrationSource,
+    /update public\.profiles as profile[\s\S]*set photo_url = asset\.signed_url[\s\S]*length\(split_part\(split_part\(profile\.photo_url, 'token=', 2\), '\.', 3\)\) < 43/,
+    'profiles.photo_url yang tokennya terpotong harus diperbaiki dari media_assets.signed_url lengkap',
+  );
+});
+
+test('state sync tidak menimpa avatar profile yang sudah lengkap dengan URL rusak', () => {
+  assert.match(
+    cloudStateSource,
+    /function shouldPreserveExistingProfilePhotoUrl\(nextUrl = '', existingUrl = ''\)/,
+    'writer profiles harus punya guard preserve avatar existing',
+  );
+  assert.match(
+    cloudStateSource,
+    /isLikelyCompleteSignedStorageUrl\(existingUrl\)[\s\S]*getSignedUrlTokenSignatureLength\(nextUrl\) < 43/,
+    'signed URL lengkap di DB tidak boleh ditimpa signed URL lokal yang tokennya terpotong',
+  );
+  assert.match(
+    cloudStateSource,
+    /function mergeRowForSafeUpsert\(table, nextRow = \{\}, existingRow = \{\}\)[\s\S]*table !== 'profiles'[\s\S]*photo_url: existingRow\.photo_url/,
+    'rekonsiliasi aman hanya berlaku untuk profiles dan mempertahankan photo_url existing',
+  );
+  assert.match(
+    cloudStateSource,
+    /safeRows\.map\(\(row\) => \{[\s\S]*mergeRowForSafeUpsert\(table, row, existing\)[\s\S]*areDbRowsEquivalent\(row, existing, keys\)/,
+    'filterChangedRowsById harus membandingkan row yang sudah diproteksi sebelum upsert',
+  );
+  assert.match(
+    photoGuardMigrationSource,
+    /create or replace function public\.check_profile_update\(\)[\s\S]*new\.photo_url := old\.photo_url;/,
+    'trigger profiles harus mempertahankan photo_url DB yang sudah lengkap dari downgrade client lama',
+  );
+  assert.match(
+    photoGuardMigrationSource,
+    /new\.photo_url like 'idb:\/\/%'[\s\S]*new\.photo_url like 'data:image\/%'[\s\S]*length\(split_part\(split_part\(coalesce\(new\.photo_url, ''\), 'token=', 2\), '\.', 3\)\) < 43/,
+    'guard DB harus menolak aset lokal dan signed URL yang tokennya terpotong',
   );
 });
 

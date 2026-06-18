@@ -1,6 +1,6 @@
 # SYSTEM_MAP - SmartPatrol SQL
 
-> Terakhir diperbarui: 2026-06-17.
+> Terakhir diperbarui: 2026-06-18.
 > Bahasa pemrograman: JavaScript (React 19 + Vite 8), SQL Postgres, Supabase Edge Functions (Deno).
 
 ## Project Summary
@@ -132,6 +132,8 @@ settle window yang dibatalkan otomatis jika snapshot Realtime berikutnya kembali
 | `supabase/migrations/202605220001_init_smartpatrol_sql.sql` | Schema Postgres, RLS, Storage policies, Realtime publication. |
 | `supabase/migrations/20260617151542_atomic_ship_personnel_assignment.sql` | RPC admin atomik untuk assignment kru kapal agar `profiles` dan `ships` tidak beda state. |
 | `supabase/migrations/20260617153122_guard_ship_assignment_state_sync.sql` | Trigger guard agar state-sync lama tidak bisa mengosongkan kolom assignment; RPC assignment memakai flag transaksi internal. |
+| `supabase/migrations/20260618024500_repair_truncated_profile_photo_urls.sql` | Repair signed URL avatar profil yang terpotong dan redefinisi trigger onboarding agar `photo_url` tidak dipotong 500 karakter. |
+| `supabase/migrations/20260618031500_guard_profile_photo_url_overwrite.sql` | Guard DB agar signed URL avatar profil lengkap tidak ditimpa snapshot lokal lama yang membawa URL kosong/lokal/terpotong. |
 | `supabase/functions/*` | Edge Functions server-time, access, approval, revoke, upload URL, provision user. |
 | `scripts/setup-admin.mjs` | Bootstrap admin pertama via service role. |
 | `vercel.json` | Header keamanan dan SPA rewrite untuk Vercel. |
@@ -180,6 +182,8 @@ npm run build
 - `firebaseUid` masih dipakai sebagai nama field kompatibel di context lama, tetapi nilainya dipetakan ke Supabase `auth_uid`.
 - `setupNativePushNotifications` sekarang no-op agar Android tidak meminta izin push dan tidak mendaftarkan token.
 - `src/context/AppContext.jsx` legacy dihapus agar tidak ada import backend lama.
+- Signed URL foto profil bisa lebih dari 500 karakter. Edge helper memakai batas 4096, dan migration `20260618024500_repair_truncated_profile_photo_urls.sql` memulihkan `profiles.photo_url` dari `media_assets.signed_url` bila token lama terpotong.
+- State-sync `profiles` dan trigger DB `check_profile_update` mempertahankan `photo_url` signed URL lengkap yang sudah ada di DB bila snapshot lokal membawa `null`, `idb://`, `data:image`, atau signed URL yang tokennya terpotong.
 - Jika schema/flow utama berubah, update file ini pada sesi yang sama.
 
 ## Assignment Kru Atomik dan Anti State-Sync Storm (2026-06-17)
