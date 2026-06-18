@@ -7496,6 +7496,85 @@ export function AppProvider({ children }) {
     selectedIncident,
     syncIncidentDomainMediaUpload,
   ]);
+  // Unggah foto SAMPUL temuan yang masih lokal (idb://) ke Storage lalu tulis ulang baris
+  // durable `incidents` dengan URL https. Tanpa ini, foto sampul temuan yang dibuat lewat
+  // "Lapor Baru" hanya tersimpan sebagai key idb:// milik perangkat pembuat — di device lain
+  // (admin/PIC) key tersebut tak bisa di-resolve sehingga galeri dokumentasi tampil kosong
+  // meski tercatat "1 foto tersimpan". Konvergen: setelah jadi https, tidak diproses ulang.
+  const healIncidentCoverMedia = useCallback(async (incident, meta = {}) => {
+    if (!isCloudSyncEnabled || !isCloudWriteEnabled || !hasOperationalCloudAccess || isOffline) return false;
+    if (!incident || incident.isSOS) return false;
+
+    const incidentId = sanitizeText(incident.id || incident.incidentId || '', 180).trim();
+    if (!incidentId) return false;
+
+    const hasLocalCover = isLocalOnlyAssetUrl(incident.photoUrl)
+      || isLocalOnlyAssetUrl(incident.heroUrl)
+      || isLocalOnlyAssetUrl(incident.thumbUrl);
+    if (!hasLocalCover) return false;
+
+    const uploadKey = `incident-cover|${incidentId}|${incident.photoUrl || incident.heroUrl || incident.thumbUrl || ''}`;
+    if (incidentDomainUploadInFlightRef.current.has(uploadKey)) return false;
+    incidentDomainUploadInFlightRef.current.add(uploadKey);
+
+    try {
+      const uploadedPhotoUrl = isLocalOnlyAssetUrl(incident.photoUrl)
+        ? await prepareCloudPhotoUrl(incident.photoUrl, ['incidents', incidentId, 'photo', incident.photoUrl])
+        : (incident.photoUrl || null);
+      // Foto penuh wajib berhasil naik; bila gagal (mis. jaringan), biarkan retry berikutnya.
+      if (isLocalOnlyAssetUrl(incident.photoUrl) && (!uploadedPhotoUrl || isLocalOnlyAssetUrl(uploadedPhotoUrl))) {
+        return false;
+      }
+
+      // Varian hero/thumb ikut dinaikkan agar device lain memuat foto kecil, bukan foto penuh.
+      const uploadedHeroUrl = await prepareCloudVariantUrl(incident.heroUrl, ['incidents', incidentId, 'hero']);
+      const uploadedThumbUrl = await prepareCloudVariantUrl(incident.thumbUrl, ['incidents', incidentId, 'thumb']);
+
+      const nextPhotoUrl = uploadedPhotoUrl || null;
+      const nextHeroUrl = uploadedHeroUrl || nextPhotoUrl;
+      const nextThumbUrl = uploadedThumbUrl || nextPhotoUrl;
+
+      // Selaraskan state lokal agar konvergen (tidak diunggah ulang) dan galeri device ini
+      // memakai URL durable yang sama.
+      setIncidentsData((previousIncidents) => previousIncidents.map((entry) => {
+        if (entry.id !== incidentId) return entry;
+        if (
+          entry.photoUrl === nextPhotoUrl
+          && entry.heroUrl === nextHeroUrl
+          && entry.thumbUrl === nextThumbUrl
+        ) return entry;
+        return { ...entry, photoUrl: nextPhotoUrl, heroUrl: nextHeroUrl, thumbUrl: nextThumbUrl };
+      }));
+
+      // Tulis ulang baris durable dengan URL https. Lewat syncIncidentDetailToDomain agar
+      // dokumentasi/progress di payload (dari meta) tidak ikut terhapus.
+      await syncIncidentDetailToDomain(
+        { ...incident, photoUrl: nextPhotoUrl, heroUrl: nextHeroUrl, thumbUrl: nextThumbUrl },
+        meta || {},
+        {
+          incidentId,
+          clientUpdatedAt: Date.now(),
+          updatedAt: incident.updatedAt || incident.createdAt,
+          updatedBy: incident.reportedBy || currentUser,
+        },
+      );
+      requestCloudSync('normal');
+      return true;
+    } catch (error) {
+      console.error('Gagal mengunggah foto sampul temuan, akan dicoba ulang saat koneksi stabil.', error);
+      return false;
+    } finally {
+      incidentDomainUploadInFlightRef.current.delete(uploadKey);
+    }
+  }, [
+    currentUser,
+    hasOperationalCloudAccess,
+    isOffline,
+    prepareCloudPhotoUrl,
+    prepareCloudVariantUrl,
+    requestCloudSync,
+    syncIncidentDetailToDomain,
+  ]);
   const activeShiftGuardSnapshot = useMemo(
     () => (operationalShipName ? buildGuardShiftSnapshot(usersData, operationalShipName, checkpoints, currentShiftStatusRecord) : []),
     [checkpoints, currentShiftStatusRecord, operationalShipName, usersData],
@@ -8649,9 +8728,20 @@ export function AppProvider({ children }) {
       createdAt,
     }]);
     closeIncidentModal();
-    void saveIncidentReport(newIncident, { clientUpdatedAt: trustedTimestamp.occurredAtClientMs });
+    // JANGAN tulis key idb:// foto sampul ke baris durable: key itu hanya valid di IndexedDB
+    // perangkat pembuat sehingga device lain (admin/PIC) tak bisa me-resolve-nya (galeri tampil
+    // kosong walau tercatat "1 foto"). Tulis null dulu, lalu healIncidentCoverMedia mengunggah
+    // foto ke Storage dan menulis ulang baris dengan URL https.
+    const durableIncident = {
+      ...newIncident,
+      photoUrl: stripLocalAssetUrlSync(newIncident.photoUrl),
+      heroUrl: stripLocalAssetUrlSync(newIncident.heroUrl),
+      thumbUrl: stripLocalAssetUrlSync(newIncident.thumbUrl),
+    };
+    void saveIncidentReport(durableIncident, { clientUpdatedAt: trustedTimestamp.occurredAtClientMs });
+    void healIncidentCoverMedia(newIncident);
     requestCloudSync('urgent');
-  }, [appendNotifications, closeIncidentModal, currentUser, currentUserRecord, currentUserRole, getShipRecipients, incidentForm, operationalShip, operationalShipName, requestCloudSync, saveIncidentReport, showTrustedTimeGateDialog]);
+  }, [appendNotifications, closeIncidentModal, currentUser, currentUserRecord, currentUserRole, getShipRecipients, healIncidentCoverMedia, incidentForm, operationalShip, operationalShipName, requestCloudSync, saveIncidentReport, showTrustedTimeGateDialog]);
 
   // Ship handlers
   const activeShip = useMemo(() => shipsData.find(s => s.id === activeShipId), [shipsData, activeShipId]);
@@ -10334,6 +10424,36 @@ export function AppProvider({ children }) {
 
     return () => clearInterval(timerId);
   }, [flushIncidentDomainLocalMediaQueue, hasOperationalCloudAccess, incidentMeta, isOffline]);
+  // Saat online, naikkan foto SAMPUL temuan yang masih lokal (mis. submit "Lapor Baru" saat
+  // offline, atau temuan lama dari sebelum fix) ke Storage lalu tulis ulang baris durable
+  // dengan URL https. Tanpa ini foto sampul hanya jadi key idb:// yang kosong di device lain.
+  useEffect(() => {
+    if (isOffline || !isCloudSyncEnabled || !isCloudWriteEnabled || !hasOperationalCloudAccess || !cloudSyncBootstrapped) {
+      return undefined;
+    }
+
+    const pendingCoverIncidents = ensureArray(incidentsData).filter((incident) => (
+      !incident?.isSOS
+      && (
+        isLocalOnlyAssetUrl(incident?.photoUrl)
+        || isLocalOnlyAssetUrl(incident?.heroUrl)
+        || isLocalOnlyAssetUrl(incident?.thumbUrl)
+      )
+    ));
+    if (pendingCoverIncidents.length === 0) return undefined;
+
+    let cancelled = false;
+    (async () => {
+      for (const incident of pendingCoverIncidents) {
+        if (cancelled) break;
+        await healIncidentCoverMedia(incident, incidentMeta[incident.id] || {});
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [cloudSyncBootstrapped, hasOperationalCloudAccess, healIncidentCoverMedia, incidentMeta, incidentsData, isOffline]);
   useEffect(() => {
     if (!isCloudSyncEnabled || !isCloudWriteEnabled || !hasOperationalCloudAccess || isOffline) return () => { };
     if (patrolReportSubscriptionTargets.length === 0) return () => { };
