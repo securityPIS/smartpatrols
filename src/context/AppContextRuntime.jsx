@@ -2736,6 +2736,22 @@ function mergeIncidentMetaCollection(baseMeta = {}, nextMeta = {}) {
   return mergedMeta;
 }
 
+// Pertahankan URL aset durable (https) yang sudah ada di state lokal saat versi domain yang
+// masuk membawa aset lebih rendah (idb:// lokal / null). Tanpa ini, event tabel `incidents`
+// yang masih menyimpan key idb:// lama bisa menimpa kembali URL https (hasil heal foto sampul
+// atau shared-state blob), membuat foto temuan hilang lagi di semua perangkat.
+function preferDurableIncidentMedia(incomingIncident, previousIncident) {
+  if (!previousIncident || !incomingIncident || typeof incomingIncident !== 'object') return incomingIncident;
+  let nextIncident = incomingIncident;
+  ['photoUrl', 'heroUrl', 'thumbUrl'].forEach((field) => {
+    if (getAssetUrlPriority(previousIncident[field]) > getAssetUrlPriority(incomingIncident[field])) {
+      if (nextIncident === incomingIncident) nextIncident = { ...incomingIncident };
+      nextIncident[field] = previousIncident[field];
+    }
+  });
+  return nextIncident;
+}
+
 function mergeIncidentsCollection(baseIncidents = [], nextIncidents = []) {
   return mergeEntitiesById(baseIncidents, nextIncidents, {
     merge: (baseIncident, nextIncident) => (
@@ -10331,11 +10347,18 @@ export function AppProvider({ children }) {
       incidentDomainIdsRef.current = nextDomainIds;
 
       setIncidentsData((prevIncidents) => {
+        const prevIncidentById = new Map(prevIncidents.map((incident) => [incident.id, incident]));
+        // Versi tabel bisa membawa photoUrl lama (idb:// / null) untuk record yang sebenarnya
+        // sudah punya URL https di state lokal (hasil heal foto sampul atau shared-state blob).
+        // Jangan biarkan key lokal/null menimpa URL durable — foto akan hilang lagi lintas-device.
+        const reconciledDomainIncidents = domainIncidents.map((incident) => (
+          preferDurableIncidentMedia(incident, prevIncidentById.get(incident.id))
+        ));
         const localOnlyIncidents = prevIncidents.filter((incident) => (
           !previousDomainIds.has(incident.id)
           || incident.pendingOfflineSync === true
         ));
-        const mergedIncidents = mergeIncidentsCollection(localOnlyIncidents, domainIncidents);
+        const mergedIncidents = mergeIncidentsCollection(localOnlyIncidents, reconciledDomainIncidents);
         return serializeSharedStateSnapshot(mergedIncidents) === serializeSharedStateSnapshot(prevIncidents)
           ? prevIncidents
           : mergedIncidents;

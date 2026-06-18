@@ -85,3 +85,31 @@ test('efek heal foto sampul temuan berjalan saat online untuk temuan berfoto lok
     'efek memanggil healIncidentCoverMedia untuk tiap temuan berfoto lokal',
   );
 });
+
+test('merge subscription tabel incidents tidak menimpa URL https dengan idb:// / null', () => {
+  const startIndex = runtimeSource.indexOf('function preferDurableIncidentMedia');
+  assert.notEqual(startIndex, -1, 'preferDurableIncidentMedia harus ada');
+  const fn = runtimeSource.slice(startIndex, startIndex + 700);
+
+  assert.match(
+    fn,
+    /\['photoUrl', 'heroUrl', 'thumbUrl'\]\.forEach/,
+    'reconcile mencakup photoUrl, heroUrl, dan thumbUrl',
+  );
+  assert.match(
+    fn,
+    /getAssetUrlPriority\(previousIncident\[field\]\) > getAssetUrlPriority\(incomingIncident\[field\]\)/,
+    'pertahankan aset prioritas lebih tinggi (https) dari state lokal',
+  );
+
+  assert.match(
+    runtimeSource,
+    /const reconciledDomainIncidents = domainIncidents\.map\(\(incident\) => \(\s*preferDurableIncidentMedia\(incident, prevIncidentById\.get\(incident\.id\)\)/,
+    'subscription menerapkan preferDurableIncidentMedia sebelum merge',
+  );
+  assert.match(
+    runtimeSource,
+    /mergeIncidentsCollection\(localOnlyIncidents, reconciledDomainIncidents\)/,
+    'merge memakai domain yang sudah direkonsiliasi medianya',
+  );
+});
