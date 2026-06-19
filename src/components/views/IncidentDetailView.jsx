@@ -171,7 +171,7 @@ export default function IncidentDetailView({ isInline = false }) {
   const { setPreviewPhoto } = useReports();
   const { shipsData } = useShips();
 
-  const [activeTab, setActiveTab] = useState('update');
+  const [activeTab, setActiveTab] = useState('info');
   const [showUpdateForm, setShowUpdateForm] = useState(false);
   const [activeInfoEditor, setActiveInfoEditor] = useState(null);
   const [incidentInfoForm, setIncidentInfoForm] = useState(() => createIncidentInfoState(null));
@@ -341,14 +341,19 @@ export default function IncidentDetailView({ isInline = false }) {
       )}
 
       <div className="flex bg-[#0b1229] border-b border-cyan-900/50 shrink-0">
+        <button onClick={() => setActiveTab('info')} className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest transition-all border-b-2 ${activeTab === 'info' ? (isSOSIncident ? 'text-rose-300 border-rose-500 bg-rose-500/5' : 'text-yellow-400 border-yellow-500 bg-yellow-500/5') : 'text-cyan-600 border-transparent hover:text-cyan-400'}`}>Info (5W1H)</button>
         <button onClick={() => setActiveTab('update')} className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest transition-all border-b-2 ${activeTab === 'update' ? 'text-emerald-400 border-emerald-500 bg-emerald-500/5' : 'text-cyan-600 border-transparent hover:text-cyan-400'}`}>Update</button>
         <button onClick={() => setActiveTab('documentation')} className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest transition-all border-b-2 ${activeTab === 'documentation' ? 'text-fuchsia-400 border-fuchsia-500 bg-fuchsia-500/5' : 'text-cyan-600 border-transparent hover:text-cyan-400'}`}>Dokumentasi</button>
-        <button onClick={() => setActiveTab('info')} className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest transition-all border-b-2 ${activeTab === 'info' ? (isSOSIncident ? 'text-rose-300 border-rose-500 bg-rose-500/5' : 'text-yellow-400 border-yellow-500 bg-yellow-500/5') : 'text-cyan-600 border-transparent hover:text-cyan-400'}`}>Info (5W1H)</button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-5 space-y-6 text-cyan-50">
         {activeTab === 'info' ? (
           <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="bg-[#0b1229] p-4 rounded-xl border border-cyan-900/50">
+              <p className="text-[10px] text-cyan-600 font-bold mb-2 uppercase tracking-widest">WHO : Pelapor</p>
+              <p className="text-sm font-bold text-cyan-50">{selectedIncident.reportedBy}</p>
+            </div>
+
             <div className={`p-4 rounded-xl border ${panelClass} ${panelBorderClass}`}>
               <div className="mb-2 flex items-start justify-between gap-3">
                 <p className={`text-[10px] font-bold flex items-center gap-1.5 uppercase tracking-widest ${isSOSIncident ? 'text-rose-400' : 'text-yellow-600'}`}><AlertTriangle className="w-3 h-3" /> WHAT : Deskripsi</p>
@@ -367,6 +372,34 @@ export default function IncidentDetailView({ isInline = false }) {
                   className="w-full bg-[#070b19]/70 border border-cyan-800/40 rounded-2xl p-4 text-sm text-cyan-50 focus:border-yellow-500/50 outline-none resize-none"
                 />
               ) : renderInfoValue(selectedIncident.deskripsi, `${isSOSIncident ? 'text-rose-50/90' : 'text-yellow-50/90 font-medium'} incident-info-value`)}
+            </div>
+
+            <div className="bg-[#0b1229] p-3 rounded-xl border border-cyan-900/50 flex flex-wrap items-center justify-between gap-2 shadow-sm">
+              <div>
+                <p className="text-[10px] text-cyan-600 font-bold mb-0.5 uppercase tracking-widest">WHEN : Waktu Kejadian</p>
+                <p className="text-sm font-bold text-cyan-50">{selectedIncident.date} {' · '} {selectedIncident.time}</p>
+              </div>
+              <TimeAuditPills record={selectedIncident} fallbackTimestampKeys={['completedAt', 'createdAt', 'triggeredAt']} />
+            </div>
+
+            <div className={`p-4 rounded-xl border ${isSOSIncident ? 'bg-rose-950/10 border-rose-900/20' : 'bg-yellow-950/10 border-yellow-900/20'}`}>
+              <div className="mb-2 flex items-start justify-between gap-3">
+                <p className={`text-[10px] font-bold uppercase tracking-widest ${isSOSIncident ? 'text-rose-500' : 'text-yellow-700'}`}>WHY : Penyebab</p>
+                {renderInfoEditorActions(
+                  'penyebab',
+                  isSOSIncident
+                    ? 'border-rose-500/30 text-rose-300 hover:bg-rose-500/20'
+                    : 'border-yellow-500/30 text-yellow-300 hover:bg-yellow-500/20',
+                )}
+              </div>
+              {activeInfoEditor === 'penyebab' ? (
+                <textarea
+                  value={incidentInfoForm.penyebab}
+                  onChange={(event) => setIncidentInfoForm((previousValue) => ({ ...previousValue, penyebab: event.target.value }))}
+                  rows={3}
+                  className="w-full bg-[#070b19]/70 border border-cyan-800/40 rounded-2xl p-4 text-sm text-cyan-50 focus:border-yellow-500/50 outline-none resize-none"
+                />
+              ) : renderInfoValue(selectedIncident.penyebab, `${isSOSIncident ? 'text-rose-50/80 italic' : 'text-yellow-50/80 italic'} incident-info-value`)}
             </div>
 
             <div className="bg-cyan-950/20 p-4 rounded-xl border border-cyan-900/30">
@@ -417,39 +450,6 @@ export default function IncidentDetailView({ isInline = false }) {
               {isSOSIncident && Array.isArray(selectedIncident.targetShipNames) && selectedIncident.targetShipNames.length > 0 && (
                 <p className="text-[11px] text-cyan-500 mt-2">Distribusi SOS: {selectedIncident.targetShipNames.join(', ')}</p>
               )}
-            </div>
-
-            <div className="bg-[#0b1229] p-3 rounded-xl border border-cyan-900/50 flex flex-wrap items-center justify-between gap-2 shadow-sm">
-              <div>
-                <p className="text-[10px] text-cyan-600 font-bold mb-0.5 uppercase tracking-widest">WHEN : Waktu Kejadian</p>
-                <p className="text-sm font-bold text-cyan-50">{selectedIncident.date} {' · '} {selectedIncident.time}</p>
-              </div>
-              <TimeAuditPills record={selectedIncident} fallbackTimestampKeys={['completedAt', 'createdAt', 'triggeredAt']} />
-            </div>
-
-            <div className={`p-4 rounded-xl border ${isSOSIncident ? 'bg-rose-950/10 border-rose-900/20' : 'bg-yellow-950/10 border-yellow-900/20'}`}>
-              <div className="mb-2 flex items-start justify-between gap-3">
-                <p className={`text-[10px] font-bold uppercase tracking-widest ${isSOSIncident ? 'text-rose-500' : 'text-yellow-700'}`}>WHY : Penyebab</p>
-                {renderInfoEditorActions(
-                  'penyebab',
-                  isSOSIncident
-                    ? 'border-rose-500/30 text-rose-300 hover:bg-rose-500/20'
-                    : 'border-yellow-500/30 text-yellow-300 hover:bg-yellow-500/20',
-                )}
-              </div>
-              {activeInfoEditor === 'penyebab' ? (
-                <textarea
-                  value={incidentInfoForm.penyebab}
-                  onChange={(event) => setIncidentInfoForm((previousValue) => ({ ...previousValue, penyebab: event.target.value }))}
-                  rows={3}
-                  className="w-full bg-[#070b19]/70 border border-cyan-800/40 rounded-2xl p-4 text-sm text-cyan-50 focus:border-yellow-500/50 outline-none resize-none"
-                />
-              ) : renderInfoValue(selectedIncident.penyebab, `${isSOSIncident ? 'text-rose-50/80 italic' : 'text-yellow-50/80 italic'} incident-info-value`)}
-            </div>
-
-            <div className="bg-[#0b1229] p-4 rounded-xl border border-cyan-900/50">
-              <p className="text-[10px] text-cyan-600 font-bold mb-2 uppercase tracking-widest">WHO : Pelapor</p>
-              <p className="text-sm font-bold text-cyan-50">{selectedIncident.reportedBy}</p>
             </div>
 
             <div className={`p-4 rounded-xl border ${isSOSIncident ? 'bg-rose-950/20 border-rose-900/30' : 'bg-emerald-950/20 border-emerald-900/30'}`}>
