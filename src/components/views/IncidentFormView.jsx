@@ -14,14 +14,15 @@ export default function IncidentFormView({ isInline = false }) {
 
   // Touched state agar error hanya muncul setelah user mulai mengisi
   // Harus dideklarasikan sebelum conditional return agar tidak melanggar Rules of Hooks
-  const [touched, setTouched] = React.useState({ deskripsi: false, penyebab: false, tindakLanjut: false });
+  const [touched, setTouched] = React.useState({ deskripsi: false, penyebab: false, tindakLanjut: false, photo: false, location: false });
   const touch = (field) => setTouched(prev => ({ ...prev, [field]: true }));
 
   // Validasi field (juga harus dideklarasikan sebelum conditional return)
   const deskripsiValid = isReportFieldValid(incidentForm.deskripsi);
   const penyebabValid = isReportFieldValid(incidentForm.penyebab);
   const tindakLanjutValid = isReportFieldValid(incidentForm.tindakLanjut);
-  const allFieldsValid = deskripsiValid && penyebabValid && tindakLanjutValid;
+  const photoValid = Boolean(incidentForm.photoUrl);
+  const allFieldsValid = deskripsiValid && penyebabValid && tindakLanjutValid && photoValid;
 
   // Validasi lokasi
   const locationValid = incidentForm.locType === 'custom'
@@ -67,25 +68,39 @@ export default function IncidentFormView({ isInline = false }) {
       </div>
       <div className="flex-1 overflow-y-auto p-5 space-y-4">
         {!incidentForm.photoUrl ? (
-          <button onClick={() => handlePhotoUpload(null, true)} className="w-full py-4 rounded-xl border-2 border-dashed border-yellow-500/40 bg-yellow-950/20 text-yellow-400 hover:bg-yellow-900/40 flex flex-col items-center gap-2 transition-colors"><Camera className="w-6 h-6" /><span className="text-sm font-bold uppercase tracking-wider">Unggah Foto Temuan</span><span className="text-[10px] text-yellow-200/60 uppercase tracking-widest">Opsional</span></button>
+          <button onClick={() => { handlePhotoUpload(null, true); touch('photo'); }} className={`w-full py-4 rounded-xl border-2 border-dashed flex flex-col items-center gap-2 transition-colors ${touched.photo && !photoValid ? 'border-rose-500 bg-rose-950/20 text-rose-400' : 'border-yellow-500/40 bg-yellow-950/20 text-yellow-400 hover:bg-yellow-900/40'}`}><Camera className="w-6 h-6" /><span className="text-sm font-bold uppercase tracking-wider">Unggah Foto Temuan <span className="text-yellow-500">*</span></span></button>
         ) : (
           <div className="w-full h-40 bg-[#070b19] rounded-xl border border-yellow-500/40 overflow-hidden relative"><AsyncImage src={incidentForm.photoUrl} alt="Preview" className="w-full h-full object-cover" /><button onClick={() => setIncidentForm(prev => ({...prev, photoUrl: null}))} className="absolute top-2 right-2 bg-black/60 p-1.5 rounded-lg border border-yellow-500/50 text-white hover:bg-rose-500 transition-colors" aria-label="Hapus foto"><X className="w-4 h-4" /></button></div>
+        )}
+        {touched.photo && !photoValid && (
+          <p className="flex items-center gap-1 text-[11px] text-rose-400">
+            <AlertCircle className="w-3 h-3 shrink-0" />
+            Foto temuan wajib diunggah
+          </p>
         )}
         <div className="grid grid-cols-2 gap-2">
           <button onClick={() => setIncidentForm(prev => ({...prev, locType: 'default'}))} className={`py-3 rounded-xl border text-xs font-black uppercase tracking-widest transition-colors ${incidentForm.locType === 'default' ? 'bg-yellow-500/10 border-yellow-500 text-yellow-400' : 'bg-[#0b1229] border-cyan-900/50 text-cyan-500 hover:border-cyan-700'}`}>Lokasi Daftar</button>
           <button onClick={() => setIncidentForm(prev => ({...prev, locType: 'custom'}))} className={`py-3 rounded-xl border text-xs font-black uppercase tracking-widest transition-colors ${incidentForm.locType === 'custom' ? 'bg-yellow-500/10 border-yellow-500 text-yellow-400' : 'bg-[#0b1229] border-cyan-900/50 text-cyan-500 hover:border-cyan-700'}`}>Lokasi Manual</button>
         </div>
         <div>
-          <label className="text-[10px] uppercase tracking-widest text-cyan-500 mb-1.5 block font-bold pl-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> Lokasi Temuan</label>
+          <label className="text-[10px] uppercase tracking-widest text-cyan-500 mb-1.5 block font-bold pl-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> Lokasi Temuan <span className="text-yellow-500">*</span></label>
           {incidentForm.locType === 'custom' ? (
-            <input type="text" value={incidentForm.customLocation} onChange={e => setIncidentForm(prev => ({...prev, customLocation: e.target.value}))} placeholder="Masukkan nama lokasi..." className="w-full bg-[#0b1229] border border-cyan-800/50 rounded-xl p-3.5 text-sm text-cyan-50 focus:border-yellow-500 outline-none shadow-sm" />
+            <input
+              type="text"
+              value={incidentForm.customLocation}
+              onChange={e => { setIncidentForm(prev => ({...prev, customLocation: e.target.value})); touch('location'); }}
+              onBlur={() => touch('location')}
+              placeholder="Masukkan nama lokasi..."
+              className={`w-full bg-[#0b1229] border rounded-xl p-3.5 text-sm text-cyan-50 outline-none shadow-sm transition-colors ${touched.location && !locationValid ? 'border-rose-500 focus:border-rose-400' : 'border-cyan-800/50 focus:border-yellow-500'}`}
+            />
           ) : (
             locs.length > 0 ? (
               <div className="space-y-2">
                 <select
                   value={incidentForm.location}
-                  onChange={e => setIncidentForm(prev => ({ ...prev, location: e.target.value }))}
-                  className="w-full bg-[#0b1229] border border-cyan-800/50 rounded-xl p-3.5 text-sm text-cyan-50 focus:border-yellow-500 outline-none appearance-none shadow-sm"
+                  onChange={e => { setIncidentForm(prev => ({ ...prev, location: e.target.value })); touch('location'); }}
+                  onBlur={() => touch('location')}
+                  className={`w-full bg-[#0b1229] border rounded-xl p-3.5 text-sm text-cyan-50 outline-none appearance-none shadow-sm transition-colors ${touched.location && !locationValid ? 'border-rose-500 focus:border-rose-400' : 'border-cyan-800/50 focus:border-yellow-500'}`}
                   required
                 >
                   <option value="" disabled>Pilih lokasi checkpoint...</option>
@@ -103,6 +118,12 @@ export default function IncidentFormView({ isInline = false }) {
                 <p className="text-[11px] text-cyan-600 mt-2">Daftar lokasi akan mengikuti checkpoint kapal yang tersedia.</p>
               </div>
             )
+          )}
+          {touched.location && !locationValid && (
+            <p className="mt-1.5 flex items-center gap-1 text-[11px] text-rose-400">
+              <AlertCircle className="w-3 h-3 shrink-0" />
+              Lokasi temuan wajib diisi
+            </p>
           )}
         </div>
         <div>
@@ -171,7 +192,7 @@ export default function IncidentFormView({ isInline = false }) {
           <button
             onClick={() => {
               if (!locationValid || !allFieldsValid) {
-                setTouched({ deskripsi: true, penyebab: true, tindakLanjut: true });
+                setTouched({ deskripsi: true, penyebab: true, tindakLanjut: true, photo: true, location: true });
                 return;
               }
               handleSubmitIncident();

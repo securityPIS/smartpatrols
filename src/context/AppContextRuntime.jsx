@@ -8704,6 +8704,8 @@ export function AppProvider({ children }) {
     // Validasi isian wajib: deskripsi, penyebab, dan tindak lanjut harus diisi
     // dengan konten bermakna (minimal REPORT_FIELD_MIN_LENGTH karakter).
     if (!isReportFieldValid(incidentForm.deskripsi) || !isReportFieldValid(incidentForm.penyebab) || !isReportFieldValid(incidentForm.tindakLanjut)) return;
+    // Foto temuan wajib diunggah sebelum laporan bisa disimpan.
+    if (!incidentForm.photoUrl) return;
     const trustedTimestamp = createTrustedTimestampRecord();
     const trustedNow = new Date(trustedTimestamp.occurredAtTrustedMs);
     const createdAt = trustedTimestamp.occurredAtTrustedIso;
