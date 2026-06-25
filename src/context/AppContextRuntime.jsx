@@ -871,6 +871,13 @@ function createCheckpointNameKey(name) {
   return sanitizeText(name || '', 120).trim().toLowerCase();
 }
 
+// Kunci pencocokan nama kapal yang tahan banting: abaikan kapitalisasi & spasi berlebih
+// (mis. "JKT 02" vs "jkt  02"). Dipakai agar selisih sepele antara profiles.ship_assigned
+// dan ships.name tidak menyembunyikan kapal operasional petugas (cermin RLS can_access_ship_name).
+function createShipNameKey(name) {
+  return sanitizeText(name || '', 80).trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
 function createShipCheckpointId(ship, checkpointName, index) {
   const slug = sanitizeText(checkpointName || '', 120)
     .trim()
@@ -3471,12 +3478,15 @@ function resolveAssignedShipForUser(user, ships = []) {
   const safeShipAssigned = sanitizeText(user.shipAssigned || '', 80);
   if (!safeShipAssigned) return null;
 
-  const matchingShips = ensureArray(ships).filter((ship) => ship?.name === safeShipAssigned);
+  const assignedKey = createShipNameKey(safeShipAssigned);
+  if (!assignedKey) return null;
+
+  const matchingShips = ensureArray(ships).filter((ship) => createShipNameKey(ship?.name) === assignedKey);
   if (matchingShips.length === 0) return null;
 
   return matchingShips.find((ship) => (
     Array.isArray(ship?.personnel) && ship.personnel.includes(user.id)
-  )) || matchingShips[0] || null;
+  )) || matchingShips.find((ship) => ship?.name === safeShipAssigned) || matchingShips[0] || null;
 }
 
 function isFirebaseManagedUser(user) {
@@ -5588,6 +5598,18 @@ export function AppProvider({ children }) {
   const operationalShipName = currentUserRecord?.role === ACCESS_ROLES.ADMIN
     ? null
     : (operationalShip?.name || (isPetugas ? null : currentUserRecord?.shipAssigned || shipsData[0]?.name || null));
+  // Petugas aktif punya nama kapal tertugas, sinkron cloud sudah jalan & online, tapi kapalnya
+  // tetap tak ter-resolve → baris kapal tidak terbaca (RLS can_access_ship_name false karena
+  // profiles.ship_assigned ≠ ships.name) atau selisih nama. Dipakai PatrolPage untuk memberi
+  // pesan eksplisit alih-alih "Belum ada titik patroli" yang menyesatkan.
+  const isAssignedShipInaccessible = useMemo(() => Boolean(
+    isPetugas
+    && !isOffline
+    && cloudSyncBootstrapped
+    && currentUserRecord?.status === 'active'
+    && sanitizeText(currentUserRecord?.shipAssigned || '', 80)
+    && !operationalShip,
+  ), [cloudSyncBootstrapped, currentUserRecord?.shipAssigned, currentUserRecord?.status, isOffline, isPetugas, operationalShip]);
   const patrolReportSubscriptionTargets = useMemo(() => {
     if (!currentUserRecord || !currentShiftMeta?.key) return [];
     if (isAdmin) {
@@ -11553,6 +11575,9 @@ export function AppProvider({ children }) {
     shipsData,
     operationalShip,
     operationalShipName,
+    isAssignedShipInaccessible,
+    isWaitingForAssignedFleetSync,
+    assignedShipLabel: sanitizeText(currentUserRecord?.shipAssigned || '', 80),
     activeShipId,
     setActiveShipId,
     activeShip,
@@ -11614,6 +11639,9 @@ export function AppProvider({ children }) {
     handleShipFormPhotoUpload,
     handleShipPhotoUpdate,
     handleTogglePersonnel,
+    isAssignedShipInaccessible,
+    isWaitingForAssignedFleetSync,
+    currentUserRecord?.shipAssigned,
     isEditingShipInfo,
     newCheckpoint,
     newShipCp,

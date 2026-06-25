@@ -565,6 +565,37 @@ server, bukan kegagalan jaringan transien. Regresi dijaga `tests/security/auth-a
 
 **Status: TERVERIFIKASI di device (2026-05-29). Checkpoint kembali otomatis tanpa refresh manual.**
 
+## Checkpoint Kosong untuk 1 Akun Petugas (nama kapal beda) (bug fix)
+
+Gejala: akun PETUGAS tertentu selalu "Belum ada titik patroli yang tersedia" (progres 0/0),
+sementara akun lain / device admin normal. Header tetap menampilkan "· <NamaKapal>".
+
+Akar masalah (otorisasi, bukan UI): pencocokan nama kapal memakai **exact equal**.
+- RLS `ships_read_assigned` = `is_admin() OR can_access_ship_name(name)`; untuk PETUGAS,
+  `can_access_ship_name` (init `202605220001`) true hanya bila
+  `current_profile_ship() = target_ship_name` PERSIS (`current_profile_ship()` =
+  `profiles.ship_assigned`). Selisih sepele (spasi/kapital/rename) → RLS menyembunyikan
+  SELURUH baris kapal → `fetchShipsRows` balik 0 → `operationalShip` null → checkpoint `[]`.
+- Klien `resolveAssignedShipForUser()` juga memfilter `ship.name === shipAssigned` persis.
+- Header menipu: nilainya `currentUserRecord.shipAssigned` mentah (dari Edge Function
+  resolve-operational-access, bukan RLS), jadi nama kapal tetap tampil walau barisnya tak terbaca.
+
+Perbaikan (cermin di dua sisi):
+- SQL `20260625000000_normalize_can_access_ship_name.sql`: `can_access_ship_name` membandingkan
+  nama ternormalisasi `btrim(regexp_replace(lower(...), '\s+', ' ', 'g'))` di kedua sisi.
+  Hanya MELONGGARKAN untuk nama setara — tidak memberi akses lintas-kapal. **Wajib `db push`.**
+- Klien: helper `createShipNameKey()` (trim + collapse whitespace + lower) dipakai
+  `resolveAssignedShipForUser()`.
+- UX: `isAssignedShipInaccessible` (petugas aktif + cloud bootstrap + online + `operationalShip`
+  null) → PatrolPage menampilkan "Kapal Tidak Dapat Diakses" alih-alih pesan kosong yang
+  menyesatkan; `isWaitingForAssignedFleetSync` → "Memuat data kapal…".
+
+> Catatan: kalau `operationalShip` ter-resolve tapi checkpoint tetap kosong → kapalnya memang
+> `custom_checkpoints` kosong (set lewat ShipsPage), bukan bug ini.
+
+Regresi: `tests/security/can-access-ship-name-normalization.test.mjs` (RLS) +
+`tests/pages/patrol-assigned-ship-access.test.mjs` (klien & UI).
+
 ## Notifikasi Cron Tidak Pernah Muncul (checkpoint pending / wrap-up) (bug fix)
 
 Gejala: notifikasi cronjob — `checkpoint_pending`, `checkpoint_pending_summary`, dan

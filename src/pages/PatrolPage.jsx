@@ -156,7 +156,7 @@ const PatrolPage = React.memo(function PatrolPage() {
     checkpoints, activeShiftGuardSnapshot, currentShiftMeta, currentShiftSchedule, canPatrolCurrentShip, canAddTemporaryPatrolNode,
     activeForms, isShiftStatusRequired, isCurrentShiftStatusCompleted, showShiftStatusModal, openShiftStatusModal,
   } = usePatrol();
-  const { operationalShip, operationalShipName } = useShips();
+  const { operationalShip, operationalShipName, isAssignedShipInaccessible, isWaitingForAssignedFleetSync, assignedShipLabel } = useShips();
   const { weatherInfo, weatherLoading, getWeatherDetail } = useWeather();
   const { setPreviewPhoto, selectedReportDetail } = useReports();
   const { selectedHistoryEntry, closeHistoryEntry } = useHistory();
@@ -454,9 +454,29 @@ const PatrolPage = React.memo(function PatrolPage() {
 
                 <div className="space-y-3 flex-1">
                   {visibleCheckpoints.length === 0 && (
-                    <p className="text-xs text-cyan-700 italic border border-dashed border-cyan-900/50 p-4 rounded-xl text-center">
-                      {searchQuery ? `Titik patroli "${searchQuery}" tidak ditemukan.` : 'Belum ada titik patroli yang tersedia.'}
-                    </p>
+                    searchQuery ? (
+                      <p className="text-xs text-cyan-700 italic border border-dashed border-cyan-900/50 p-4 rounded-xl text-center">
+                        {`Titik patroli "${searchQuery}" tidak ditemukan.`}
+                      </p>
+                    ) : isWaitingForAssignedFleetSync ? (
+                      <p className="text-xs text-cyan-700 italic border border-dashed border-cyan-900/50 p-4 rounded-xl text-center">
+                        Memuat data kapal &amp; titik patroli…
+                      </p>
+                    ) : isAssignedShipInaccessible ? (
+                      <div className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-4 text-center">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-amber-300">Kapal Tidak Dapat Diakses</p>
+                        <p className="mt-2 text-xs text-amber-100">
+                          {assignedShipLabel
+                            ? `Penugasan kapal "${assignedShipLabel}" belum cocok dengan data armada, jadi titik patroli tidak dapat dimuat.`
+                            : 'Penugasan kapal Anda belum cocok dengan data armada, jadi titik patroli tidak dapat dimuat.'}
+                          {' '}Hubungi admin untuk memeriksa penugasan kapal Anda.
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-cyan-700 italic border border-dashed border-cyan-900/50 p-4 rounded-xl text-center">
+                        Belum ada titik patroli yang tersedia.
+                      </p>
+                    )
                   )}
                   {visibleCheckpoints.map((item) => {
                     if (item.status === 'completed') return renderSummaryListItem(item);
