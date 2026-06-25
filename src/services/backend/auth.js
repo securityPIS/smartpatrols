@@ -1,15 +1,19 @@
 /*
 Tujuan: Menyediakan wrapper Supabase Auth kompatibel dengan flow auth SmartPatrol lama.
 Caller: AppContextRuntime, LoginPage, dan form admin yang butuh login/register/provision akun.
-Dependensi: Supabase Auth dan Edge Function provision-operational-user untuk pembuatan user oleh admin.
-Main Functions: Login/register email-password, provision user operasional, logout, subscribe auth state dengan guard offline, dan normalisasi error.
+Dependensi: Supabase Auth, classifier error akses, dan Edge Function provision-operational-user untuk pembuatan user oleh admin.
+Main Functions: Login/register email-password, provision user operasional, logout, subscribe auth state dengan guard offline, dan normalisasi error auth/akses.
 Side Effects: Membuat/menghapus sesi Supabase Auth aktif, membaca sesi lokal, dan dapat memanggil Edge Function service-role terproteksi.
 */
 
 import { ensureSupabaseClient, isSupabaseConfigured, normalizeSupabaseUser } from './app';
+import { getOperationalAccessResolveErrorMessage } from './accessErrors';
 
 function getFirebaseAuthErrorMessage(error) {
-  const code = String(error?.code || error?.message || '').toLowerCase();
+  const accessResolveMessage = getOperationalAccessResolveErrorMessage(error);
+  if (accessResolveMessage) return accessResolveMessage;
+
+  const code = String(error?.code || error?.name || error?.message || '').toLowerCase();
 
   if (code === 'supabase-not-configured') {
     return 'Supabase belum dikonfigurasi pada aplikasi ini.';

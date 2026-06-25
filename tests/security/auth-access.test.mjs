@@ -7,6 +7,11 @@ import {
   buildOperationalAccessPayload,
   buildPendingRegistrationPayload,
 } from '../../src/services/backend/accessModels.js';
+import {
+  OPERATIONAL_ACCESS_ERROR_KIND,
+  classifyOperationalAccessResolveError,
+  getOperationalAccessResolveErrorMessage,
+} from '../../src/services/backend/accessErrors.js';
 
 const authSource = readFileSync(new URL('../../src/services/backend/auth.js', import.meta.url), 'utf8');
 const accessSource = readFileSync(new URL('../../src/services/backend/access.js', import.meta.url), 'utf8');
@@ -18,6 +23,14 @@ const photoRepairMigrationSource = readFileSync(new URL('../../supabase/migratio
 const photoGuardMigrationSource = readFileSync(new URL('../../supabase/migrations/20260618031500_guard_profile_photo_url_overwrite.sql', import.meta.url), 'utf8');
 const pendingUpdatePolicySource = readFileSync(new URL('../../supabase/migrations/202605250002_fix_rls_policies_and_triggers.sql', import.meta.url), 'utf8');
 const sharedEdgeSource = readFileSync(new URL('../../supabase/functions/_shared/smartpatrol.ts', import.meta.url), 'utf8');
+
+function createFunctionError({ name = 'FunctionsHttpError', message = 'Edge Function returned a non-2xx status code', status = null, code = '' } = {}) {
+  const error = new Error(message);
+  error.name = name;
+  if (code) error.code = code;
+  if (status) error.context = { status };
+  return error;
+}
 
 test('pending registration payload tetap membuang field sensitif dan approval field liar', () => {
   const longSignedPhotoUrl = `https://hsquavmbeaawywpebafw.supabase.co/storage/v1/object/sign/registration-assets/uid-public-1/profile/avatar-1770000000000.webp?token=${'a'.repeat(520)}`;
@@ -258,6 +271,95 @@ test('listener auth tidak mengubah gagal jaringan menjadi logout final', () => {
     authSource,
     /isTransient:\s*!normalizedUser\s*&&\s*!isExplicitLogout\s*&&\s*\(isBrowserOffline\(\)\s*\|\|\s*event\s*===\s*'SIGNED_OUT'\)/,
     'SIGNED_OUT involunter / browser offline harus transien; hanya logout eksplisit yang final',
+  );
+});
+
+test('classifier resolve access membedakan timeout, http fatal, dan error platform', () => {
+  assert.equal(
+    classifyOperationalAccessResolveError(createFunctionError({
+      code: 'resolve-operational-access-timeout',
+      message: 'resolve-operational-access-timeout',
+    })),
+    OPERATIONAL_ACCESS_ERROR_KIND.TRANSIENT,
+  );
+  assert.equal(
+    classifyOperationalAccessResolveError(createFunctionError({ name: 'FunctionsFetchError', message: 'Failed to send a request to the Edge Function' })),
+    OPERATIONAL_ACCESS_ERROR_KIND.TRANSIENT,
+  );
+  assert.equal(
+    classifyOperationalAccessResolveError(createFunctionError({ name: 'FunctionsRelayError', message: 'Relay Error invoking the Edge Function' })),
+    OPERATIONAL_ACCESS_ERROR_KIND.TRANSIENT,
+  );
+  assert.equal(
+    classifyOperationalAccessResolveError(createFunctionError({ status: 503 })),
+    OPERATIONAL_ACCESS_ERROR_KIND.TRANSIENT,
+  );
+  assert.equal(
+    classifyOperationalAccessResolveError(createFunctionError({ status: 401 })),
+    OPERATIONAL_ACCESS_ERROR_KIND.FATAL_AUTH,
+  );
+  assert.equal(
+    classifyOperationalAccessResolveError(createFunctionError({ status: 403 })),
+    OPERATIONAL_ACCESS_ERROR_KIND.AMBIGUOUS,
+  );
+});
+
+test('mapper auth memberi pesan khusus untuk error Edge Function', () => {
+  assert.equal(
+    getOperationalAccessResolveErrorMessage(createFunctionError({
+      code: 'resolve-operational-access-timeout',
+      message: 'resolve-operational-access-timeout',
+    })),
+    'Server akses lambat merespons. Validasi akses sedang dicoba ulang.',
+  );
+  assert.equal(
+    getOperationalAccessResolveErrorMessage(createFunctionError({ name: 'FunctionsFetchError', message: 'Failed to send a request to the Edge Function' })),
+    'Jaringan gagal menjangkau server akses SmartPatrol. Periksa koneksi internet.',
+  );
+  assert.equal(
+    getOperationalAccessResolveErrorMessage(createFunctionError({ name: 'FunctionsRelayError', message: 'Relay Error invoking the Edge Function' })),
+    'Server akses SmartPatrol sedang bermasalah. Coba lagi sebentar.',
+  );
+  assert.equal(
+    getOperationalAccessResolveErrorMessage(createFunctionError({ status: 403 })),
+    'Server akses SmartPatrol belum bisa memvalidasi akun. Coba lagi sebentar.',
+  );
+  assert.equal(
+    getOperationalAccessResolveErrorMessage(createFunctionError({ status: 401 })),
+    'Sesi Supabase tidak valid. Silakan login ulang.',
+  );
+  assert.equal(
+    getOperationalAccessResolveErrorMessage(createFunctionError({ name: 'AuthApiError', message: 'Invalid login credentials', status: 400 })),
+    '',
+    'mapper akses tidak boleh mengambil alih error auth biasa seperti password salah',
+  );
+});
+
+test('login auth sukses tidak membuka app atau signOut saat resolve access transien', () => {
+  assert.match(
+    appContextSource,
+    /const LOGIN_ACCESS_RESOLVE_RETRY_DELAYS_MS = \[600, 1500\];/,
+    'login harus punya retry pendek sebelum menyerah ke fallback background',
+  );
+  assert.match(
+    appContextSource,
+    /const accessResult = await resolveOperationalAccessForLogin\(\);/,
+    'handleLogin harus memakai helper resolve login yang punya retry terbatas',
+  );
+  assert.match(
+    appContextSource,
+    /if \(credential\?\.user\) \{[\s\S]*?const kind = classifyOperationalAccessResolveError\(error\);[\s\S]*?if \(kind !== ACCESS_RESOLVE_ERROR_KIND_FATAL_AUTH\) \{/,
+    'catch handleLogin harus membedakan auth sukses + resolve transien dari error kredensial/fatal',
+  );
+  assert.match(
+    appContextSource,
+    /if \(kind !== ACCESS_RESOLVE_ERROR_KIND_FATAL_AUTH\) \{[\s\S]*?setAuthAccessState\(null\);[\s\S]*?setAuthAccessResolvedUid\(''\);[\s\S]*?setAuthAccessOfflineUid\(currentUid\);[\s\S]*?setAuthAccessResolveNonce\(\(nonce\) => nonce \+ 1\);[\s\S]*?setAuthNotice\(`Login Supabase berhasil\. \$\{getFirebaseAuthErrorMessage\(error\)\}`\);[\s\S]*?return;/,
+    'resolve transien harus mempertahankan Supabase session, menahan app login, dan memicu background re-resolve',
+  );
+  assert.doesNotMatch(
+    appContextSource,
+    /if \(kind !== ACCESS_RESOLVE_ERROR_KIND_FATAL_AUTH\) \{[\s\S]*?finalizeAuthorizedLogin\(/,
+    'login fresh tidak boleh membuka app hanya karena Supabase Auth sudah sukses',
   );
 });
 

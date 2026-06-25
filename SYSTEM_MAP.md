@@ -23,10 +23,17 @@
 ```
 LoginPage -> AppContextRuntime.handleLogin
   -> services/backend/auth.loginWithFirebaseEmail (alias kompatibel Supabase Auth)
-  -> services/backend/access.resolveOperationalAccess
+  -> services/backend/access.resolveOperationalAccess (retry pendek khusus login)
   -> Supabase Edge Function resolve-operational-access
   -> profiles.enabled + review_state approved
   -> saveAuthSession(localStorage) -> render AppShell
+
+Catatan: sukses Supabase Auth belum membuka AppShell. `sessionUserId` baru aktif bila
+`resolveOperationalAccess` mengembalikan `access` valid. Error transien/ambigu pada
+resolver akses (timeout/fetch/relay/5xx platform) tidak memaksa `signOut`; sesi Supabase
+dipertahankan di layar login dengan notice validasi, lalu background resolver/self-heal
+mencoba ulang. Denial definitif pada login fresh (`pending`, `rejected`, `disabled`,
+`restricted`, atau `missing`) tetap menutup sesi dan menampilkan pesan spesifik.
 
 Register
   -> Supabase Auth signUp + metadata onboarding publik

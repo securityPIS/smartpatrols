@@ -1,13 +1,14 @@
 /*
 Tujuan: Menyediakan onboarding dan otorisasi operasional berbasis Supabase/Postgres.
 Caller: AppContextRuntime untuk registrasi publik, approval admin, dan resolve akses sesi.
-Dependensi: Supabase Auth/Functions/Postgres, adapter aset, dan utilitas sanitasi.
-Main Functions: Membuat pending registration, subscribe pending list, resolve access, approval/reject/revoke, dan sync profil operasional.
+Dependensi: Supabase Auth/Functions/Postgres, adapter aset, classifier error akses, dan utilitas sanitasi.
+Main Functions: Membuat pending registration, subscribe pending list, resolve access, klasifikasi error resolve, approval/reject/revoke, dan sync profil operasional.
 Side Effects: Menulis tabel pending_registrations/profiles, memanggil Edge Functions security, dan upload aset registrasi.
 */
 
 import { sanitizeEmail, sanitizePhone, sanitizeText, sanitizeUrl } from '../../utils/sanitize';
 import { ensureSupabaseClient } from './app';
+import { classifyOperationalAccessResolveError } from './accessErrors';
 import { buildRegistrationAssetPath, uploadRegistrationPhotoAsset } from './assets';
 import { enqueueOutboxMutation, registerOutboxHandler } from './outbox';
 
@@ -240,6 +241,7 @@ export async function revokeOperationalUserAccess(payload) {
 
 export {
   buildRegistrationAssetPath,
+  classifyOperationalAccessResolveError,
   PENDING_REGISTRATIONS_TABLE as PENDING_REGISTRATIONS_COLLECTION,
   USER_ACCESS_TABLE as USER_ACCESS_COLLECTION,
   uploadRegistrationPhotoAsset,

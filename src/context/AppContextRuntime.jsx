@@ -68,6 +68,7 @@ import {
 import { subscribeToShiftHistoryEntries } from '../services/backend/shiftHistory';
 import {
   approvePendingRegistration,
+  classifyOperationalAccessResolveError,
   createPendingRegistration,
   rejectPendingRegistration,
   resolveOperationalAccess,
@@ -100,6 +101,8 @@ const ACCESS_ROLES = {
 const ACCESS_ROLE_VALUES = Object.values(ACCESS_ROLES);
 const AUTH_SESSION_KEY = 'smartpatrol.auth.local.v1';
 const SESSION_VALIDATION_LOGOUT_DELAY_MS = 5000;
+const LOGIN_ACCESS_RESOLVE_RETRY_DELAYS_MS = [600, 1500];
+const ACCESS_RESOLVE_ERROR_KIND_FATAL_AUTH = 'fatal-auth';
 const APP_TIME_ZONE = 'Asia/Jakarta';
 const APP_TIME_ZONE_UTC_OFFSET_HOURS = 7;
 const SHIFT_NOTIFICATION_DEBUG_KEY = 'smartpatrol.debug.shiftNotifications';
@@ -500,6 +503,50 @@ function isDefinitiveAccessDenial(accessResult) {
   if (!accessResult || typeof accessResult !== 'object') return false;
   const status = String(accessResult.status || '').trim().toLowerCase();
   return DEFINITIVE_ACCESS_DENIAL_STATUSES.has(status);
+}
+
+const LOGIN_ACCESS_DENIAL_STATUSES = new Set(['pending', 'rejected', 'restricted', 'disabled', 'missing']);
+function getLoginAccessDenialStatus(accessResult) {
+  if (!accessResult || typeof accessResult !== 'object') return 'missing';
+  const candidates = [
+    accessResult.status,
+    accessResult.profile?.review_state,
+    accessResult.profile?.reviewState,
+    accessResult.profile?.status,
+    accessResult.access?.reviewState,
+    accessResult.access?.status,
+  ]
+    .map((status) => sanitizeText(status || '', 30).toLowerCase())
+    .filter(Boolean);
+  return candidates.find((status) => LOGIN_ACCESS_DENIAL_STATUSES.has(status)) || candidates[0] || 'missing';
+}
+
+function getLoginAccessDenialMessage(accessResult) {
+  const status = getLoginAccessDenialStatus(accessResult);
+  if (status === 'pending') return 'Registrasi Anda masih menunggu approval admin.';
+  if (status === 'rejected') return 'Registrasi Anda ditolak admin. Hubungi admin operasional.';
+  if (status === 'restricted' || status === 'disabled') return 'Akses operasional Anda sedang nonaktif. Hubungi admin untuk assignment ulang.';
+  return 'Akun Supabase ini belum memiliki akses operasional SmartPatrol.';
+}
+
+function waitForLoginAccessRetry(delayMs) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, delayMs);
+  });
+}
+
+async function resolveOperationalAccessForLogin() {
+  for (let attempt = 0; attempt <= LOGIN_ACCESS_RESOLVE_RETRY_DELAYS_MS.length; attempt += 1) {
+    try {
+      return await resolveOperationalAccess();
+    } catch (error) {
+      const kind = classifyOperationalAccessResolveError(error);
+      const hasRetryBudget = attempt < LOGIN_ACCESS_RESOLVE_RETRY_DELAYS_MS.length;
+      if (kind === ACCESS_RESOLVE_ERROR_KIND_FATAL_AUTH || !hasRetryBudget) throw error;
+      await waitForLoginAccessRetry(LOGIN_ACCESS_RESOLVE_RETRY_DELAYS_MS[attempt]);
+    }
+  }
+  return null;
 }
 
 // --- UTILITY FUNCTIONS ---
@@ -10105,26 +10152,21 @@ export function AppProvider({ children }) {
     setAuthError('');
     setAuthNotice('');
 
+    let credential = null;
     try {
       const localUser = usersData.find(item => (item.email || '').toLowerCase() === safeEmail) || null;
-      const credential = await loginWithFirebaseEmail(safeEmail, passwordInput);
+      credential = await loginWithFirebaseEmail(safeEmail, passwordInput);
       setFirebaseAuthUser(credential.user);
       setFirebaseAuthReady(true);
-      const accessResult = await resolveOperationalAccess();
+      setAuthAccessResolvedUid('');
+      setAuthAccessOfflineUid('');
+      const accessResult = await resolveOperationalAccessForLogin();
       setAuthAccessState(accessResult || null);
 
       if (!accessResult?.access) {
         await logoutFirebaseUser();
         clearOperationalSessionState();
-        if (accessResult?.status === 'pending') {
-          setAuthError('Registrasi Anda masih menunggu approval admin.');
-          return;
-        }
-        if (accessResult?.status === 'rejected') {
-          setAuthError('Registrasi Anda ditolak admin. Hubungi admin operasional.');
-          return;
-        }
-        setAuthError('Akun Supabase ini belum memiliki akses operasional SmartPatrol.');
+        setAuthError(getLoginAccessDenialMessage(accessResult));
         return;
       }
 
@@ -10150,6 +10192,21 @@ export function AppProvider({ children }) {
 
       finalizeAuthorizedLogin(resolvedUser);
     } catch (error) {
+      if (credential?.user) {
+        const kind = classifyOperationalAccessResolveError(error);
+        if (kind !== ACCESS_RESOLVE_ERROR_KIND_FATAL_AUTH) {
+          const currentUid = sanitizeText(credential.user.uid || credential.user.id || '', 160);
+          setAuthAccessState(null);
+          setAuthAccessResolvedUid('');
+          if (currentUid) {
+            setAuthAccessOfflineUid(currentUid);
+            setAuthAccessResolveNonce((nonce) => nonce + 1);
+          }
+          setAuthError('');
+          setAuthNotice(`Login Supabase berhasil. ${getFirebaseAuthErrorMessage(error)}`);
+          return;
+        }
+      }
       try {
         await logoutFirebaseUser();
       } catch {
@@ -10998,6 +11055,8 @@ export function AppProvider({ children }) {
     });
     if (matchedUser?.id && matchedUser.id !== sessionUserId) {
       setSessionUserId(matchedUser.id);
+      setAuthError('');
+      setAuthNotice('');
     }
   }, [authAccessState, firebaseAuthUser, sessionUserId, usersData]);
   useEffect(() => {
