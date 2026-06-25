@@ -76,3 +76,17 @@ test('fetch realtime memakai debounce dan penjaga in-flight agar tidak paralel l
   assert.match(fn, /setTimeout\(\(\) => \{[\s\S]*?flushQueuedFetch\(\)\.catch\(onError\)/);
   assert.match(fn, /if \(fetchInFlight \|\| disposed\) return/);
 });
+
+test('refresh server wajib tidak fallback diam-diam ke cache cloud lama', () => {
+  assert.match(source, /function shouldUseCloudStateCacheFallback\(options = \{\}\)/);
+  assert.match(source, /if \(options\.allowCacheFallback === false\) return false/);
+  assert.match(source, /if \(options\.preferServer === true\) return false/);
+  assert.match(source, /export async function fetchCloudAppState\(options = \{\}\)/);
+  assert.match(source, /if \(!shouldUseCloudStateCacheFallback\(options\)\) \{[\s\S]*?throw error;[\s\S]*?\}/);
+});
+
+test('hydrate awal realtime tidak emit cache lama saat browser jelas online', () => {
+  const fn = extractActiveSubscribeFunction();
+  assert.match(source, /function isBrowserDefinitelyOnline\(\)[\s\S]*?navigator\.onLine === true/);
+  assert.match(fn, /const cached = isBrowserDefinitelyOnline\(\)[\s\S]*?\? null[\s\S]*?: await loadCacheSnapshot\('cloud-state'\)/);
+});

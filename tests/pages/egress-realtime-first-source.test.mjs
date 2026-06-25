@@ -39,6 +39,10 @@ test('runtime memakai watermark watchdog, bukan full snapshot 8 detik', () => {
   assert.doesNotMatch(runtimeSource, /const refreshIntervalId = typeof window/);
 });
 
+test('runtime refresh online mewajibkan server agar cache stale tidak menimpa armada', () => {
+  assert.match(runtimeSource, /fetchCloudAppState\(\{[\s\S]*?preferServer: options\.preferServer !== false,[\s\S]*?allowCacheFallback: options\.allowCacheFallback \?\? options\.preferServer === false,[\s\S]*?\}\)/);
+});
+
 test('signal domain tidak selalu memaksa snapshot penuh', () => {
   assert.match(runtimeSource, /function shouldRefreshSharedStateForSignal\(signal = \{\}\)/);
   assert.match(runtimeSource, /signal-domain-skip-full-refresh/);

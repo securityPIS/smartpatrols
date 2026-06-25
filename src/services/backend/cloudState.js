@@ -17,6 +17,16 @@ const isCloudWriteAllowedByEnv = import.meta.env.VITE_ENABLE_CLOUD_SYNC_WRITE !=
 const isCloudSyncEnabled = Boolean(isSupabaseConfigured) && isCloudSyncAllowedByEnv;
 const isCloudWriteEnabled = isCloudSyncEnabled && isCloudWriteAllowedByEnv;
 
+function shouldUseCloudStateCacheFallback(options = {}) {
+  if (options.allowCacheFallback === false) return false;
+  if (options.preferServer === true) return false;
+  return true;
+}
+
+function isBrowserDefinitelyOnline() {
+  return typeof navigator !== 'undefined' && navigator.onLine === true;
+}
+
 const PROFILE_COLUMNS = [
   'id',
   'auth_uid',
@@ -970,7 +980,9 @@ export function subscribeToCloudAppState(callback, onError) {
 
   queuedFullHydrate = true;
   flushQueuedFetch().catch(async (error) => {
-    const cached = await loadCacheSnapshot('cloud-state').catch(() => null);
+    const cached = isBrowserDefinitelyOnline()
+      ? null
+      : await loadCacheSnapshot('cloud-state').catch(() => null);
     if (cached && !disposed) callback(cached);
     onError?.(error);
   });
@@ -1044,13 +1056,16 @@ export function subscribeToCloudSyncSignal(callback, onError) {
   };
 }
 
-export async function fetchCloudAppState() {
+export async function fetchCloudAppState(options = {}) {
   if (!isCloudSyncEnabled) return null;
   try {
     const payload = await hydrateStateFromSql();
     await saveCacheSnapshot('cloud-state', payload);
     return payload;
   } catch (error) {
+    if (!shouldUseCloudStateCacheFallback(options)) {
+      throw error;
+    }
     return loadCacheSnapshot('cloud-state').catch(() => {
       throw error;
     });

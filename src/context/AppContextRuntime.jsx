@@ -6925,6 +6925,7 @@ export function AppProvider({ children }) {
     try {
       const cloudPayload = await fetchCloudAppState({
         preferServer: options.preferServer !== false,
+        allowCacheFallback: options.allowCacheFallback ?? options.preferServer === false,
       });
       return handleIncomingCloudPayload(cloudPayload, {
         source: options.source || 'manual-refresh',

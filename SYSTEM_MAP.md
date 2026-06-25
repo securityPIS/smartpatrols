@@ -589,6 +589,10 @@ Perbaikan (cermin di dua sisi):
 - UX: `isAssignedShipInaccessible` (petugas aktif + cloud bootstrap + online + `operationalShip`
   null) → PatrolPage menampilkan "Kapal Tidak Dapat Diakses" alih-alih pesan kosong yang
   menyesatkan; `isWaitingForAssignedFleetSync` → "Memuat data kapal…".
+- Hardening cache: refresh cloud yang meminta server saat online tidak boleh fallback diam-diam
+  ke snapshot IndexedDB `cloud-state` lama. Cache tetap boleh dipakai untuk offline-first, tetapi
+  bootstrap/focus online harus menunggu server agar snapshot kosong/terbatas dari device tidak
+  menimpa armada valid dan membuat checkpoint tetap 0/0.
 
 > Catatan: kalau `operationalShip` ter-resolve tapi checkpoint tetap kosong → kapalnya memang
 > `custom_checkpoints` kosong (set lewat ShipsPage), bukan bug ini.
