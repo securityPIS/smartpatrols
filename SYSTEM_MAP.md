@@ -593,6 +593,9 @@ Perbaikan (cermin di dua sisi):
   ke snapshot IndexedDB `cloud-state` lama. Cache tetap boleh dipakai untuk offline-first, tetapi
   bootstrap/focus online harus menunggu server agar snapshot kosong/terbatas dari device tidak
   menimpa armada valid dan membuat checkpoint tetap 0/0.
+- Penyimpanan cache `cloud-state` bersifat best-effort. Jika local storage/IndexedDB device penuh
+  atau gagal menulis snapshot, payload server yang sudah valid tetap diterapkan ke UI; kegagalan
+  cache tidak boleh membatalkan hydrate kapal/checkpoint.
 
 > Catatan: kalau `operationalShip` ter-resolve tapi checkpoint tetap kosong → kapalnya memang
 > `custom_checkpoints` kosong (set lewat ShipsPage), bukan bug ini.

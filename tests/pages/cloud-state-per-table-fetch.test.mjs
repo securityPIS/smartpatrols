@@ -90,3 +90,11 @@ test('hydrate awal realtime tidak emit cache lama saat browser jelas online', ()
   assert.match(source, /function isBrowserDefinitelyOnline\(\)[\s\S]*?navigator\.onLine === true/);
   assert.match(fn, /const cached = isBrowserDefinitelyOnline\(\)[\s\S]*?\? null[\s\S]*?: await loadCacheSnapshot\('cloud-state'\)/);
 });
+
+test('gagal menyimpan cache cloud tidak membatalkan payload server valid', () => {
+  const fn = extractActiveSubscribeFunction();
+  assert.match(source, /async function saveCloudStateCacheSnapshot\(payload\)[\s\S]*?try \{[\s\S]*?await saveCacheSnapshot\('cloud-state', payload\)[\s\S]*?catch \(error\) \{[\s\S]*?lanjut memakai state server/);
+  assert.match(fn, /await saveCloudStateCacheSnapshot\(payload\);[\s\S]*?if \(!disposed\) callback\(payload\)/);
+  assert.match(source, /const payload = await hydrateStateFromSql\(\);[\s\S]*?await saveCloudStateCacheSnapshot\(payload\);[\s\S]*?return payload;/);
+  assert.equal((source.match(/await saveCacheSnapshot\('cloud-state', payload\);/g) || []).length, 1);
+});

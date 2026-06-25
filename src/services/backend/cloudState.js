@@ -27,6 +27,14 @@ function isBrowserDefinitelyOnline() {
   return typeof navigator !== 'undefined' && navigator.onLine === true;
 }
 
+async function saveCloudStateCacheSnapshot(payload) {
+  try {
+    await saveCacheSnapshot('cloud-state', payload);
+  } catch (error) {
+    console.warn('Gagal menyimpan cache snapshot cloud, lanjut memakai state server.', error);
+  }
+}
+
 const PROFILE_COLUMNS = [
   'id',
   'auth_uid',
@@ -876,7 +884,7 @@ export function subscribeToCloudAppState(callback, onError) {
       cachedRows.sos_alerts,
       cachedRows.notifications,
     );
-    await saveCacheSnapshot('cloud-state', payload);
+    await saveCloudStateCacheSnapshot(payload);
     if (!disposed) callback(payload);
     return payload;
   };
@@ -1060,7 +1068,7 @@ export async function fetchCloudAppState(options = {}) {
   if (!isCloudSyncEnabled) return null;
   try {
     const payload = await hydrateStateFromSql();
-    await saveCacheSnapshot('cloud-state', payload);
+    await saveCloudStateCacheSnapshot(payload);
     return payload;
   } catch (error) {
     if (!shouldUseCloudStateCacheFallback(options)) {
