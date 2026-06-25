@@ -685,11 +685,15 @@ async function fetchShipsRows(supabase) {
   );
 }
 
-async function fetchPatrolReportRows(supabase) {
+async function fetchPatrolReportRows(supabase, options = {}) {
+  let query = supabase.from('patrol_reports').select(PATROL_REPORT_COLUMNS).limit(500);
+  if (options.shiftKey) query = query.eq('shift_key', options.shiftKey);
+  if (options.shipId) query = query.eq('ship_id', options.shipId);
+  if (options.shipName) query = query.eq('ship_name', options.shipName);
+
   return readCloudRows(
     'patrol_reports',
-    supabase.from('patrol_reports').select(PATROL_REPORT_COLUMNS).limit(500),
-    { critical: true },
+    query,
   );
 }
 
@@ -842,12 +846,12 @@ function buildStatePayload(
   };
 }
 
-async function hydrateStateFromSql() {
+async function hydrateStateFromSql(options = {}) {
   const supabase = ensureSupabaseClient();
   const [profileRows, shipRows, reportRows, incidentRows, sosRows, notifRows] = await Promise.all([
     fetchProfilesRows(supabase),
     fetchShipsRows(supabase),
-    fetchPatrolReportRows(supabase),
+    fetchPatrolReportRows(supabase, options),
     fetchIncidentRows(supabase),
     fetchSosAlertRows(supabase),
     fetchNotificationRows(supabase),
@@ -856,7 +860,7 @@ async function hydrateStateFromSql() {
   return buildStatePayload(profileRows, shipRows, reportRows, incidentRows, sosRows, notifRows);
 }
 
-export function subscribeToCloudAppState(callback, onError) {
+export function subscribeToCloudAppState(callback, onError, options = {}) {
   if (!isCloudSyncEnabled) return () => {};
   const supabase = ensureSupabaseClient();
   let disposed = false;
@@ -889,11 +893,11 @@ export function subscribeToCloudAppState(callback, onError) {
     return payload;
   };
 
-  const hydrateAllTablesNow = async () => {
+  const hydrateAllTablesNow = async (options = {}) => {
     const [profileRows, shipRows, reportRows, incidentRows, sosRows, notifRows] = await Promise.all([
       fetchProfilesRows(supabase),
       fetchShipsRows(supabase),
-      fetchPatrolReportRows(supabase),
+      fetchPatrolReportRows(supabase, options),
       fetchIncidentRows(supabase),
       fetchSosAlertRows(supabase),
       fetchNotificationRows(supabase),
@@ -913,7 +917,7 @@ export function subscribeToCloudAppState(callback, onError) {
   const fetchOneTableNow = async (table) => {
     switch (table) {
       case 'patrol_reports':
-        cachedRows.patrol_reports = await fetchPatrolReportRows(supabase);
+        cachedRows.patrol_reports = await fetchPatrolReportRows(supabase, options);
         break;
       case 'incidents':
         cachedRows.incidents = await fetchIncidentRows(supabase);
@@ -955,7 +959,7 @@ export function subscribeToCloudAppState(callback, onError) {
         queuedTables.clear();
 
         if (shouldFullHydrate) {
-          await hydrateAllTablesNow();
+          await hydrateAllTablesNow(options);
         } else if (tables.length > 0) {
           await Promise.all(tables.map(fetchOneTableNow));
         } else {
@@ -1067,7 +1071,7 @@ export function subscribeToCloudSyncSignal(callback, onError) {
 export async function fetchCloudAppState(options = {}) {
   if (!isCloudSyncEnabled) return null;
   try {
-    const payload = await hydrateStateFromSql();
+    const payload = await hydrateStateFromSql(options);
     await saveCloudStateCacheSnapshot(payload);
     return payload;
   } catch (error) {

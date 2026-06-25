@@ -30,14 +30,22 @@ function extractActiveSubscribeFunction() {
 test('hydrate cloud memakai helper fetch per tabel dengan limit profiles dan ships', () => {
   assert.match(source, /async function fetchProfilesRows\(supabase\)[\s\S]*?\.from\('profiles'\)\.select\(PROFILE_COLUMNS\)[\s\S]*?\.limit\(500\)/);
   assert.match(source, /async function fetchShipsRows\(supabase\)[\s\S]*?\.from\('ships'\)\.select\(SHIP_COLUMNS\)[\s\S]*?\.limit\(200\)/);
-  assert.match(source, /async function fetchPatrolReportRows\(supabase\)[\s\S]*?\.from\('patrol_reports'\)\.select\(PATROL_REPORT_COLUMNS\)[\s\S]*?\.limit\(500\)/);
+  assert.match(source, /async function fetchPatrolReportRows\(supabase, options = \{\}\)[\s\S]*?\.from\('patrol_reports'\)\.select\(PATROL_REPORT_COLUMNS\)[\s\S]*?\.limit\(500\)/);
 });
 
-test('domain inti tetap critical dan domain sekunder fallback kosong', () => {
+test('domain armada tetap critical dan domain laporan/sekunder fallback kosong', () => {
   assert.match(source, /fetchProfilesRows\(supabase\)[\s\S]*?\{ critical: true \}/);
   assert.match(source, /fetchShipsRows\(supabase\)[\s\S]*?\{ critical: true \}/);
-  assert.match(source, /fetchPatrolReportRows\(supabase\)[\s\S]*?\{ critical: true \}/);
+  assert.doesNotMatch(source, /fetchPatrolReportRows\(supabase(?:, options)?\)[\s\S]*?\{ critical: true \}/);
   assert.match(source, /console\.error\(`Gagal memuat domain '\$\{label\}'/);
+});
+
+test('fetch patrol_reports bisa dipersempit ke shift dan kapal agar RLS tidak timeout', () => {
+  assert.match(source, /async function fetchPatrolReportRows\(supabase, options = \{\}\)/);
+  assert.match(source, /if \(options\.shiftKey\) query = query\.eq\('shift_key', options\.shiftKey\)/);
+  assert.match(source, /if \(options\.shipId\) query = query\.eq\('ship_id', options\.shipId\)/);
+  assert.match(source, /if \(options\.shipName\) query = query\.eq\('ship_name', options\.shipName\)/);
+  assert.match(source, /fetchPatrolReportRows\(supabase, options\)/);
 });
 
 test('subscribe cloud state menyimpan raw rows di closure dan emit payload dari cache', () => {
@@ -87,6 +95,7 @@ test('refresh server wajib tidak fallback diam-diam ke cache cloud lama', () => 
 
 test('hydrate awal realtime tidak emit cache lama saat browser jelas online', () => {
   const fn = extractActiveSubscribeFunction();
+  assert.match(fn, /export function subscribeToCloudAppState\(callback, onError, options = \{\}\)/);
   assert.match(source, /function isBrowserDefinitelyOnline\(\)[\s\S]*?navigator\.onLine === true/);
   assert.match(fn, /const cached = isBrowserDefinitelyOnline\(\)[\s\S]*?\? null[\s\S]*?: await loadCacheSnapshot\('cloud-state'\)/);
 });
@@ -95,6 +104,6 @@ test('gagal menyimpan cache cloud tidak membatalkan payload server valid', () =>
   const fn = extractActiveSubscribeFunction();
   assert.match(source, /async function saveCloudStateCacheSnapshot\(payload\)[\s\S]*?try \{[\s\S]*?await saveCacheSnapshot\('cloud-state', payload\)[\s\S]*?catch \(error\) \{[\s\S]*?lanjut memakai state server/);
   assert.match(fn, /await saveCloudStateCacheSnapshot\(payload\);[\s\S]*?if \(!disposed\) callback\(payload\)/);
-  assert.match(source, /const payload = await hydrateStateFromSql\(\);[\s\S]*?await saveCloudStateCacheSnapshot\(payload\);[\s\S]*?return payload;/);
+  assert.match(source, /const payload = await hydrateStateFromSql\(options\);[\s\S]*?await saveCloudStateCacheSnapshot\(payload\);[\s\S]*?return payload;/);
   assert.equal((source.match(/await saveCacheSnapshot\('cloud-state', payload\);/g) || []).length, 1);
 });

@@ -43,6 +43,12 @@ test('runtime refresh online mewajibkan server agar cache stale tidak menimpa ar
   assert.match(runtimeSource, /fetchCloudAppState\(\{[\s\S]*?preferServer: options\.preferServer !== false,[\s\S]*?allowCacheFallback: options\.allowCacheFallback \?\? options\.preferServer === false,[\s\S]*?\}\)/);
 });
 
+test('runtime mengirim scope shift dan kapal saat hydrate cloud petugas', () => {
+  assert.match(runtimeSource, /const cloudReadScope = useMemo\(\(\) => \(\{[\s\S]*?shiftKey: currentShiftMeta\?\.key \|\| null,[\s\S]*?shipId: isAdmin \? null : operationalShip\?\.id \|\| null,[\s\S]*?shipName: isAdmin \? null : \(operationalShipName \|\| currentUserRecord\?\.shipAssigned \|\| null\)/);
+  assert.match(runtimeSource, /fetchCloudAppState\(\{[\s\S]*?\.\.\.cloudReadScope,[\s\S]*?\}\)/);
+  assert.match(runtimeSource, /subscribeToCloudAppState\([\s\S]*?\}, cloudReadScope\)/);
+});
+
 test('signal domain tidak selalu memaksa snapshot penuh', () => {
   assert.match(runtimeSource, /function shouldRefreshSharedStateForSignal\(signal = \{\}\)/);
   assert.match(runtimeSource, /signal-domain-skip-full-refresh/);

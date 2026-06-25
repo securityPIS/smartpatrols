@@ -596,6 +596,10 @@ Perbaikan (cermin di dua sisi):
 - Penyimpanan cache `cloud-state` bersifat best-effort. Jika local storage/IndexedDB device penuh
   atau gagal menulis snapshot, payload server yang sudah valid tetap diterapkan ke UI; kegagalan
   cache tidak boleh membatalkan hydrate kapal/checkpoint.
+- `patrol_reports` tidak boleh memblokir bootstrap armada. Untuk PETUGAS/PIC, refresh cloud
+  mengirim scope `shiftKey` + `shipName/shipId` agar query memakai index kapal/shift dan tidak
+  timeout karena RLS scan luas; bila domain laporan tetap gagal, checkpoint dasar dari
+  `ships.custom_checkpoints` tetap dirender sebagai pending.
 
 > Catatan: kalau `operationalShip` ter-resolve tapi checkpoint tetap kosong → kapalnya memang
 > `custom_checkpoints` kosong (set lewat ShipsPage), bukan bug ini.

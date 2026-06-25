@@ -5710,6 +5710,11 @@ export function AppProvider({ children }) {
     const safeLookup = String(deferredSearchQuery || '').toLowerCase();
     return checkpoints.filter(checkpoint => String(checkpoint?.name || '').toLowerCase().includes(safeLookup));
   }, [checkpoints, deferredSearchQuery]);
+  const cloudReadScope = useMemo(() => ({
+    shiftKey: currentShiftMeta?.key || null,
+    shipId: isAdmin ? null : operationalShip?.id || null,
+    shipName: isAdmin ? null : (operationalShipName || currentUserRecord?.shipAssigned || null),
+  }), [currentShiftMeta?.key, currentUserRecord?.shipAssigned, isAdmin, operationalShip?.id, operationalShipName]);
   const incidentLocationOptions = useMemo(() => {
     const checkpointDefinitions = (
       operationalShip?.customCheckpoints?.length
@@ -6926,6 +6931,7 @@ export function AppProvider({ children }) {
       const cloudPayload = await fetchCloudAppState({
         preferServer: options.preferServer !== false,
         allowCacheFallback: options.allowCacheFallback ?? options.preferServer === false,
+        ...cloudReadScope,
       });
       return handleIncomingCloudPayload(cloudPayload, {
         source: options.source || 'manual-refresh',
@@ -6947,7 +6953,7 @@ export function AppProvider({ children }) {
         queueMicrotask(() => refreshCloudSharedState(pendingOptions));
       }
     }
-  }, [handleIncomingCloudPayload]);
+  }, [cloudReadScope, handleIncomingCloudPayload]);
   refreshCloudSharedStateRef.current = refreshCloudSharedState;
   const applyPatrolReportDocuments = useCallback((reportDocuments = []) => {
     if (!Array.isArray(reportDocuments) || reportDocuments.length === 0) return;
@@ -10381,8 +10387,8 @@ export function AppProvider({ children }) {
     }, (error) => {
       setCloudSyncBootstrapped(true);
       console.error('Gagal subscribe data patroli cloud', error);
-    });
-  }, [hasOperationalCloudAccess]);
+    }, cloudReadScope);
+  }, [cloudReadScope, hasOperationalCloudAccess]);
   useEffect(() => {
     if (!isCloudSyncEnabled || !hasOperationalCloudAccess || !currentShiftMeta?.key) return () => { };
     if (patrolReportSubscriptionTargets.length === 0) return () => { };
