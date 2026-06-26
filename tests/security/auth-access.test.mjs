@@ -254,8 +254,13 @@ test('listener auth tidak mengubah gagal jaringan menjadi logout final', () => {
   );
   assert.match(
     authSource,
-    /isTransientAuthError\(error\)/,
-    'error auth jaringan harus ditandai transien agar context tidak menghapus sesi offline',
+    /event:\s*'INITIAL_SESSION_ERROR'[\s\S]*?isTransient:\s*true/,
+    'error restore awal harus transien agar context tidak menghapus sesi saat data mati diam-diam',
+  );
+  assert.match(
+    authSource,
+    /event:\s*'INITIAL_SESSION'[\s\S]*?isTransient:\s*!normalizedUser/,
+    'INITIAL_SESSION null harus transien meski navigator.onLine masih true',
   );
   assert.match(
     authSource,
@@ -386,12 +391,17 @@ test('validator sesi hanya reset saat resolusi akses DEFINITIF (anti tendangan r
   // untuk UID aktif. Resolusi gagal jaringan (authAccessOfflineUid di-set) saat baru pulih
   // koneksi TIDAK boleh memicu reset — itulah penyebab logout "saat back online".
   const definitiveGuards = appContextSource.match(
-    /if \(authAccessResolvedUid !== currentUid\)(?: \{[\s\S]{0,160}?return;\s*\n\s*\}| return;)\s*\n\s*(?:clearPendingSessionValidationLogout\(\);\s*\n\s*)?resetAuthSession\('Sesi cloud Anda telah berakhir/g,
+    /const hasDefinitiveResolvedUid = Boolean\(currentUid\) && authAccessResolvedUid === currentUid;[\s\S]{0,220}?if \(!hasDefinitiveResolvedUid\)[\s\S]{0,220}?resetAuthSession\('Sesi cloud Anda telah berakhir/g,
   ) || [];
   assert.equal(
     definitiveGuards.length,
     2,
-    'kedua validator harus pakai guard definitif resolvedUid sebelum resetAuthSession',
+    'kedua validator harus menolak UID kosong sebelum resetAuthSession',
+  );
+  assert.doesNotMatch(
+    appContextSource,
+    /if \(authAccessResolvedUid !== currentUid\)[\s\S]{0,220}?resetAuthSession\('Sesi cloud Anda telah berakhir/,
+    'guard lama bisa lolos saat currentUid dan resolvedUid sama-sama kosong',
   );
   assert.doesNotMatch(
     appContextSource,

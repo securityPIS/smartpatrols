@@ -11104,7 +11104,8 @@ export function AppProvider({ children }) {
     // (authAccessOfflineUid di-set, resolvedUid belum cocok) atau masih pending, JANGAN
     // reset — mencegah logout liar saat koneksi flaky / baru pulih (reconnect).
     const currentUid = sanitizeText(firebaseAuthUser?.uid || '', 160);
-    if (authAccessResolvedUid !== currentUid) return;
+    const hasDefinitiveResolvedUid = Boolean(currentUid) && authAccessResolvedUid === currentUid;
+    if (!hasDefinitiveResolvedUid) return;
     resetAuthSession('Sesi cloud Anda telah berakhir. Silakan login kembali.');
   }, [authAccessBusy, authAccessResolvedUid, authAccessOfflineUid, authBusy, firebaseAuthReady, firebaseAuthUser, isOffline, resetAuthSession, sessionUserId, usersData]);
   useEffect(() => {
@@ -11196,7 +11197,8 @@ export function AppProvider({ children }) {
         // Reset HANYA saat jawaban akses DEFINITIF (resolvedUid === currentUid). Resolusi
         // gagal jaringan (authAccessOfflineUid di-set) atau masih pending JANGAN memicu
         // logout — mencegah tendangan saat koneksi baru pulih (reconnect).
-        if (authAccessResolvedUid !== currentUid) {
+        const hasDefinitiveResolvedUid = Boolean(currentUid) && authAccessResolvedUid === currentUid;
+        if (!hasDefinitiveResolvedUid) {
           clearPendingSessionValidationLogout();
           return;
         }

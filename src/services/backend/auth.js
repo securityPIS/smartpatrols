@@ -139,7 +139,10 @@ function subscribeToFirebaseAuthChanges(callback) {
       if (error) {
         callback(null, {
           event: 'INITIAL_SESSION_ERROR',
-          isTransient: isTransientAuthError(error),
+          // Restore awal yang gagal belum membuktikan sesi dicabut. Saat sinyal data
+          // hilang, navigator.onLine bisa tetap true, jadi biarkan validator akses
+          // operasional yang memberi jawaban final saat server benar-benar terjangkau.
+          isTransient: true,
           error,
         });
         return;
@@ -147,14 +150,16 @@ function subscribeToFirebaseAuthChanges(callback) {
       const normalizedUser = normalizeSupabaseUser(data?.session?.user);
       callback(normalizedUser, {
         event: 'INITIAL_SESSION',
-        isTransient: !normalizedUser && isBrowserOffline(),
+        // getSession null pada restore awal bukan bukti logout final; WebView bisa
+        // remount saat data mati walau browser masih mengaku online.
+        isTransient: !normalizedUser,
       });
     })
     .catch((error) => {
       if (!disposed) {
         callback(null, {
           event: 'INITIAL_SESSION_ERROR',
-          isTransient: isTransientAuthError(error),
+          isTransient: true,
           error,
         });
       }

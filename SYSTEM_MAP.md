@@ -105,7 +105,8 @@ initializeTrustedTime
 ```
 Supabase Auth listener
   -> getSession lokal untuk initial restore
-  -> SIGNED_OUT/auth-null INVOLUNTER ditandai transient (flag explicitFirebaseLogout=false)
+  -> INITIAL_SESSION null/error dan SIGNED_OUT/auth-null INVOLUNTER ditandai transient
+     (flag explicitFirebaseLogout=false)
   -> AppContextRuntime mempertahankan firebaseAuthUser terakhir / sessionUserRecord
   -> authAccessOfflineUid menjaga sesi patroli sampai koneksi pulih
 ```
@@ -113,10 +114,13 @@ Supabase Auth listener
 Catatan: hanya logout EKSPLISIT pengguna yang membersihkan sesi. `logoutFirebaseUser()`
 men-set flag modul `explicitFirebaseLogout` selama `supabase.auth.signOut()`, sehingga
 `SIGNED_OUT` yang menyusul ditandai `explicit:true` dan listener membersihkan sesi.
-Auth-null involunter — `SIGNED_OUT` dari refresh token yang gagal, atau saat browser
-offline — SELALU transien (tidak bergantung `navigator.onLine`, karena "internet hilang"
-≠ "radio terputus": `navigator.onLine` bisa tetap `true` tanpa data). Ini mencegah petugas
-ketendang login saat menekan tombol "Sync Laporan" / submit patroli di jaringan buruk.
+Auth-null involunter — `INITIAL_SESSION` null/error saat restore awal, `SIGNED_OUT`
+dari refresh token yang gagal, atau saat browser offline — SELALU transien (tidak
+bergantung `navigator.onLine`, karena "internet hilang" ≠ "radio terputus":
+`navigator.onLine` bisa tetap `true` tanpa data). Ini mencegah petugas ketendang login
+saat WebView remount/kamera, menekan tombol "Sync Laporan", atau submit patroli di
+jaringan buruk. Validator cloud session juga menolak reset saat UID aktif kosong; reset
+hanya boleh setelah `resolveOperationalAccess` memberi jawaban definitif untuk UID aktif.
 Pencabutan akun (disabled/rejected/restricted) tetap ditegakkan jalur `resolveOperationalAccess`
 ke delayed session-validation logout (settle 5 detik) saat benar-benar online, bukan oleh
 listener auth. Validator data-driven seperti PETUGAS off-duty/tanpa kapal juga memakai
