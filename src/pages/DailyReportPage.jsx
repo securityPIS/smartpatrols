@@ -9,9 +9,11 @@ import {
   BarChart3,
   CalendarRange,
   CheckCircle2,
+  ChevronDown,
   CircleAlert,
   CircleOff,
   ShieldAlert,
+  SlidersHorizontal,
   UserRound,
 } from 'lucide-react';
 
@@ -507,6 +509,7 @@ const DailyReportPage = React.memo(function DailyReportPage() {
 
   const [startDate, setStartDate] = React.useState(initialRange.from);
   const [endDate, setEndDate] = React.useState(initialRange.to);
+  const [showFilters, setShowFilters] = React.useState(false);
   const activeQuickFilter = React.useMemo(() => {
     const activeFilter = QUICK_FILTERS.find((filter) => {
       const range = createQuickRange(filter.daysBack);
@@ -769,9 +772,22 @@ const DailyReportPage = React.memo(function DailyReportPage() {
             <p className="mt-3 text-sm leading-relaxed text-cyan-200/75 dashboard-header-desc">
               Dashboard ini menyajikan rangkuman kegiatan patroli keamanan, status temuan yang belum terselesaikan, pembaruan aktivitas petugas jaga, serta informasi SOS selama periode waktu yang dipilih.
             </p>
+
+            <button
+              type="button"
+              onClick={() => setShowFilters((prev) => !prev)}
+              aria-expanded={showFilters}
+              className="mt-4 flex w-full items-center justify-between gap-2 rounded-2xl border border-cyan-800/50 bg-[#070b19]/70 px-4 py-3 text-[11px] font-black uppercase tracking-widest text-cyan-300 transition-colors hover:border-cyan-600 hover:text-cyan-200 dashboard-secondary-box xl:hidden"
+            >
+              <span className="flex items-center gap-2">
+                <SlidersHorizontal className="h-4 w-4" />
+                Filter Periode
+              </span>
+              <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+            </button>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:min-w-[440px]">
+          <div className={`${showFilters ? 'grid' : 'hidden'} grid-cols-1 gap-3 sm:grid-cols-2 xl:grid xl:min-w-[440px]`}>
             <label className="rounded-2xl border border-cyan-800/50 bg-[#070b19]/70 p-3 dashboard-secondary-box">
               <span className="mb-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-cyan-500">
                 <CalendarRange className="h-3.5 w-3.5" />
@@ -819,7 +835,7 @@ const DailyReportPage = React.memo(function DailyReportPage() {
           </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px] text-cyan-300/70">
+        <div className={`${showFilters ? 'flex' : 'hidden'} mt-4 flex-wrap items-center gap-2 text-[11px] text-cyan-300/70 xl:flex`}>
           <span className="rounded-full border border-cyan-800/60 bg-[#0b1229]/70 px-3 py-1.5 dashboard-secondary-box dashboard-info-badge">
             Periode: {formatDateKey(startDate)} - {formatDateKey(endDate)}
           </span>
