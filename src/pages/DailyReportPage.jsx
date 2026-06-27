@@ -768,7 +768,7 @@ const DailyReportPage = React.memo(function DailyReportPage() {
         <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-2xl">
             <p className="text-[10px] font-black uppercase tracking-[0.28em] text-cyan-400">Admin Daily Report</p>
-            <h2 className="mt-2 text-3xl font-black text-white">Ringkasan Penjagaan Kapal Non-Operasional</h2>
+            <h2 className="mt-2 text-xl font-black text-white sm:text-2xl xl:text-3xl">Ringkasan Penjagaan Kapal Non-Operasional</h2>
             <p className="mt-3 text-sm leading-relaxed text-cyan-200/75 dashboard-header-desc">
               Dashboard ini menyajikan rangkuman kegiatan patroli keamanan, status temuan yang belum terselesaikan, pembaruan aktivitas petugas jaga, serta informasi SOS selama periode waktu yang dipilih.
             </p>
