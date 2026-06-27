@@ -376,11 +376,11 @@ function DailyReportTrendChart({ chartData }) {
           </span>
         ))}
       </div>
-      <div className="overflow-hidden rounded-[1.5rem] border border-cyan-800/40 bg-[#070b19] px-0 py-3">
+      <div className="overflow-x-auto overflow-y-hidden rounded-[1.5rem] border border-cyan-800/40 bg-[#070b19] px-0 py-3 sm:overflow-hidden">
         <svg
           viewBox={`0 0 ${chartSvg.width} ${chartSvg.height}`}
           preserveAspectRatio="xMidYMid meet"
-          className="h-72 w-full"
+          className="h-[208px] w-[864px] sm:h-72 sm:w-full"
         >
           {chartSvg.guideLines.map((guide) => (
             <g key={`guide-${guide.value}`}>
