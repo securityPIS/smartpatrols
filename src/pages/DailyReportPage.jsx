@@ -14,6 +14,7 @@ import {
   CircleOff,
   ShieldAlert,
   SlidersHorizontal,
+  Trophy,
   UserRound,
 } from 'lucide-react';
 
@@ -736,6 +737,53 @@ const DailyReportPage = React.memo(function DailyReportPage() {
       .slice(0, 5);
   }, [filteredEntries]);
 
+  const topGuardsByReports = React.useMemo(() => {
+    const guardMap = new Map();
+
+    filteredEntries.forEach((entry) => {
+      (entry.checkpoints || []).forEach((checkpoint) => {
+        if (checkpoint.status !== 'completed') return;
+
+        const guardKey = checkpoint.completedByUserId || checkpoint.completedBy;
+        if (!guardKey) return;
+
+        const timestamp = new Date(checkpoint.completedAt || '').getTime();
+        const photo = (entry.crewSnapshot || []).find((guard) => (
+          guard.id === checkpoint.completedByUserId || guard.name === checkpoint.completedBy
+        ))?.photoUrl || null;
+
+        const existing = guardMap.get(guardKey) || {
+          id: guardKey,
+          name: checkpoint.completedBy || 'Petugas',
+          ship: checkpoint.shipName || entry.ship || '-',
+          reports: 0,
+          photoUrl: null,
+          latestAt: -Infinity,
+        };
+
+        existing.reports += 1;
+
+        if (!Number.isNaN(timestamp) && timestamp >= existing.latestAt) {
+          existing.latestAt = timestamp;
+          existing.name = checkpoint.completedBy || existing.name;
+          existing.ship = checkpoint.shipName || entry.ship || existing.ship;
+          if (photo) existing.photoUrl = photo;
+        } else if (!existing.photoUrl && photo) {
+          existing.photoUrl = photo;
+        }
+
+        guardMap.set(guardKey, existing);
+      });
+    });
+
+    return Array.from(guardMap.values())
+      .sort((left, right) => {
+        if (right.reports !== left.reports) return right.reports - left.reports;
+        return right.latestAt - left.latestAt;
+      })
+      .slice(0, 5);
+  }, [filteredEntries]);
+
   const sosInfoEntries = React.useMemo(() => {
     return [...filteredSos]
       .map((item) => ({
@@ -1014,6 +1062,7 @@ const DailyReportPage = React.memo(function DailyReportPage() {
           </div>
         </div>
 
+        <div className="min-w-0 space-y-6">
         <div className="min-w-0 rounded-[1.9rem] border border-cyan-800/50 bg-[#0b1229] p-5 shadow-[0_0_24px_rgba(8,145,178,0.08)]">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -1059,6 +1108,55 @@ const DailyReportPage = React.memo(function DailyReportPage() {
               </div>
             ))}
           </div>
+        </div>
+
+        <div className="min-w-0 rounded-[1.9rem] border border-cyan-800/50 bg-[#0b1229] p-5 shadow-[0_0_24px_rgba(8,145,178,0.08)]">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.24em] text-cyan-500">Aktivitas Petugas</p>
+              <h3 className="mt-2 text-xl font-black text-white">Top 5 Petugas</h3>
+            </div>
+            <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-3 text-amber-300">
+              <Trophy className="h-5 w-5" />
+            </div>
+          </div>
+
+          <div className="mt-5 space-y-3">
+            {topGuardsByReports.length === 0 ? (
+              <EmptyState
+                title="Belum Ada Laporan"
+                description="Belum ada checkpoint selesai pada periode tanggal ini."
+                icon={<Trophy className="h-5 w-5" />}
+              />
+            ) : topGuardsByReports.map((guard, index) => (
+              <div key={guard.id} className="flex items-center gap-3 rounded-[1.25rem] border border-cyan-800/50 bg-[#070b19] p-3">
+                <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl border border-cyan-700/50 bg-[#0b1229] text-cyan-400">
+                  {guard.photoUrl ? (
+                    <AsyncImage
+                      src={guard.photoUrl}
+                      alt={guard.name}
+                      className="h-full w-full object-cover"
+                      fallbackLayout={<UserRound className="h-5 w-5" />}
+                    />
+                  ) : (
+                    <UserRound className="h-5 w-5" />
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="shrink-0 text-xs font-black text-amber-300">#{index + 1}</span>
+                    <p className="truncate text-sm font-black text-white">{guard.name}</p>
+                  </div>
+                  <p className="mt-1 truncate text-xs text-cyan-300/75 latest-guard-subtext">{guard.ship}</p>
+                </div>
+                <div className="rounded-xl border border-cyan-800/50 bg-[#0b1229] px-3 py-2 text-right">
+                  <p className="text-base font-black text-cyan-100">{formatMetricNumber(guard.reports)}</p>
+                  <p className="mt-0.5 text-[10px] font-black uppercase tracking-widest text-cyan-500">Dilaporkan</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
         </div>
       </section>
 
