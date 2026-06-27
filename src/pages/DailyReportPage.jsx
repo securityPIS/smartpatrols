@@ -866,24 +866,24 @@ const DailyReportPage = React.memo(function DailyReportPage() {
 
         <MetricCard
           title="Total Aman"
-          value={formatMetricNumber(dashboardMetrics.aman)}
-          subtitle="Checkpoint selesai dengan status aman"
+          value={`${formatMetricNumber(getCompletionRate(dashboardMetrics.aman, dashboardMetrics.total), 1)}%`}
+          subtitle={`Checkpoint aman berjumlah ${formatMetricNumber(dashboardMetrics.aman)} dari ${formatMetricNumber(dashboardMetrics.total)} titik`}
           accentClass="text-cyan-300"
           icon={<CheckCircle2 className="h-5 w-5 text-cyan-300" />}
         />
 
         <MetricCard
           title="Total Missed"
-          value={formatMetricNumber(dashboardMetrics.missed)}
-          subtitle="Checkpoint yang tidak dipatroli pada periode ini"
+          value={`${formatMetricNumber(getCompletionRate(dashboardMetrics.missed, dashboardMetrics.total), 1)}%`}
+          subtitle={`Terdapat ${formatMetricNumber(dashboardMetrics.missed)} titik yang tidak dipatroli dari ${formatMetricNumber(dashboardMetrics.total)} titik`}
           accentClass="text-rose-300"
           icon={<CircleOff className="h-5 w-5 text-rose-300" />}
         />
 
         <MetricCard
           title="Total Temuan"
-          value={formatMetricNumber(dashboardMetrics.temuan)}
-          subtitle={`${openIncidents.length} temuan masih OPEN`}
+          value={`${formatMetricNumber(getCompletionRate(dashboardMetrics.temuan, dashboardMetrics.total), 1)}%`}
+          subtitle={`Terdapat ${formatMetricNumber(dashboardMetrics.temuan)} temuan pada periode ini`}
           accentClass="text-yellow-300"
           icon={<AlertTriangle className="h-5 w-5 text-yellow-300" />}
         />
