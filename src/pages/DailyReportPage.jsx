@@ -11,6 +11,8 @@ import {
   CalendarRange,
   CheckCircle2,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   CircleAlert,
   CircleOff,
   ShieldAlert,
@@ -546,6 +548,37 @@ function DailyReportTrendChart({ chartData }) {
   );
 }
 
+// Bangun deretan nomor halaman bergaya "< 1 2 3 4 5 … terakhir >".
+// Menampilkan jendela ringkas di sekitar halaman aktif + halaman terakhir,
+// dengan elipsis sebagai pemisah. `current` & hasil bernilai 1-based.
+function buildPaginationItems(current, total) {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, index) => index + 1);
+  }
+
+  const items = [];
+  const showLeftDots = current > 4;
+  const showRightDots = current < total - 3;
+
+  if (!showLeftDots && showRightDots) {
+    for (let page = 1; page <= 5; page += 1) items.push(page);
+    items.push('ellipsis');
+    items.push(total);
+  } else if (showLeftDots && !showRightDots) {
+    items.push(1);
+    items.push('ellipsis');
+    for (let page = total - 4; page <= total; page += 1) items.push(page);
+  } else {
+    items.push(1);
+    items.push('ellipsis');
+    for (let page = current - 1; page <= current + 1; page += 1) items.push(page);
+    items.push('ellipsis');
+    items.push(total);
+  }
+
+  return items;
+}
+
 const DailyReportPage = React.memo(function DailyReportPage() {
   const { historyEntries } = useHistory();
   const { checkpoints, currentShiftMeta, activeShiftGuardSnapshot } = usePatrol();
@@ -561,6 +594,35 @@ const DailyReportPage = React.memo(function DailyReportPage() {
   const [startDate, setStartDate] = React.useState(initialRange.from);
   const [endDate, setEndDate] = React.useState(initialRange.to);
   const [showFilters, setShowFilters] = React.useState(false);
+
+  // Carousel temuan "open": lacak kartu aktif untuk pagination bergaya halaman.
+  const incidentScrollRef = React.useRef(null);
+  const [activeIncidentIndex, setActiveIncidentIndex] = React.useState(0);
+
+  const handleIncidentScroll = React.useCallback(() => {
+    const container = incidentScrollRef.current;
+    if (!container) return;
+    const { scrollLeft } = container;
+    let nearest = 0;
+    let minDistance = Infinity;
+    Array.from(container.children).forEach((child, index) => {
+      const distance = Math.abs((child.offsetLeft - container.offsetLeft) - scrollLeft);
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearest = index;
+      }
+    });
+    setActiveIncidentIndex((previous) => (previous === nearest ? previous : nearest));
+  }, []);
+
+  const scrollToIncident = React.useCallback((index) => {
+    const container = incidentScrollRef.current;
+    if (!container) return;
+    const child = container.children[index];
+    if (!child) return;
+    container.scrollTo({ left: child.offsetLeft - container.offsetLeft, behavior: 'smooth' });
+    setActiveIncidentIndex(index);
+  }, []);
   const activeQuickFilter = React.useMemo(() => {
     const activeFilter = QUICK_FILTERS.find((filter) => {
       const range = createQuickRange(filter.daysBack);
@@ -758,6 +820,14 @@ const DailyReportPage = React.memo(function DailyReportPage() {
       })
       .sort((left, right) => right.sortTimestamp - left.sortTimestamp);
   }, [allIncidents, incidentMeta]);
+
+  // Jaga indeks aktif tetap valid saat jumlah temuan berubah (mis. filter).
+  React.useEffect(() => {
+    setActiveIncidentIndex((previous) => {
+      const maxIndex = Math.max(0, openIncidents.length - 1);
+      return Math.min(previous, maxIndex);
+    });
+  }, [openIncidents.length]);
 
   const latestGuardPatrols = React.useMemo(() => {
     const latestByGuard = new Map();
@@ -1274,7 +1344,11 @@ const DailyReportPage = React.memo(function DailyReportPage() {
             </div>
           </div>
 
-          <div className="mt-4 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 scrollbar-none [&::-webkit-scrollbar]:hidden">
+          <div
+            ref={incidentScrollRef}
+            onScroll={handleIncidentScroll}
+            className="mt-4 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 scrollbar-none [&::-webkit-scrollbar]:hidden"
+          >
             {openIncidents.length === 0 ? (
               <div className="w-full shrink-0 snap-center">
                 <EmptyState
@@ -1345,24 +1419,57 @@ const DailyReportPage = React.memo(function DailyReportPage() {
 
           {openIncidents.length > 1 && (
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-              {openIncidents.map((incident, index) => (
-                <button
-                  key={`nav-${incident.id}`}
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const el = document.getElementById(`incident-card-${incident.id}`);
-                    if (el) {
-                      el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-                    }
-                  }}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-cyan-800/50 bg-[#0b1229] text-xs font-black text-cyan-500 transition-all hover:border-cyan-400 hover:bg-cyan-500/10 hover:shadow-[0_0_12px_rgba(6,182,212,0.15)] focus:outline-none"
-                  aria-label={`Scroll ke temuan ${index + 1}`}
-                >
-                  {index + 1}
-                </button>
-              ))}
+              <button
+                type="button"
+                disabled={activeIncidentIndex <= 0}
+                onClick={() => scrollToIncident(activeIncidentIndex - 1)}
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-cyan-800/50 bg-[#0b1229] text-cyan-400 transition-all hover:border-cyan-400 hover:bg-cyan-500/10 hover:shadow-[0_0_12px_rgba(6,182,212,0.15)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-cyan-800/50 disabled:hover:bg-[#0b1229] disabled:hover:shadow-none"
+                aria-label="Temuan sebelumnya"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+
+              {buildPaginationItems(activeIncidentIndex + 1, openIncidents.length).map((item, position) => {
+                if (item === 'ellipsis') {
+                  return (
+                    <span
+                      key={`ellipsis-${position}`}
+                      className="flex h-8 w-6 items-center justify-center text-xs font-black text-cyan-700"
+                    >
+                      …
+                    </span>
+                  );
+                }
+
+                const isActive = item === activeIncidentIndex + 1;
+
+                return (
+                  <button
+                    key={`nav-${item}`}
+                    type="button"
+                    onClick={() => scrollToIncident(item - 1)}
+                    aria-current={isActive ? 'true' : undefined}
+                    className={`flex h-8 w-8 items-center justify-center rounded-full border text-xs font-black transition-all focus:outline-none ${
+                      isActive
+                        ? 'border-cyan-400 bg-cyan-500/20 text-cyan-100 shadow-[0_0_16px_rgba(6,182,212,0.35)]'
+                        : 'border-cyan-800/50 bg-[#0b1229] text-cyan-500 hover:border-cyan-400 hover:bg-cyan-500/10 hover:shadow-[0_0_12px_rgba(6,182,212,0.15)]'
+                    }`}
+                    aria-label={`Scroll ke temuan ${item}`}
+                  >
+                    {item}
+                  </button>
+                );
+              })}
+
+              <button
+                type="button"
+                disabled={activeIncidentIndex >= openIncidents.length - 1}
+                onClick={() => scrollToIncident(activeIncidentIndex + 1)}
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-cyan-800/50 bg-[#0b1229] text-cyan-400 transition-all hover:border-cyan-400 hover:bg-cyan-500/10 hover:shadow-[0_0_12px_rgba(6,182,212,0.15)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-cyan-800/50 disabled:hover:bg-[#0b1229] disabled:hover:shadow-none"
+                aria-label="Temuan berikutnya"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
             </div>
           )}
         </div>
