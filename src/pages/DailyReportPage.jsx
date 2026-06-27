@@ -1031,8 +1031,7 @@ const DailyReportPage = React.memo(function DailyReportPage() {
                       title="Total Titik Dilaporkan"
                       className="flex flex-col items-center justify-center rounded-xl border border-cyan-900/40 bg-[#0b1229] px-2 py-3 text-cyan-300"
                     >
-                      <Activity className="h-4 w-4" />
-                      <p className="mt-2 text-sm font-black text-cyan-100">{formatMetricNumber(ship.completed)} titik</p>
+                      <p className="text-sm font-black text-cyan-100">{formatMetricNumber(ship.completed)} titik</p>
                     </div>
                     <div
                       title="Aman"
