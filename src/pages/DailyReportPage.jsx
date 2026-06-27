@@ -1028,11 +1028,11 @@ const DailyReportPage = React.memo(function DailyReportPage() {
 
                   <div className="grid grid-cols-4 gap-2 lg:min-w-[252px]">
                     <div
-                      title="Completion Rate"
+                      title="Total Titik Dilaporkan"
                       className="flex flex-col items-center justify-center rounded-xl border border-cyan-900/40 bg-[#0b1229] px-2 py-3 text-cyan-300"
                     >
                       <Activity className="h-4 w-4" />
-                      <p className="mt-2 text-sm font-black text-cyan-100">{formatMetricNumber(ship.completionRate, 1)}%</p>
+                      <p className="mt-2 text-sm font-black text-cyan-100">{formatMetricNumber(ship.completed)} titik</p>
                     </div>
                     <div
                       title="Aman"
