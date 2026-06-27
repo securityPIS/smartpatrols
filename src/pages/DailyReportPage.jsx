@@ -1,6 +1,7 @@
 import React from 'react';
 import { useHistory, useIncidents, usePatrol, useShips, useSOS, useUI } from '../context/AppContextRuntime';
 import AsyncImage from '../components/AsyncImage';
+import ShipLocationMap from '../components/ShipLocationMap';
 import { TimeAuditPills } from '../components/TimeAuditStatus';
 import {
   Activity,
@@ -74,6 +75,55 @@ function formatDateKey(value) {
   const parsed = new Date(`${value}T00:00:00+07:00`);
   if (Number.isNaN(parsed.getTime())) return value;
   return longDateFormatter.format(parsed);
+}
+
+function getCheckpointSortTimestamp(checkpoint) {
+  const timestamp = (
+    Number.isFinite(checkpoint?.occurredAtTrustedMs)
+      ? checkpoint.occurredAtTrustedMs
+      : new Date(
+        checkpoint?.occurredAtTrustedIso
+        || checkpoint?.completedAt
+        || checkpoint?.updatedAt
+        || checkpoint?.createdAt
+        || 0,
+      ).getTime()
+  );
+
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
+// Posisi terakhir tiap kapal = koordinat dari checkpoint patroli terbaru yang punya
+// gpsSnapshot valid. Mengambil dari seluruh riwayat (bukan rentang tanggal terpilih)
+// supaya "last known position" tetap akurat walau filter menunjuk periode lampau.
+function getShipLastKnownPositions(entries = []) {
+  const latestByShip = new Map();
+
+  entries.forEach((entry) => {
+    const shipName = entry?.ship || 'Tanpa Kapal';
+    (entry?.checkpoints || []).forEach((checkpoint) => {
+      const lat = Number(checkpoint?.gpsSnapshot?.lat);
+      const lng = Number(checkpoint?.gpsSnapshot?.lng);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+      const timestamp = getCheckpointSortTimestamp(checkpoint);
+      const previous = latestByShip.get(shipName);
+      if (previous && previous.timestamp >= timestamp) return;
+
+      latestByShip.set(shipName, {
+        ship: shipName,
+        lat,
+        lng,
+        timestamp,
+        capturedLabel: timestamp
+          ? dateTimeFormatter.format(new Date(timestamp))
+          : '',
+      });
+    });
+  });
+
+  return Array.from(latestByShip.values())
+    .sort((left, right) => right.timestamp - left.timestamp);
 }
 
 function getChartAxisLabel(dateKey, previousDateKey, isBoundary = false) {
@@ -669,6 +719,13 @@ const DailyReportPage = React.memo(function DailyReportPage() {
     });
   }, [chartDays, filteredEntries]);
 
+  // Posisi terakhir kapal diambil dari seluruh riwayat (reportEntries), independen dari
+  // filter tanggal, agar peta selalu menampilkan lokasi terakhir yang diketahui.
+  const shipLastPositions = React.useMemo(
+    () => getShipLastKnownPositions(reportEntries),
+    [reportEntries],
+  );
+
   const openIncidents = React.useMemo(() => {
     return allIncidents
       .filter((incident) => {
@@ -937,6 +994,7 @@ const DailyReportPage = React.memo(function DailyReportPage() {
         />
       </section>
 
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_1fr]">
       <section className="min-w-0 rounded-[1.9rem] border border-cyan-800/50 bg-[#0b1229] p-5 shadow-[0_0_24px_rgba(8,145,178,0.08)]">
         <div className="flex items-center justify-between gap-3">
           <div>
@@ -972,6 +1030,48 @@ const DailyReportPage = React.memo(function DailyReportPage() {
           </SectionErrorBoundary>
         )}
       </section>
+
+      <section className="min-w-0 rounded-[1.9rem] border border-cyan-800/50 bg-[#0b1229] p-5 shadow-[0_0_24px_rgba(8,145,178,0.08)]">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-cyan-500">Peta Armada</p>
+            <h3 className="mt-2 text-xl font-black text-white">Posisi Terakhir Kapal</h3>
+          </div>
+          <div className="rounded-2xl border border-cyan-500/20 bg-cyan-500/10 p-3 text-cyan-300">
+            <Anchor className="h-5 w-5" />
+          </div>
+        </div>
+
+        {shipLastPositions.length === 0 ? (
+          <div className="mt-5">
+            <EmptyState
+              title="Belum Ada Lokasi Kapal"
+              description="Posisi akan muncul setelah ada checkpoint patroli dengan GPS perangkat aktif."
+              icon={<Anchor className="h-5 w-5" />}
+            />
+          </div>
+        ) : (
+          <SectionErrorBoundary
+            fallback={(
+              <div className="mt-5">
+                <EmptyState
+                  title="Peta Tidak Tersedia"
+                  description="Peta sementara tidak bisa dirender, tetapi data report lainnya tetap aman tampil."
+                  icon={<Anchor className="h-5 w-5" />}
+                />
+              </div>
+            )}
+          >
+            <div className="mt-5 h-[320px] w-full">
+              <ShipLocationMap positions={shipLastPositions} />
+            </div>
+            <p className="mt-3 text-[11px] text-cyan-600">
+              Menampilkan {shipLastPositions.length} kapal. Klik penanda untuk detail koordinat &amp; waktu.
+            </p>
+          </SectionErrorBoundary>
+        )}
+      </section>
+      </div>
 
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="min-w-0 rounded-[1.9rem] border border-cyan-800/50 bg-[#0b1229] p-5 shadow-[0_0_24px_rgba(8,145,178,0.08)]">

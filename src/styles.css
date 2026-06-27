@@ -690,3 +690,58 @@ textarea {
 .scale-up-center {
   animation: scaleUpCenter 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
+
+/* Peta posisi terakhir kapal (Leaflet + OpenStreetMap) */
+.ship-location-map {
+  background-color: #070b19;
+}
+
+.ship-location-map .leaflet-control-attribution {
+  background: rgba(7, 11, 25, 0.7);
+  color: #67e8f9;
+  font-size: 9px;
+}
+
+.ship-location-map .leaflet-control-attribution a {
+  color: #22d3ee;
+}
+
+.ship-location-marker {
+  background: transparent;
+  border: none;
+}
+
+.ship-location-pin {
+  display: block;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6));
+}
+
+.ship-location-map .leaflet-popup-content-wrapper {
+  background: #0b1229;
+  color: #e0faff;
+  border: 1px solid rgba(8, 145, 178, 0.5);
+  border-radius: 0.85rem;
+  box-shadow: 0 0 24px rgba(8, 145, 178, 0.18);
+}
+
+.ship-location-map .leaflet-popup-tip {
+  background: #0b1229;
+  border: 1px solid rgba(8, 145, 178, 0.5);
+}
+
+.ship-location-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.ship-location-popup strong {
+  font-size: 12px;
+  color: #67e8f9;
+}
+
+.ship-location-popup span {
+  color: #94a3b8;
+}
