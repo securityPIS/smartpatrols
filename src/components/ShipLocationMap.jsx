@@ -88,21 +88,35 @@ export default function ShipLocationMap({ positions = [] }) {
     };
   }, []);
 
-  // Render ulang marker setiap posisi berubah.
+  // Signature isi data posisi (string primitif). Dipakai sebagai dependency effect
+  // supaya marker & fitBounds HANYA diperbarui ketika data benar-benar berubah —
+  // bukan tiap kali parent (DailyReportPage) re-render dan memberi referensi array
+  // baru. Tanpa ini, setiap re-render akan memanggil fitBounds() dan mereset zoom
+  // pengguna kembali ke tampilan awal (gejala "dizoom langsung zoom out lagi").
+  const positionsSignature = positions
+    .map((position) => `${position.ship}:${position.lat}:${position.lng}:${position.timestamp ?? ''}`)
+    .join('|');
+
+  // Posisi terbaru disimpan di ref agar effect bisa membacanya tanpa menjadikan
+  // objek `positions` sebagai dependency.
+  const positionsRef = React.useRef(positions);
+  positionsRef.current = positions;
+
   React.useEffect(() => {
     const map = mapRef.current;
     const markerLayer = markerLayerRef.current;
     if (!map || !markerLayer) return;
 
+    const currentPositions = positionsRef.current;
     markerLayer.clearLayers();
 
-    if (positions.length === 0) {
+    if (currentPositions.length === 0) {
       map.setView(DEFAULT_CENTER, DEFAULT_ZOOM);
       return;
     }
 
     const latLngs = [];
-    positions.forEach((position) => {
+    currentPositions.forEach((position) => {
       const marker = L.marker([position.lat, position.lng], { icon: iconRef.current });
       marker.bindPopup(buildPopupHtml(position));
       marker.bindTooltip(position.ship || 'Tanpa Kapal', {
@@ -118,7 +132,7 @@ export default function ShipLocationMap({ positions = [] }) {
     } else {
       map.fitBounds(L.latLngBounds(latLngs).pad(0.2), { maxZoom: 14 });
     }
-  }, [positions]);
+  }, [positionsSignature]);
 
   return (
     <div className="relative h-full w-full">
