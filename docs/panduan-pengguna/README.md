@@ -31,6 +31,34 @@ Pilih dokumen sesuai role akun Anda. Untuk panduan gabungan/menyeluruh, lihat
 > Catatan: Petugas & PIC hanya melihat data kapal tempat mereka di-*assign* (dijaga oleh
 > Row Level Security). Akun baru harus di-*approve* Admin sebelum bisa masuk area operasional.
 
+## Versi PDF Bergambar (dengan ilustrasi antarmuka)
+
+Tersedia juga panduan **PDF per role** yang dilengkapi **ilustrasi tampilan layar** beserta
+anotasi "👆 KLIK" (elemen yang ditekan) dan "✅ HASIL" (yang muncul) di setiap langkah:
+
+| Role | PDF |
+|---|---|
+| 🛡️ Petugas | [pdf/panduan-petugas.pdf](pdf/panduan-petugas.pdf) |
+| 👁️ PIC | [pdf/panduan-pic.pdf](pdf/panduan-pic.pdf) |
+| 🏢 Admin | [pdf/panduan-admin.pdf](pdf/panduan-admin.pdf) |
+
+> Catatan: mockup layar pada PDF adalah **ilustrasi yang dibangun ulang dari token desain asli
+> aplikasi** (tema gelap `#070b19`/`#0b1229`, aksen cyan, bottom-nav, tombol SOS) — bukan tangkapan
+> layar live, karena layar operasional berada di balik login Supabase + approval admin + assignment
+> kapal yang tidak dapat diakses tanpa backend aktif. Tampilan produksi aktual dapat sedikit berbeda.
+
+### Membangun ulang PDF
+
+```bash
+# butuh playwright-core + Chromium (di lingkungan web sudah tersedia di /opt/pw-browsers)
+npm install --no-save playwright-core
+node docs/panduan-pengguna/build-pdf.mjs
+# output -> docs/panduan-pengguna/pdf/panduan-{petugas,pic,admin}.pdf
+```
+
+Edit konten/langkah ada di [`build-pdf.mjs`](build-pdf.mjs) (objek `ROLES`); mockup layar ada di
+fungsi `screen*()`. Skrip otomatis mendeteksi Chromium di `PLAYWRIGHT_BROWSERS_PATH`.
+
 ## Konsep yang Berlaku untuk Semua Role
 
 - **Offline-First** — laporan & foto tetap bisa dibuat tanpa internet; tersinkron otomatis saat online.
