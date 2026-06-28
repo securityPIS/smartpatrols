@@ -37,7 +37,8 @@ function loadEnvFile() {
 }
 loadEnvFile();
 
-const URL = process.env.SMARTPATROL_URL;
+// URL aplikasi ter-deploy (publik). Bisa di-override via env SMARTPATROL_URL / .env.capture.
+const URL = process.env.SMARTPATROL_URL || 'https://smartpatrols.vercel.app';
 const ACCOUNTS = {
   petugas: { email: process.env.SP_PETUGAS_EMAIL, pass: process.env.SP_PETUGAS_PASSWORD, mobile: true },
   admin: { email: process.env.SP_ADMIN_EMAIL, pass: process.env.SP_ADMIN_PASSWORD, mobile: true },
