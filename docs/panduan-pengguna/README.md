@@ -59,6 +59,36 @@ node docs/panduan-pengguna/build-pdf.mjs
 Edit konten/langkah ada di [`build-pdf.mjs`](build-pdf.mjs) (objek `ROLES`); mockup layar ada di
 fungsi `screen*()`. Skrip otomatis mendeteksi Chromium di `PLAYWRIGHT_BROWSERS_PATH`.
 
+### Memakai SCREENSHOT ASLI aplikasi (jalankan di mesin lokal)
+
+Sesi Claude Code di web memiliki *network policy* yang **memblokir** akses ke Supabase dan host
+aplikasi (proxy menolak dengan 403), sehingga login & capture layar asli **tidak bisa** dilakukan
+dari sana. Lakukan langkah ini di **mesin lokal** (internet normal):
+
+```bash
+# 1) Pasang Playwright (sekalian unduh Chromium)
+npm install playwright          # atau: npm i playwright-core && npx playwright install chromium
+
+# 2) Siapkan kredensial (file ini TIDAK di-commit)
+cp docs/panduan-pengguna/.env.capture.example docs/panduan-pengguna/.env.capture
+#   lalu isi SMARTPATROL_URL + email/password admin & petugas
+
+# 3) Tangkap screenshot asli, lalu bangun ulang PDF
+node docs/panduan-pengguna/capture-screens.mjs --build
+```
+
+Hasil screenshot tersimpan di `pdf/screens/<role>/step-N.png` dan **otomatis dipakai** oleh
+`build-pdf.mjs` (langkah tanpa screenshot tetap memakai mockup sebagai fallback).
+
+**Keamanan (produksi):** [`capture-screens.mjs`](capture-screens.mjs) bersifat **non-destruktif** —
+hanya login, navigasi, membuka layar/modal, dan **menyorot** tombol target. Skrip **tidak pernah
+menekan** aksi yang menulis/mengirim data (submit status shift, AMAN/TEMUAN, **SOS**, approve user,
+assign kru, tutup/hapus temuan), sehingga tidak mengubah data nyata atau memicu alarm SOS.
+
+> Catatan role: akun PIC belum tersedia, jadi panduan PIC tetap memakai mockup. Tambahkan
+> `SP_PIC_EMAIL`/`SP_PIC_PASSWORD` di `.env.capture` dan sebuah alur `capturePic()` bila ingin
+> PIC juga memakai screenshot asli.
+
 ## Konsep yang Berlaku untuk Semua Role
 
 - **Offline-First** — laporan & foto tetap bisa dibuat tanpa internet; tersinkron otomatis saat online.

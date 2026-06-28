@@ -1,3 +1,7 @@
 supabase/.temp/
 node_modules/
 dist/
+
+# Panduan: kredensial capture screenshot & screenshot mentah (jangan di-commit)
+docs/panduan-pengguna/.env.capture
+docs/panduan-pengguna/pdf/screens/

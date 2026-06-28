@@ -494,6 +494,11 @@ body { font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif; co
 .callout.hasil .ck { color:#047857; }
 .step .art { flex:0 0 196px; display:flex; justify-content:center; }
 
+/* Screenshot asli dalam bingkai HP */
+.shot { width:196px; border:6px solid #1e293b; border-radius:26px; overflow:hidden;
+  box-shadow:0 6px 18px rgba(2,6,23,.18); background:#070b19; }
+.shot img { width:100%; display:block; }
+
 /* Phone mockup */
 .phone { width:196px; }
 .ph-screen { background:var(--bg); border:6px solid #1e293b; border-radius:26px; padding:8px; height:380px;
@@ -630,7 +635,17 @@ function coverPage(role) {
   </div>`;
 }
 
-function stepsPages(role) {
+// Gunakan screenshot asli (screens/<roleKey>/step-N.png) bila ada; jika tidak, mockup.
+function artFor(roleKey, n, step) {
+  const shot = path.join(outDir, 'screens', roleKey, `step-${n}.png`);
+  if (fs.existsSync(shot)) {
+    const b64 = fs.readFileSync(shot).toString('base64');
+    return `<div class="shot"><img src="data:image/png;base64,${b64}" alt="screenshot"/></div>`;
+  }
+  return step.screen();
+}
+
+function stepsPages(roleKey, role) {
   // 2 langkah per halaman
   const perPage = 2;
   let html = '';
@@ -645,7 +660,7 @@ function stepsPages(role) {
           <div class="callout klik"><span class="ck">👆 KLIK</span>${s.klik}</div>
           <div class="callout hasil"><span class="ck">✅ HASIL</span>${s.hasil}</div>
         </div>
-        <div class="art">${s.screen()}</div>
+        <div class="art">${artFor(roleKey, n, s)}</div>
       </div>`;
     }).join('');
     html += `<div class="page" style="--accent:${role.color}">
@@ -678,9 +693,9 @@ function closingPage(role) {
   </div>`;
 }
 
-function buildHtml(role) {
+function buildHtml(roleKey, role) {
   return `<!doctype html><html lang="id"><head><meta charset="utf-8"><style>${CSS}</style></head>
-  <body>${coverPage(role)}${stepsPages(role)}${closingPage(role)}</body></html>`;
+  <body>${coverPage(role)}${stepsPages(roleKey, role)}${closingPage(role)}</body></html>`;
 }
 
 export { ROLES, buildHtml };
@@ -693,7 +708,7 @@ async function main() {
   const page = await browser.newPage();
   const results = [];
   for (const [key, role] of Object.entries(ROLES)) {
-    const html = buildHtml(role);
+    const html = buildHtml(key, role);
     await page.setContent(html, { waitUntil: 'load' });
     const out = path.join(outDir, `panduan-${key}.pdf`);
     await page.pdf({ path: out, format: 'A4', printBackground: true, margin: { top: 0, bottom: 0, left: 0, right: 0 } });
