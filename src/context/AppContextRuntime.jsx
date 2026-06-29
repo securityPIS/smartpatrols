@@ -2869,6 +2869,26 @@ function omitDeletedEntities(items = [], deletedRecords = {}) {
   return items.filter((item) => !deletedRecords[item?.id]);
 }
 
+function omitNotificationsForDeletedEntities(notifications = [], deletedRecords = {}) {
+  const deletedHistoryEntries = deletedRecords?.historyEntries || {};
+  const deletedIncidents = deletedRecords?.incidents || {};
+
+  return ensureArray(notifications).filter((notification) => {
+    if (!notification || typeof notification !== 'object') return false;
+    const notificationType = sanitizeText(notification.type || '', 80).trim();
+    if (notificationType.endsWith('_deleted')) return true;
+    const routeParams = notification.routeParams && typeof notification.routeParams === 'object'
+      ? notification.routeParams
+      : {};
+    const historyId = sanitizeText(notification.historyId || routeParams.historyId || '', 180).trim();
+    const incidentId = sanitizeText(notification.incidentId || routeParams.incidentId || '', 220).trim();
+
+    if (historyId && deletedHistoryEntries[historyId]) return false;
+    if (incidentId && deletedIncidents[incidentId]) return false;
+    return true;
+  });
+}
+
 function remapUserIdFromMap(userId, userIdMap = new Map()) {
   const safeUserId = String(userId || '').trim();
   if (!safeUserId) return '';
@@ -3080,7 +3100,10 @@ function mergeSharedStateSnapshots(baseState = {}, nextState = {}) {
       mergeIncidentsCollection(baseState.incidentsData || [], nextState.incidentsData || []),
       deletedRecords.incidents,
     ),
-    notifications: mergeNotificationsCollection(baseState.notifications || [], nextState.notifications || []),
+    notifications: omitNotificationsForDeletedEntities(
+      mergeNotificationsCollection(baseState.notifications || [], nextState.notifications || []),
+      deletedRecords,
+    ),
     shipsData: mergedShips,
     usersData: mergedUsers,
     shiftStatusRecords: pruneStaleShiftStatusRecords(mergedShiftStatusRecords),
@@ -3802,7 +3825,7 @@ function createSharedStateSnapshot({
     historyEntries,
     deletedRecords: createDeletedRecordsState(deletedRecords),
     activeShiftKey,
-    notifications,
+    notifications: omitNotificationsForDeletedEntities(notifications, deletedRecords),
     shiftStatusRecords: shiftStatusRecords && typeof shiftStatusRecords === 'object' ? shiftStatusRecords : {},
     activeSOSAlert,
     sosHistory,
@@ -4899,9 +4922,16 @@ export { ACCESS_ROLES, defaultLocationOptions, SHIP_STATUS_OPTIONS };
 
 export function AppProvider({ children }) {
   const initialCurrentShiftMeta = getShiftMeta(getTrustedDate());
-  const initialShipsRawCollection = normalizeShipsCollection(persistedState?.shipsData || getInitialShipsData());
+  const initialDeletedRecords = createDeletedRecordsState(persistedState?.deletedRecords);
+  const initialShipsRawCollection = omitDeletedEntities(
+    normalizeShipsCollection(persistedState?.shipsData || getInitialShipsData()),
+    initialDeletedRecords.ships,
+  );
   const initialUserDedupeState = deduplicateUsersByOperationalIdentity(
-    normalizeUsersCollection(persistedState?.usersData || getMockUsersList()),
+    omitDeletedEntities(
+      normalizeUsersCollection(persistedState?.usersData || getMockUsersList()),
+      initialDeletedRecords.users,
+    ),
     { ships: initialShipsRawCollection },
   );
   const initialShipsCollection = remapShipPersonnelUserIds(
@@ -4921,7 +4951,10 @@ export function AppProvider({ children }) {
   const initialShiftState = migrateCheckpointStateToCurrentShift({
     ships: initialShipsCollection,
     checkpointsByShip: initialRawCheckpointsByShip,
-    historyEntries: sortHistoryEntries(persistedState?.historyEntries || createSeedHistoryEntries()),
+    historyEntries: omitDeletedEntities(
+      sortHistoryEntries(persistedState?.historyEntries || createSeedHistoryEntries()),
+      initialDeletedRecords.historyEntries,
+    ),
     shiftStatusRecords: persistedState?.shiftStatusRecords || {},
     users: initialUsersCollection,
     currentShiftMeta: initialCurrentShiftMeta,
@@ -5008,10 +5041,15 @@ export function AppProvider({ children }) {
   checkpointsByShipRef.current = checkpointsByShip;
   const [shipsData, setShipsData] = useState(() => initialShipsCollection);
   const [usersData, setUsersData] = useState(() => initialUsersCollection);
-  const [incidentsData, setIncidentsData] = useState(() => persistedState?.incidentsData || []);
+  const [incidentsData, setIncidentsData] = useState(() => omitDeletedEntities(
+    persistedState?.incidentsData || [],
+    initialDeletedRecords.incidents,
+  ));
   const [historyEntries, setHistoryEntries] = useState(() => initialShiftState.historyEntries);
   const [shiftStatusRecords, setShiftStatusRecords] = useState(() => initialShiftState.shiftStatusRecords || {});
-  const [notifications, setNotifications] = useState(() => sortNotifications(persistedState?.notifications || []));
+  const [notifications, setNotifications] = useState(() => sortNotifications(
+    omitNotificationsForDeletedEntities(persistedState?.notifications || [], initialDeletedRecords),
+  ));
   const [selectedHistoryId, setSelectedHistoryId] = useState(null);
   // Pakai getTrustedDate().getTime() bukan getTrustedNowMs() langsung — di Android
   // cold start, getTrustedNowMs() return null sebelum anchor server sync, dan
@@ -5128,8 +5166,12 @@ export function AppProvider({ children }) {
   const [weatherLoading, setWeatherLoading] = useState(() => !loadWeatherCache());
   const [submittingPatrolId, setSubmittingPatrolId] = useState(null);
   const [selectedIncident, setSelectedIncident] = useState(null);
-  const [incidentMeta, setIncidentMeta] = useState(() => persistedState?.incidentMeta || {});
-  const [deletedRecords, setDeletedRecords] = useState(() => createDeletedRecordsState(persistedState?.deletedRecords));
+  const [incidentMeta, setIncidentMeta] = useState(() => Object.fromEntries(
+    Object.entries(persistedState?.incidentMeta || {}).filter(([incidentId]) => (
+      !initialDeletedRecords.incidents[incidentId]
+    )),
+  ));
+  const [deletedRecords, setDeletedRecords] = useState(() => initialDeletedRecords);
   const [newProgress, setNewProgress] = useState({ comment: '', photoUrl: null, heroUrl: null, thumbUrl: null });
   const [showUserForm, setShowUserForm] = useState(false);
   const [userFormData, setUserFormData] = useState(() => createUserFormState());
@@ -5166,9 +5208,19 @@ export function AppProvider({ children }) {
   ));
   const pendingShiftStatusRecordsRef = useRef(new Map());
   const localSharedStateRef = useRef(null);
+  const deletedRecordsRef = useRef(deletedRecords);
   const activeSOSAlertRef = useRef(activeSOSAlert);
   const sosHistoryRef = useRef(sosHistory);
   const [cloudSyncKick, setCloudSyncKick] = useState(0);
+  const updateDeletedRecords = useCallback((updater) => {
+    setDeletedRecords((previousDeletedRecords) => {
+      const nextDeletedRecords = typeof updater === 'function'
+        ? createDeletedRecordsState(updater(previousDeletedRecords))
+        : createDeletedRecordsState(updater);
+      deletedRecordsRef.current = nextDeletedRecords;
+      return nextDeletedRecords;
+    });
+  }, []);
   const requestCloudSync = useCallback((priority = 'normal') => {
     if (priority === 'urgent') {
       cloudSyncPriorityRef.current = 'urgent';
@@ -5694,12 +5746,12 @@ export function AppProvider({ children }) {
   const notificationWriteIdentityId = currentUserId || firebaseAuthUid || '';
   const visibleNotifications = useMemo(() => {
     if (notificationRecipientIds.length === 0) return [];
-    return ensureArray(notifications).filter((notification) => (
+    return omitNotificationsForDeletedEntities(notifications, deletedRecords).filter((notification) => (
       ensureObject(notification)
       && Array.isArray(notification.targetUserIds)
       && notification.targetUserIds.some((targetUserId) => notificationRecipientIds.includes(targetUserId))
     ));
-  }, [notificationRecipientIds, notifications]);
+  }, [deletedRecords, notificationRecipientIds, notifications]);
   const unreadNotificationCount = useMemo(() => {
     if (notificationReadIdentityIds.length === 0) return 0;
     return visibleNotifications.filter((notification) => !(
@@ -5787,6 +5839,9 @@ export function AppProvider({ children }) {
   useEffect(() => {
     localSharedStateRef.current = sharedState;
   }, [sharedState]);
+  useEffect(() => {
+    deletedRecordsRef.current = createDeletedRecordsState(deletedRecords);
+  }, [deletedRecords]);
   useEffect(() => {
     activeSOSAlertRef.current = activeSOSAlert;
   }, [activeSOSAlert]);
@@ -6715,7 +6770,13 @@ export function AppProvider({ children }) {
       : incomingState;
     const normalizedCloudState = mergeSharedStateSnapshots({}, auditedIncomingState);
     const serializedCloudState = serializeSharedStateSnapshot(normalizedCloudState);
-    const currentLocalState = localSharedStateRef.current || {};
+    const currentLocalState = createSharedStateSnapshot({
+      ...(localSharedStateRef.current || {}),
+      deletedRecords: mergeDeletedRecords(
+        localSharedStateRef.current?.deletedRecords || {},
+        deletedRecordsRef.current || {},
+      ),
+    });
     const resolvedActiveShiftKey = resolveLatestShiftKey(
       [currentLocalState.activeShiftKey, normalizedCloudState.activeShiftKey],
       freshShiftMeta,
@@ -6776,7 +6837,7 @@ export function AppProvider({ children }) {
     setUsersData(normalizedState.usersData);
     setIncidentsData(normalizedState.incidentsData);
     setIncidentMeta(normalizedState.incidentMeta);
-    setDeletedRecords(normalizedState.deletedRecords);
+    updateDeletedRecords(normalizedState.deletedRecords);
     setHistoryEntries(normalizedState.historyEntries);
     setShiftStatusRecords(normalizedState.shiftStatusRecords || {});
     setNotifications(normalizedState.notifications);
@@ -6869,7 +6930,7 @@ export function AppProvider({ children }) {
         : previousIncident;
     });
     return normalizedState;
-  }, [applyPendingShiftStatusRecords]);
+  }, [applyPendingShiftStatusRecords, updateDeletedRecords]);
   const handleIncomingCloudPayloadRef = useRef(null);
   const refreshCloudSharedStateRef = useRef(null);
   const cloudSyncWatermarksRef = useRef(null);
@@ -7251,7 +7312,7 @@ export function AppProvider({ children }) {
       cancelText: 'BATAL',
       onConfirm: () => {
         const deletedAt = new Date().toISOString();
-        setDeletedRecords(previousDeletedRecords => markDeletedRecord(previousDeletedRecords, 'historyEntries', historyId, deletedAt));
+        updateDeletedRecords(previousDeletedRecords => markDeletedRecord(previousDeletedRecords, 'historyEntries', historyId, deletedAt));
         setHistoryEntries(previousEntries => previousEntries.filter(entry => entry.id !== historyId));
         appendNotifications([{
           type: 'history_deleted',
@@ -7270,7 +7331,7 @@ export function AppProvider({ children }) {
         }
       }
     });
-  }, [appendNotifications, currentUser, currentUserRole, getUsersByRole, historyEntries, isAdmin, selectedHistoryId]);
+  }, [appendNotifications, currentUser, currentUserRole, getUsersByRole, historyEntries, isAdmin, selectedHistoryId, updateDeletedRecords]);
 
   const handleDeleteHistoryEntriesBulk = useCallback((historyIds = [], options = {}) => {
     if (!isAdmin) return;
@@ -7288,7 +7349,7 @@ export function AppProvider({ children }) {
       cancelText: 'BATAL',
       onConfirm: () => {
         const deletedAt = new Date().toISOString();
-        setDeletedRecords(previousDeletedRecords => (
+        updateDeletedRecords(previousDeletedRecords => (
           eligibleIds.reduce((acc, id) => markDeletedRecord(acc, 'historyEntries', id, deletedAt), previousDeletedRecords)
         ));
         setHistoryEntries(previousEntries => previousEntries.filter(entry => !eligibleIds.includes(entry.id)));
@@ -7309,7 +7370,7 @@ export function AppProvider({ children }) {
         if (onAfterDelete) onAfterDelete(eligibleIds);
       }
     });
-  }, [appendNotifications, currentUser, currentUserRole, getUsersByRole, historyEntries, isAdmin, selectedHistoryId]);
+  }, [appendNotifications, currentUser, currentUserRole, getUsersByRole, historyEntries, isAdmin, selectedHistoryId, updateDeletedRecords]);
 
   // Computed incident lists
   const patrolIncidents = useMemo(() => (
@@ -9137,7 +9198,7 @@ export function AppProvider({ children }) {
       cancelText: 'BATAL',
       onConfirm: () => {
         const deletedAt = new Date().toISOString();
-        setDeletedRecords(previousDeletedRecords => markDeletedRecord(previousDeletedRecords, 'ships', id, deletedAt));
+        updateDeletedRecords(previousDeletedRecords => markDeletedRecord(previousDeletedRecords, 'ships', id, deletedAt));
         setShipsData(prev => prev
           .filter(s => s.id !== id)
           .map((ship) => normalizeShipRecord({
@@ -9148,7 +9209,7 @@ export function AppProvider({ children }) {
         closeShipDocForm();
       }
     });
-  }, [isAdmin, shipsData, activeShipId, closeShipDocForm]);
+  }, [isAdmin, shipsData, activeShipId, closeShipDocForm, updateDeletedRecords]);
 
   // User handlers
   const clearUserManagementFeedback = useCallback(() => {
@@ -9492,14 +9553,14 @@ export function AppProvider({ children }) {
             console.error('Gagal revoke akses operasional user', error);
           }
         }
-        setDeletedRecords(previousDeletedRecords => markDeletedRecord(previousDeletedRecords, 'users', id, deletedAt));
+        updateDeletedRecords(previousDeletedRecords => markDeletedRecord(previousDeletedRecords, 'users', id, deletedAt));
         setUsersData(prev => prev.filter(u => u.id !== id));
         setShipsData(prev => prev.map(ship => ({ ...ship, personnel: ship.personnel.filter(userId => userId !== id), personnelNextMonth: ship.personnelNextMonth.filter(userId => userId !== id) })));
         if (sessionUserId === id) { setSessionUserId(null); setAuthMode('login'); setAuthNotice('Akun sedang dipakai telah dihapus. Silakan login ulang.'); }
         setSelectedUser(null);
       }
     });
-  }, [isAdmin, usersData, sessionUserId]);
+  }, [isAdmin, usersData, sessionUserId, updateDeletedRecords]);
   const handleEditUserPhotoUpload = useCallback(async () => { const dataUrl = await pickLocalImage(); if (!dataUrl) return; const url = await saveImageToDB(dataUrl); if (url) setSelectedUser(prev => ({ ...prev, photoUrl: url })); }, []);
   const handleApprovePendingUser = useCallback(async (pendingRegistration) => {
     if (!isAdmin || !pendingRegistration?.uid) return;
@@ -9957,7 +10018,7 @@ export function AppProvider({ children }) {
           });
         } else {
           const deletedAt = new Date().toISOString();
-          setDeletedRecords((previousDeletedRecords) => markDeletedRecord(previousDeletedRecords, 'incidents', incidentId, deletedAt));
+          updateDeletedRecords((previousDeletedRecords) => markDeletedRecord(previousDeletedRecords, 'incidents', incidentId, deletedAt));
           setIncidentsData((previousIncidents) => previousIncidents.filter((entry) => entry.id !== incidentId));
           setIncidentMeta((previousMeta) => {
             if (!previousMeta[incidentId]) return previousMeta;
@@ -9975,7 +10036,7 @@ export function AppProvider({ children }) {
         requestCloudSync('urgent');
       },
     });
-  }, [allIncidents, currentShiftMeta.key, deleteIncidentReport, deletePatrolReport, deleteSosAlert, isAdmin, requestCloudSync, selectedIncident]);
+  }, [allIncidents, currentShiftMeta.key, deleteIncidentReport, deletePatrolReport, deleteSosAlert, isAdmin, requestCloudSync, selectedIncident, updateDeletedRecords]);
   const handlePhotoProgress = useCallback(() => {
     setPendingPatrolCameraCapture({
       id: 'incident-progress',
@@ -10446,14 +10507,22 @@ export function AppProvider({ children }) {
           !previousDomainIds.has(incident.id)
           || incident.pendingOfflineSync === true
         ));
-        const mergedIncidents = mergeIncidentsCollection(localOnlyIncidents, reconciledDomainIncidents);
+        const mergedIncidents = omitDeletedEntities(
+          mergeIncidentsCollection(localOnlyIncidents, reconciledDomainIncidents),
+          deletedRecordsRef.current.incidents,
+        );
         return serializeSharedStateSnapshot(mergedIncidents) === serializeSharedStateSnapshot(prevIncidents)
           ? prevIncidents
           : mergedIncidents;
       });
-      if (Object.keys(domainIncidentMeta).length > 0) {
+      const visibleDomainIncidentMeta = Object.fromEntries(
+        Object.entries(domainIncidentMeta).filter(([incidentId]) => (
+          !deletedRecordsRef.current.incidents?.[incidentId]
+        )),
+      );
+      if (Object.keys(visibleDomainIncidentMeta).length > 0) {
         setIncidentMeta((previousMeta) => {
-          const mergedMeta = mergeIncidentMetaCollection(previousMeta, domainIncidentMeta);
+          const mergedMeta = mergeIncidentMetaCollection(previousMeta, visibleDomainIncidentMeta);
           return serializeSharedStateSnapshot(mergedMeta) === serializeSharedStateSnapshot(previousMeta)
             ? previousMeta
             : mergedMeta;
@@ -10508,7 +10577,15 @@ export function AppProvider({ children }) {
             crewSnapshot: Array.isArray(row.crew_snapshot) ? row.crew_snapshot : [],
           };
         });
-        setHistoryEntries((prev) => mergeHistoryEntries(prev, serverEntries));
+        setHistoryEntries((prev) => {
+          const nextEntries = omitDeletedEntities(
+            mergeHistoryEntries(prev, serverEntries),
+            deletedRecordsRef.current.historyEntries,
+          );
+          return serializeSharedStateSnapshot(nextEntries) === serializeSharedStateSnapshot(prev)
+            ? prev
+            : nextEntries;
+        });
       },
       (error) => {
         console.error('Gagal subscribe shift history entries', error);
@@ -11317,7 +11394,7 @@ export function AppProvider({ children }) {
     if (!isCloudSyncEnabled || !isCloudWriteEnabled || isOffline || !hasOperationalCloudAccess) return;
     const recordsToCreate = [];
     const readBaseIds = [];
-    ensureArray(notifications).forEach((notification) => {
+    omitNotificationsForDeletedEntities(notifications, deletedRecords).forEach((notification) => {
       if (!notification?.id) return;
       const targetUserIds = Array.isArray(notification.targetUserIds) ? notification.targetUserIds : [];
       if (targetUserIds.length === 0) return;
@@ -11342,7 +11419,7 @@ export function AppProvider({ children }) {
         console.warn('Gagal menandai notifikasi dibaca di cloud', error);
       });
     }
-  }, [currentUserId, hasOperationalCloudAccess, isOffline, notifications]);
+  }, [currentUserId, deletedRecords, hasOperationalCloudAccess, isOffline, notifications]);
 
   // Weather
   useEffect(() => {

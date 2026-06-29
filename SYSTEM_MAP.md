@@ -1,6 +1,6 @@
 # SYSTEM_MAP - SmartPatrol SQL
 
-> Terakhir diperbarui: 2026-06-18.
+> Terakhir diperbarui: 2026-06-29.
 > Bahasa pemrograman: JavaScript (React 19 + Vite 8), SQL Postgres, Supabase Edge Functions (Deno).
 
 ## Project Summary
@@ -303,6 +303,37 @@ Perubahan utama:
    dan menghapus snapshot history yang cocok.
 5. Listener `incidents` di AppContext mengganti domain slice dari Supabase, bukan
    merge-only, agar DELETE manual incident tidak tertahan di cache PETUGAS.
+
+## Tombstone Admin Anti-Resurrection untuk History, Incident, dan Notifikasi (2026-06-29)
+
+Tujuan: mencegah data yang sudah dihapus admin muncul kembali dari local cache,
+shared-state cloud, atau subscription tabel server.
+
+Perubahan utama:
+
+1. `deletedRecords` tetap menjadi tombstone client/shared-state untuk
+   `historyEntries`, `incidents`, `ships`, dan `users`, tetapi kini memiliki ref
+   otoritatif (`deletedRecordsRef`) yang diperbarui sinkron lewat helper delete.
+   `applyCloudSharedState` selalu menggabungkan snapshot cloud dengan tombstone
+   terbaru dari ref ini agar snapshot yang datang di sela render tidak menghapus
+   tombstone baru.
+2. Initial state dari localStorage disaring terhadap tombstone sebelum masuk UI:
+   `shipsData`, `usersData`, `historyEntries`, `incidentsData`, `incidentMeta`,
+   dan `notifications`.
+3. Subscription domain `subscribeToShiftHistoryEntries` dan `subscribeToIncidents`
+   tidak boleh lagi menulis server rows langsung ke state tanpa filter tombstone.
+   History server dari `shift_history_entries` dan incident domain dari `incidents`
+   difilter ulang memakai `deletedRecordsRef.current`.
+4. Notifikasi stale yang merujuk `historyId` atau `incidentId` terhapus difilter di
+   `mergeSharedStateSnapshots`, `createSharedStateSnapshot`, `visibleNotifications`,
+   dan efek persistensi `notifications` ke SQL. Notifikasi eksplisit bertipe
+   `*_deleted` tetap boleh tampil sebagai pemberitahuan audit delete.
+5. Delete kapal mengikuti behavior produk saat ini: armada hilang dari Page Armada,
+   tetapi arsip history/incident lama tidak otomatis di-cascade-delete. Jika produk
+   ingin kapal hilang dari semua permukaan, wording dialog dan cascade harus diubah
+   eksplisit.
+
+Regresi dijaga oleh `tests/pages/admin-deletion-tombstone-source.test.mjs`.
 
 ## Target Admin Notifikasi Temuan (2026-06-08)
 
