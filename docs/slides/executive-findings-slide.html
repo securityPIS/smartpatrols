@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ringkasan Temuan — Slide Eksekutif</title>
+<!--
+  ============================================================================
+  TEMPLATE SLIDE EKSEKUTIF — "RINGKASAN TEMUAN" (SmartPatrol)
+  ============================================================================
+  Cara pakai:
+  - Ganti semua teks/angka bertanda  [GANTI]  dengan data periode Anda.
+  - Semua metrik di sini memakai field yang MEMANG ADA di data temuan:
+      lokasi, kapal, status (open/closed), sumber (patroli/manual/SOS),
+      pelapor, waktu, tindak lanjut. TIDAK ADA tingkat keparahan.
+  - Slide ini 16:9. Buka di browser, lalu Print -> "Save as PDF"
+    (Landscape, margin none, background graphics ON) untuk ekspor 1 halaman.
+  - Bar chart memakai CSS var --val (0..100 = persen tinggi/lebar). Ubah angkanya.
+  ============================================================================
+-->
+<style>
+  :root{
+    --bg:#070b19;
+    --panel:#0b1229;
+    --panel-2:#0e1733;
+    --line:rgba(34,211,238,.14);
+    --ink:#e6f0ff;
+    --muted:#7d93b8;
+    --cyan:#22d3ee;
+    --amber:#fbbf24;   /* temuan */
+    --rose:#fb7185;    /* SOS darurat */
+    --emerald:#34d399; /* selesai/closed */
+    --violet:#a78bfa;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:#05070f;
+    color:var(--ink);
+    font-family:"Inter","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+    display:flex;align-items:center;justify-content:center;
+    min-height:100vh;padding:24px;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---- Kanvas 16:9 ---- */
+  .slide{
+    position:relative;
+    width:1280px;height:720px;
+    background:
+      radial-gradient(1200px 520px at 82% -10%, rgba(34,211,238,.10), transparent 60%),
+      radial-gradient(900px 480px at -8% 110%, rgba(167,139,250,.10), transparent 55%),
+      linear-gradient(180deg,#0a0f22 0%, var(--bg) 100%);
+    border:1px solid var(--line);
+    border-radius:22px;
+    overflow:hidden;
+    box-shadow:0 40px 120px rgba(0,0,0,.55);
+    padding:36px 40px 30px;
+    display:flex;flex-direction:column;
+  }
+  .slide::before{ /* garis aksen atas */
+    content:"";position:absolute;left:0;top:0;height:4px;width:100%;
+    background:linear-gradient(90deg,var(--cyan),var(--violet) 45%,var(--amber) 75%,var(--rose));
+    opacity:.9;
+  }
+
+  /* ---- Header ---- */
+  header{display:flex;align-items:flex-start;justify-content:space-between;gap:24px}
+  .eyebrow{font-size:11px;letter-spacing:.32em;font-weight:800;color:var(--cyan);text-transform:uppercase}
+  h1{font-size:30px;font-weight:800;letter-spacing:-.01em;margin-top:6px;line-height:1.05}
+  h1 .accent{color:var(--amber)}
+  .brand{display:flex;align-items:center;gap:12px;text-align:right}
+  .brand .meta{font-size:11px;color:var(--muted);line-height:1.5}
+  .brand .meta b{color:var(--ink)}
+  .logo{
+    width:46px;height:46px;border-radius:13px;flex:none;
+    background:linear-gradient(145deg,var(--panel-2),#16224a);
+    border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:900;color:var(--cyan);font-size:17px;letter-spacing:.02em;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+  }
+
+  /* ---- Headline strip ---- */
+  .headline{
+    margin-top:16px;
+    background:linear-gradient(90deg,rgba(251,191,36,.10),rgba(11,18,41,.2));
+    border:1px solid rgba(251,191,36,.28);
+    border-radius:14px;padding:12px 16px;
+    font-size:14.5px;color:#fde9b8;font-weight:600;display:flex;gap:10px;align-items:center;
+  }
+  .headline .dot{width:9px;height:9px;border-radius:99px;background:var(--amber);box-shadow:0 0 12px var(--amber);flex:none}
+
+  /* ---- KPI ---- */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:16px}
+  .kpi{
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    border:1px solid var(--line);border-radius:16px;padding:14px 16px;position:relative;overflow:hidden;
+  }
+  .kpi::after{content:"";position:absolute;right:-18px;top:-18px;width:70px;height:70px;border-radius:99px;opacity:.18;filter:blur(2px)}
+  .kpi .label{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .kpi .num{font-size:38px;font-weight:800;line-height:1;margin-top:8px;letter-spacing:-.02em}
+  .kpi .sub{font-size:11px;color:var(--muted);margin-top:7px}
+  .kpi.total .num{color:var(--ink)} .kpi.total::after{background:var(--cyan)}
+  .kpi.open  .num{color:var(--amber)} .kpi.open::after{background:var(--amber)}
+  .kpi.closed .num{color:var(--emerald)} .kpi.closed::after{background:var(--emerald)}
+  .kpi.sos   .num{color:var(--rose)} .kpi.sos::after{background:var(--rose)}
+  .kpi .chip{display:inline-block;font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;margin-top:7px}
+  .chip.up{background:rgba(52,211,153,.14);color:var(--emerald);border:1px solid rgba(52,211,153,.3)}
+  .chip.down{background:rgba(251,113,133,.14);color:var(--rose);border:1px solid rgba(251,113,133,.3)}
+
+  /* ---- Body grid ---- */
+  .body{display:grid;grid-template-columns:1.05fr 1.05fr 1.25fr;gap:14px;margin-top:16px;flex:1;min-height:0}
+  .card{
+    background:linear-gradient(180deg,rgba(14,23,51,.75),rgba(11,18,41,.85));
+    border:1px solid var(--line);border-radius:16px;padding:14px 15px;display:flex;flex-direction:column;min-height:0;
+  }
+  .card h3{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);font-weight:800;display:flex;align-items:center;gap:8px}
+  .card h3 .ic{width:6px;height:14px;border-radius:3px;background:var(--cyan);display:inline-block}
+
+  /* breakdown bars (horizontal) */
+  .bars{margin-top:12px;display:flex;flex-direction:column;gap:13px}
+  .bar .row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;color:#cdd9ef;font-weight:600}
+  .bar .row b{font-weight:800}
+  .track{height:9px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden}
+  .fill{height:100%;border-radius:99px;width:calc(var(--val,0) * 1%)}
+  .fill.amber{background:linear-gradient(90deg,#f59e0b,var(--amber))}
+  .fill.cyan{background:linear-gradient(90deg,#0891b2,var(--cyan))}
+  .fill.rose{background:linear-gradient(90deg,#e11d48,var(--rose))}
+  .fill.violet{background:linear-gradient(90deg,#7c3aed,var(--violet))}
+  .fill.emerald{background:linear-gradient(90deg,#059669,var(--emerald))}
+
+  /* trend (vertical bars) */
+  .trend{margin-top:auto;display:flex;align-items:flex-end;gap:10px;height:118px;padding-top:8px}
+  .tcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+  .tcol .vbar{width:78%;border-radius:7px 7px 3px 3px;background:linear-gradient(180deg,var(--cyan),#0e7490);height:calc(var(--val,0)*1%);min-height:4px;box-shadow:0 0 14px rgba(34,211,238,.25)}
+  .tcol .vbar.hot{background:linear-gradient(180deg,var(--amber),#b45309);box-shadow:0 0 14px rgba(251,191,36,.3)}
+  .tcol small{font-size:10px;color:var(--muted);font-weight:700}
+
+  /* open list */
+  .openlist{margin-top:11px;display:flex;flex-direction:column;gap:9px;overflow:hidden}
+  .item{display:flex;gap:11px;align-items:flex-start;background:rgba(7,11,25,.55);border:1px solid rgba(34,211,238,.10);border-radius:12px;padding:9px 11px}
+  .item .tag{font-size:9px;font-weight:800;letter-spacing:.08em;padding:3px 7px;border-radius:7px;white-space:nowrap;margin-top:1px}
+  .tag.open{background:rgba(251,191,36,.13);color:var(--amber);border:1px solid rgba(251,191,36,.32)}
+  .tag.sos{background:rgba(251,113,133,.14);color:var(--rose);border:1px solid rgba(251,113,133,.34)}
+  .item .txt{min-width:0;flex:1}
+  .item .txt .t{font-size:12.5px;font-weight:700;color:#eaf1ff;line-height:1.25}
+  .item .txt .s{font-size:10.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .item .age{font-size:10px;color:var(--muted);text-align:right;white-space:nowrap;margin-top:1px}
+  .item .age b{display:block;color:#cdd9ef;font-size:13px;font-weight:800}
+
+  /* ---- Footer / rekomendasi ---- */
+  footer{margin-top:14px;display:flex;gap:12px;align-items:stretch}
+  .reco{flex:1;background:linear-gradient(90deg,rgba(52,211,153,.08),rgba(11,18,41,.4));border:1px solid rgba(52,211,153,.24);border-radius:14px;padding:11px 15px}
+  .reco .lab{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--emerald);font-weight:800}
+  .reco .txt{font-size:12.5px;color:#d7e6e0;margin-top:5px;line-height:1.45}
+  .reco .txt b{color:#fff}
+  .pageno{display:flex;align-items:center;justify-content:center;min-width:54px;border:1px solid var(--line);border-radius:14px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.1em}
+
+  /* ---- Print ---- */
+  @media print{
+    @page{size:1280px 720px;margin:0}
+    body{padding:0;background:#fff}
+    .slide{box-shadow:none;border-radius:0;border:none}
+    .hint{display:none !important}
+  }
+  .hint{position:fixed;bottom:10px;left:0;right:0;text-align:center;color:#5e7298;font-size:11px}
+</style>
+</head>
+<body>
+
+  <section class="slide">
+    <!-- ============ HEADER ============ -->
+    <header>
+      <div>
+        <div class="eyebrow">Laporan Operasional · Keamanan Armada</div>
+        <h1>Ringkasan <span class="accent">Temuan</span> — Periode <!--[GANTI]-->Juni 2026</h1>
+      </div>
+      <div class="brand">
+        <div class="meta">
+          <b>SmartPatrol</b><br />
+          Armada: <b><!--[GANTI]-->Seluruh Kapal</b><br />
+          Disusun: <b><!--[GANTI]-->30 Jun 2026</b>
+        </div>
+        <div class="logo">SP</div>
+      </div>
+    </header>
+
+    <!-- ============ HEADLINE ============ -->
+    <div class="headline">
+      <span class="dot"></span>
+      <!--[GANTI headline 1 kalimat]-->
+      Periode ini tercatat <b>24 temuan</b> — <b>18 selesai (closed)</b>, <b>6 masih open</b>,
+      termasuk <b>2 SOS darurat</b>. Tren menurun 15% dibanding bulan lalu.
+    </div>
+
+    <!-- ============ KPI STRIP ============ -->
+    <div class="kpis">
+      <div class="kpi total">
+        <div class="label">Total Temuan</div>
+        <div class="num">24</div>
+        <div class="sub">Patroli + Manual + SOS</div>
+      </div>
+      <div class="kpi closed">
+        <div class="label">Selesai (Closed)</div>
+        <div class="num">18</div>
+        <div class="sub">75% tingkat penyelesaian</div>
+        <span class="chip up">▲ 8% vs bln lalu</span>
+      </div>
+      <div class="kpi open">
+        <div class="label">Masih Open</div>
+        <div class="num">6</div>
+        <div class="sub">Butuh tindak lanjut</div>
+      </div>
+      <div class="kpi sos">
+        <div class="label">SOS Darurat</div>
+        <div class="num">2</div>
+        <div class="sub">1 active · 1 resolved</div>
+      </div>
+    </div>
+
+    <!-- ============ BODY 3 KOLOM ============ -->
+    <div class="body">
+
+      <!-- Kolom 1: Sumber temuan -->
+      <div class="card">
+        <h3><span class="ic"></span>Sumber Temuan</h3>
+        <div class="bars">
+          <div class="bar">
+            <div class="row"><span>Dari Patroli</span><b>14</b></div>
+            <div class="track"><div class="fill emerald" style="--val:58"></div></div>
+          </div>
+          <div class="bar">
+            <div class="row"><span>Manual</span><b>8</b></div>
+            <div class="track"><div class="fill cyan" style="--val:33"></div></div>
+          </div>
+          <div class="bar">
+            <div class="row"><span>SOS Darurat</span><b>2</b></div>
+            <div class="track"><div class="fill rose" style="--val:9"></div></div>
+          </div>
+        </div>
+
+        <h3 style="margin-top:18px"><span class="ic"></span>Status Penyelesaian</h3>
+        <div class="bars">
+          <div class="bar">
+            <div class="row"><span>Closed / Resolved</span><b>18</b></div>
+            <div class="track"><div class="fill emerald" style="--val:75"></div></div>
+          </div>
+          <div class="bar">
+            <div class="row"><span>Open</span><b>6</b></div>
+            <div class="track"><div class="fill amber" style="--val:25"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kolom 2: Distribusi lokasi/kapal + tren -->
+      <div class="card">
+        <h3><span class="ic"></span>Lokasi / Kapal Terbanyak</h3>
+        <div class="bars">
+          <div class="bar">
+            <div class="row"><span><!--[GANTI]-->MV Garuda — Engine Room</span><b>7</b></div>
+            <div class="track"><div class="fill amber" style="--val:100"></div></div>
+          </div>
+          <div class="bar">
+            <div class="row"><span><!--[GANTI]-->MV Garuda — Deck</span><b>5</b></div>
+            <div class="track"><div class="fill amber" style="--val:71"></div></div>
+          </div>
+          <div class="bar">
+            <div class="row"><span><!--[GANTI]-->MV Nusantara — Gudang</span><b>4</b></div>
+            <div class="track"><div class="fill violet" style="--val:57"></div></div>
+          </div>
+          <div class="bar">
+            <div class="row"><span><!--[GANTI]-->Lainnya</span><b>8</b></div>
+            <div class="track"><div class="fill cyan" style="--val:114;width:100%"></div></div>
+          </div>
+        </div>
+
+        <h3 style="margin-top:18px"><span class="ic"></span>Tren Mingguan</h3>
+        <div class="trend">
+          <div class="tcol"><div class="vbar" style="--val:55"></div><small>Mg-1</small></div>
+          <div class="tcol"><div class="vbar hot" style="--val:90"></div><small>Mg-2</small></div>
+          <div class="tcol"><div class="vbar" style="--val:65"></div><small>Mg-3</small></div>
+          <div class="tcol"><div class="vbar" style="--val:40"></div><small>Mg-4</small></div>
+        </div>
+      </div>
+
+      <!-- Kolom 3: Sorotan temuan OPEN -->
+      <div class="card">
+        <h3><span class="ic"></span>Sorotan Temuan Masih Open</h3>
+        <div class="openlist">
+          <div class="item">
+            <span class="tag sos">SOS</span>
+            <div class="txt">
+              <div class="t"><!--[GANTI]-->Kebocoran pipa hidrolik — MV Garuda</div>
+              <div class="s">Tindak lanjut: tim teknis dikerahkan, isolasi area</div>
+            </div>
+            <div class="age"><b>2h</b>open</div>
+          </div>
+          <div class="item">
+            <span class="tag open">OPEN</span>
+            <div class="txt">
+              <div class="t"><!--[GANTI]-->Lampu darurat Deck B mati</div>
+              <div class="s">Tindak lanjut: pengadaan suku cadang menunggu</div>
+            </div>
+            <div class="age"><b>9h</b>open</div>
+          </div>
+          <div class="item">
+            <span class="tag open">OPEN</span>
+            <div class="txt">
+              <div class="t"><!--[GANTI]-->Pintu gudang tidak terkunci</div>
+              <div class="s">Tindak lanjut: SOP akses sedang direvisi</div>
+            </div>
+            <div class="age"><b>5h</b>open</div>
+          </div>
+          <div class="item">
+            <span class="tag open">OPEN</span>
+            <div class="txt">
+              <div class="t"><!--[GANTI]-->CCTV area dermaga buram</div>
+              <div class="s">Tindak lanjut: jadwal pembersihan/ganti unit</div>
+            </div>
+            <div class="age"><b>3h</b>open</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ FOOTER ============ -->
+    <footer>
+      <div class="reco">
+        <div class="lab">Tindak Lanjut &amp; Rekomendasi</div>
+        <div class="txt">
+          <!--[GANTI]-->
+          <b>Sudah dilakukan:</b> 18 temuan ditutup, respons SOS rata-rata &lt; 1 jam.
+          <b>Butuh keputusan:</b> anggaran suku cadang lampu darurat &amp; penggantian 2 unit CCTV dermaga.
+        </div>
+      </div>
+      <div class="pageno">1 / 1</div>
+    </footer>
+  </section>
+
+  <div class="hint">Ganti teks bertanda [GANTI] dan angka <code>--val</code> pada bar. Print → Save as PDF (Landscape) untuk ekspor.</div>
+</body>
+</html>
