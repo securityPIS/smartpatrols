@@ -1,6 +1,6 @@
 # SYSTEM_MAP - SmartPatrol SQL
 
-> Terakhir diperbarui: 2026-06-29.
+> Terakhir diperbarui: 2026-06-30.
 > Bahasa pemrograman: JavaScript (React 19 + Vite 8), SQL Postgres, Supabase Edge Functions (Deno).
 
 ## Project Summary
@@ -75,6 +75,14 @@ Incident form/detail -> saveIncidentReport/deleteIncidentReport
   -> Supabase Realtime subscribeToIncidents
   -> offline write masuk outbox
 
+Tap TEMUAN checkpoint
+  -> AppContextRuntime.handleActionClick
+  -> jika checkpoint punya temuan lama open yang dapat dikelola pada kapal yang sama
+     (match shipId atau nama kapal ternormalisasi + checkpointId/lokasi ternormalisasi)
+     tampilkan PatrolFindingChoiceModal
+  -> "Temuan Lama" membuka IncidentDetailView tab Update dan menambah progress via incidents
+  -> "Temuan Baru" lanjut kamera + PatrolFormView dan menulis patrol_reports seperti biasa
+
 Temuan patrol/incident -> AppContextRuntime.getShipRecipients
   -> PIC/PETUGAS tetap dari usersData sekapal
   -> ADMIN ditambah dari RPC get_admin_recipient_ids (security definer, id only)
@@ -131,6 +139,7 @@ settle window yang dibatalkan otomatis jika snapshot Realtime berikutnya kembali
 | Path | Peran |
 |---|---|
 | `src/context/AppContextRuntime.jsx` | Runtime utama state/UI. Import backend sudah diarahkan ke `src/services/backend/*`. |
+| `src/utils/incidentStatus.js` | Resolver status open/closed temuan/SOS bersama, termasuk kandidat key patrol incident `p-*`. |
 | `src/services/backend/app.js` | Singleton Supabase browser client dan start outbox worker. |
 | `src/services/backend/auth.js` | Supabase Auth wrapper dengan nama ekspor kompatibel context lama. |
 | `src/services/backend/access.js` | Pending registration, approval/revoke/sync access via Edge Functions. |

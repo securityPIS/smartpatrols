@@ -11,49 +11,7 @@ import { useIncidents, useReports, useRole, useShips } from '../../context/AppCo
 import { ChevronDown, AlertTriangle, CheckCircle2, Camera, X, Plus, FileText, Trash2, Images, Pencil, Save, MapPin, ExternalLink } from 'lucide-react';
 import AsyncImage from '../AsyncImage';
 import { TimeAuditPills, TimeAuditRecordCard } from '../TimeAuditStatus';
-
-function normalizeIncidentMetaKeyPart(value) {
-  return String(value || '')
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
-}
-
-function buildIncidentMetaKeyCandidates(incident) {
-  const candidates = new Set();
-  const exactId = String(incident?.id || '').trim();
-  const explicitIncidentId = String(incident?.incidentId || '').trim();
-  const checkpointToken = normalizeIncidentMetaKeyPart(incident?.checkpointId);
-  const completedToken = normalizeIncidentMetaKeyPart(incident?.completedAt);
-
-  if (exactId) candidates.add(exactId);
-  if (explicitIncidentId) candidates.add(explicitIncidentId);
-  if (checkpointToken) {
-    candidates.add(`p-${checkpointToken}`);
-    if (completedToken) {
-      candidates.add(`p-${checkpointToken}-${completedToken}`);
-    }
-  }
-
-  return Array.from(candidates);
-}
-
-function resolveIncidentMetaRecord(incidentMeta = {}, incident = null) {
-  const candidates = buildIncidentMetaKeyCandidates(incident);
-  return candidates.reduce((resolvedMeta, candidateKey) => (
-    resolvedMeta || incidentMeta?.[candidateKey] || null
-  ), null);
-}
-
-function getIncidentStatus(selectedIncident, incidentMetaRecord) {
-  const metaStatus = incidentMetaRecord?.status;
-  if (metaStatus) return metaStatus;
-  if (selectedIncident?.isSOS) {
-    return selectedIncident.sosStatus === 'resolved' ? 'closed' : 'open';
-  }
-  return 'open';
-}
+import { getIncidentStatus, resolveIncidentMetaRecord } from '../../utils/incidentStatus';
 
 function createIncidentInfoState(incident) {
   return {
@@ -165,7 +123,7 @@ export default function IncidentDetailView({ isInline = false }) {
     selectedIncident, setSelectedIncident, incidentMeta, canManageIncident,
     canCloseIncident, handleAddProgress, handleCloseIncident, handleDeleteIncident, newProgress,
     setNewProgress, handlePhotoProgress, handleUpdateIncidentPhoto, handleAddIncidentDocumentation,
-    handleUpdateIncidentInfo,
+    handleUpdateIncidentInfo, pendingIncidentUpdateOpen, setPendingIncidentUpdateOpen,
   } = useIncidents();
   const { isAdmin, isPic } = useRole();
   const { setPreviewPhoto } = useReports();
@@ -180,6 +138,14 @@ export default function IncidentDetailView({ isInline = false }) {
     setIncidentInfoForm(createIncidentInfoState(selectedIncident));
     setActiveInfoEditor(null);
   }, [selectedIncident?.id]);
+
+  useEffect(() => {
+    if (!selectedIncident?.id) return;
+    if (pendingIncidentUpdateOpen !== selectedIncident.id) return;
+    setActiveTab('update');
+    setShowUpdateForm(true);
+    setPendingIncidentUpdateOpen(null);
+  }, [pendingIncidentUpdateOpen, selectedIncident?.id, setPendingIncidentUpdateOpen]);
 
   if (!selectedIncident) {
     if (isInline) return (

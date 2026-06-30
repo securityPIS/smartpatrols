@@ -2,16 +2,10 @@ import React from 'react';
 import { useIncidents, useShips } from '../context/AppContextRuntime';
 import { AlertOctagon, PlusCircle, User, Search, Ship, CalendarDays, Filter, FilterX } from 'lucide-react';
 import AsyncImage from '../components/AsyncImage';
+import { getIncidentStatus } from '../utils/incidentStatus';
 
 import IncidentDetailView from '../components/views/IncidentDetailView';
 import IncidentFormView from '../components/views/IncidentFormView';
-
-function getIncidentStatus(incident, incidentMeta) {
-  const metaStatus = incidentMeta[incident?.id]?.status;
-  if (metaStatus) return metaStatus;
-  if (incident?.isSOS) return incident.sosStatus === 'resolved' ? 'closed' : 'open';
-  return 'open';
-}
 
 const IncidentsPage = React.memo(function IncidentsPage() {
   const { visibleIncidents, openIncidentModal, closeIncidentModal, setSelectedIncident, incidentMeta, selectedIncident, showIncidentModal } = useIncidents();

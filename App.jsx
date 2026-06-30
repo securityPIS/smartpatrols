@@ -23,6 +23,7 @@ import NotificationsPage from './src/pages/NotificationsPage';
 import UsersPage from './src/pages/UsersPage';
 import ShipsPage from './src/pages/ShipsPage';
 import DailyReportPage from './src/pages/DailyReportPage';
+import PatrolFindingChoiceModal from './src/components/modals/PatrolFindingChoiceModal';
 import PatrolCameraModal from './src/components/modals/PatrolCameraModal';
 import PatrolFormModal from './src/components/modals/PatrolFormModal';
 import IncidentFormModal from './src/components/modals/IncidentFormModal';
@@ -99,7 +100,7 @@ function AppShell() {
   const { sessionUserId, isAuthSessionRestoring } = useAuth();
   const { currentPage, theme, showSettingsDropdown, setShowSettingsDropdown, showNotificationsDropdown, setShowNotificationsDropdown, confirmDialog, setConfirmDialog } = useUI();
   const { isAdmin, isPic } = useRole();
-  const { pendingPatrolCameraCapture, activePatrolItem } = usePatrol();
+  const { pendingPatrolCameraCapture, patrolFindingChoice, activePatrolItem } = usePatrol();
   const { showIncidentModal, selectedIncident } = useIncidents();
   const { showShipForm, showShipDocForm, showAssignPopup } = useShips();
   const { showUserForm, selectedUser } = useUsers();
@@ -155,6 +156,7 @@ function AppShell() {
     selectedIncident?.id || '',
     selectedReportDetail?.id || '',
     activePatrolItem?.id || '',
+    patrolFindingChoice?.checkpointId || '',
     showIncidentModal ? 'incident-open' : 'incident-closed',
     pendingPatrolCameraCapture ? 'camera-open' : 'camera-closed',
   ].join(':');
@@ -191,6 +193,7 @@ function AppShell() {
         <BottomNav />
       </div>
 
+      {patrolFindingChoice && <PatrolFindingChoiceModal />}
       {pendingPatrolCameraCapture && <PatrolCameraModal />}
       {activePatrolItem && <PatrolFormModal />}
       {showIncidentModal && <IncidentFormModal />}

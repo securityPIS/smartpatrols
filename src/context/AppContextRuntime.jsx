@@ -16,6 +16,7 @@ import { sanitizeEmail, sanitizeMultilineText, sanitizePhone, sanitizeText, sani
 import { loadImageFromDB, saveImageToDB } from '../utils/imageStore';
 import { saveImagePhotoSet } from '../utils/imageVariants';
 import { checkStorageQuota } from '../utils/storageQuota';
+import { getIncidentStatus, resolveIncidentMetaRecord } from '../utils/incidentStatus';
 import { assignUserToExclusiveShip, reconcileUserShipAssignments, removeUserFromShipAssignment, resolveExplicitOverride, shouldDeferPetugasFleetValidation } from '../utils/userManagement';
 import {
   addNativeNetworkStatusListener,
@@ -5166,6 +5167,8 @@ export function AppProvider({ children }) {
   const [weatherLoading, setWeatherLoading] = useState(() => !loadWeatherCache());
   const [submittingPatrolId, setSubmittingPatrolId] = useState(null);
   const [selectedIncident, setSelectedIncident] = useState(null);
+  const [patrolFindingChoice, setPatrolFindingChoice] = useState(null);
+  const [pendingIncidentUpdateOpen, setPendingIncidentUpdateOpen] = useState(null);
   const [incidentMeta, setIncidentMeta] = useState(() => Object.fromEntries(
     Object.entries(persistedState?.incidentMeta || {}).filter(([incidentId]) => (
       !initialDeletedRecords.incidents[incidentId]
@@ -5803,7 +5806,22 @@ export function AppProvider({ children }) {
     if (!currentUserRecord || !incident) return false;
     if (isAdmin || isPic) return true;
     if (!isPetugas) return false;
-    return Boolean(assignedShipForCurrentUser && incident.shipName === assignedShipForCurrentUser.name);
+    if (!assignedShipForCurrentUser) return false;
+
+    const assignedShipId = String(assignedShipForCurrentUser.id || '');
+    const incidentShipId = String(incident.shipId || '');
+    if (assignedShipId && incidentShipId) return assignedShipId === incidentShipId;
+
+    const assignedShipKey = createShipNameKey(assignedShipForCurrentUser.name);
+    const incidentShipKey = createShipNameKey(incident.shipName);
+    const targetShipKeys = ensureArray(incident.targetShipNames).map(createShipNameKey);
+    return Boolean(
+      assignedShipKey
+      && (
+        incidentShipKey === assignedShipKey
+        || targetShipKeys.includes(assignedShipKey)
+      )
+    );
   }, [assignedShipForCurrentUser, currentUserRecord, isAdmin, isPic, isPetugas]);
   const canCloseIncident = useCallback((incident) => Boolean(currentUserRecord && incident && (isAdmin || isPic)), [currentUserRecord, isAdmin, isPic]);
   const getCanonicalCheckpointRecord = useCallback((checkpoint) => (
@@ -7427,17 +7445,63 @@ export function AppProvider({ children }) {
         return incidentMap;
       }, new Map()).values(),
     )
-      .filter((incident) => incident?.deleted !== true && incidentMeta[incident.id]?.deleted !== true)
+      .filter((incident) => {
+        const metaRecord = resolveIncidentMetaRecord(incidentMeta, incident);
+        return incident?.deleted !== true && metaRecord?.deleted !== true;
+      })
       .sort((left, right) => getIncidentSortTimestamp(right) - getIncidentSortTimestamp(left))
   ), [historyPatrolIncidents, incidentMeta, incidentsData, operationalShipName, patrolIncidents, sosIncidents]);
-  const visibleIncidents = useMemo(() => (
-    isPetugas && assignedShipForCurrentUser
-      ? allIncidents.filter((incident) => (
-        incident.shipName === assignedShipForCurrentUser.name
-        || (Array.isArray(incident.targetShipNames) && incident.targetShipNames.includes(assignedShipForCurrentUser.name))
-      ))
-      : allIncidents
-  ), [allIncidents, assignedShipForCurrentUser, isPetugas]);
+  const visibleIncidents = useMemo(() => {
+    if (!isPetugas || !assignedShipForCurrentUser) return allIncidents;
+
+    const assignedShipId = String(assignedShipForCurrentUser.id || '');
+    const assignedShipKey = createShipNameKey(assignedShipForCurrentUser.name);
+    return allIncidents.filter((incident) => {
+      const incidentShipId = String(incident.shipId || '');
+      if (assignedShipId && incidentShipId && assignedShipId === incidentShipId) return true;
+
+      const incidentShipKey = createShipNameKey(incident.shipName);
+      const targetShipKeys = ensureArray(incident.targetShipNames).map(createShipNameKey);
+      return Boolean(
+        assignedShipKey
+        && (
+          incidentShipKey === assignedShipKey
+          || targetShipKeys.includes(assignedShipKey)
+        )
+      );
+    });
+  }, [allIncidents, assignedShipForCurrentUser, isPetugas]);
+
+  const isSameFindingShip = useCallback((incident, checkpoint) => {
+    const checkpointShipId = String(checkpoint?.shipId || operationalShip?.id || '');
+    const incidentShipId = String(incident?.shipId || '');
+    if (checkpointShipId && incidentShipId) return incidentShipId === checkpointShipId;
+
+    const checkpointShipKey = createShipNameKey(checkpoint?.shipName || operationalShipName || '');
+    const incidentShipKey = createShipNameKey(incident?.shipName || '');
+    return Boolean(checkpointShipKey && incidentShipKey && checkpointShipKey === incidentShipKey);
+  }, [operationalShip?.id, operationalShipName]);
+
+  const getOpenFindingsForCheckpoint = useCallback((checkpoint) => {
+    if (!checkpoint) return [];
+    const cpId = String(checkpoint.id || '');
+    const cpNameKey = createCheckpointNameKey(checkpoint.name || '');
+
+    return allIncidents.filter((incident) => {
+      const metaRecord = resolveIncidentMetaRecord(incidentMeta, incident);
+      if (getIncidentStatus(incident, metaRecord) !== 'open') return false;
+      if (!canManageIncident(incident)) return false;
+      if (!isSameFindingShip(incident, checkpoint)) return false;
+
+      const byCheckpoint = Boolean(
+        incident.checkpointId && cpId && String(incident.checkpointId) === cpId,
+      );
+      const byManualLocation = !incident.isPatrol && !incident.isSOS
+        && createCheckpointNameKey(incident.location || '') === cpNameKey;
+
+      return byCheckpoint || byManualLocation;
+    });
+  }, [allIncidents, canManageIncident, incidentMeta, isSameFindingShip]);
   useEffect(() => {
     if (!selectedIncident?.id) return;
 
@@ -8389,6 +8453,38 @@ export function AppProvider({ children }) {
   }, [activeShiftGuardSnapshot, currentShiftMeta.key, currentUser, currentUserRecord, operationalShip?.id, operationalShipName, requestCloudSync, showTrustedTimeGateDialog]);
 
   // Patrol handlers
+  const closePatrolFindingChoice = useCallback(() => {
+    setPatrolFindingChoice(null);
+  }, []);
+
+  const chooseNewPatrolFinding = useCallback(() => {
+    const checkpointId = patrolFindingChoice?.checkpointId;
+    setPatrolFindingChoice(null);
+    if (!checkpointId) return;
+    setPendingPatrolCameraCapture({ id: checkpointId, type: 'temuan' });
+  }, [patrolFindingChoice?.checkpointId]);
+
+  const openFindingUpdate = useCallback((finding) => {
+    if (!finding?.id || !canManageIncident(finding)) return;
+
+    setPatrolFindingChoice(null);
+    setActiveForms({});
+    setPendingPatrolCameraCapture(null);
+    setSelectedReportDetail(null);
+    setShowIncidentModal(false);
+    setIncidentForm(createIncidentFormState());
+    setSelectedHistoryId(null);
+    setPatrolTab('checkpoint');
+    setSearchQuery('');
+
+    if (!finding.isPatrol) {
+      setCurrentPage('incidents');
+    }
+
+    setSelectedIncident(finding);
+    setPendingIncidentUpdateOpen(finding.id);
+  }, [canManageIncident]);
+
   const handleActionClick = useCallback(async (id, type) => {
     if (!canPatrolCurrentShip) return;
     if (showTrustedTimeGateDialog()) return;
@@ -8397,8 +8493,21 @@ export function AppProvider({ children }) {
       return;
     }
 
+    if (type === 'temuan') {
+      const checkpoint = checkpoints.find(item => String(item?.id) === String(id));
+      const openFindings = getOpenFindingsForCheckpoint(checkpoint);
+      if (openFindings.length > 0) {
+        setPatrolFindingChoice({
+          checkpointId: id,
+          checkpointName: checkpoint?.name || '',
+          openFindings,
+        });
+        return;
+      }
+    }
+
     setPendingPatrolCameraCapture({ id, type });
-  }, [canPatrolCurrentShip, isCurrentShiftStatusCompleted, showTrustedTimeGateDialog]);
+  }, [canPatrolCurrentShip, checkpoints, getOpenFindingsForCheckpoint, isCurrentShiftStatusCompleted, showTrustedTimeGateDialog]);
   const handleFormChange = useCallback((id, field, value) => { setActiveForms(prev => ({ ...prev, [id]: { ...prev[id], [field]: value } })); }, []);
   const handlePhotoUpload = useCallback(async (id, isIncident = false, options = {}) => {
     const useCameraOnly = Boolean(options.cameraOnly);
@@ -11598,6 +11707,7 @@ export function AppProvider({ children }) {
     canAddTemporaryPatrolNode,
     shouldForcePatrolCameraCapture,
     pendingPatrolCameraCapture,
+    patrolFindingChoice,
     submittingPatrolId,
     completedCount,
     totalCount,
@@ -11607,6 +11717,9 @@ export function AppProvider({ children }) {
     openShiftStatusModal,
     closeShiftStatusModal,
     handleSaveCurrentShiftStatus,
+    closePatrolFindingChoice,
+    chooseNewPatrolFinding,
+    openFindingUpdate,
     handleActionClick,
     handleFormChange,
     handlePhotoUpload,
@@ -11629,7 +11742,9 @@ export function AppProvider({ children }) {
     checkpoints,
     closeShiftStatusModal,
     closePatrolCameraCapture,
+    closePatrolFindingChoice,
     completedCount,
+    chooseNewPatrolFinding,
     currentShiftStatusRecord,
     currentShiftMeta,
     currentShiftSchedule,
@@ -11648,7 +11763,9 @@ export function AppProvider({ children }) {
     isShiftStatusRequired,
     newCustomNode,
     openShiftStatusModal,
+    openFindingUpdate,
     patrolTab,
+    patrolFindingChoice,
     pendingPatrolCameraCapture,
     progressPercentage,
     searchQuery,
@@ -11755,6 +11872,8 @@ export function AppProvider({ children }) {
     incidentLocationOptions,
     selectedIncident,
     setSelectedIncident,
+    pendingIncidentUpdateOpen,
+    setPendingIncidentUpdateOpen,
     openIncidentModal,
     closeIncidentModal,
     handleSubmitIncident,
@@ -11787,6 +11906,7 @@ export function AppProvider({ children }) {
     incidentMeta,
     incidentsData,
     newProgress,
+    pendingIncidentUpdateOpen,
     openIncidentModal,
     selectedIncident,
     showIncidentModal,
