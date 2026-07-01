@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ringkasan Temuan · 18 Jun – 1 Jul 2026 (Light)</title>
+<!--
+  VERSI LIGHT MODE — pratinjau desain yang sama dengan file .pptx
+  (executive-findings-18jun-01jul-2026-light.pptx).
+  Data: 33 temuan substantif 18 Jun–1 Jul 2026 (26 open / 7 closed), SOS = 0.
+-->
+<style>
+  :root{
+    --bg:#f4f6fb; --card:#ffffff; --border:#dde4ee; --ink:#0f172a; --muted:#64748b;
+    --track:#ecf1f8; --cyan:#0e7490; --cyanL:#06b6d4; --amber:#d97706; --rose:#e11d48;
+    --emerald:#059669; --violet:#7c3aed; --amberbg:#fff7e6; --greenbg:#ecfdf3; --slatebg:#f1f5fb;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#e7ebf3;color:var(--ink);
+    font-family:"Inter","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+    display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;-webkit-font-smoothing:antialiased;}
+  .slide{position:relative;width:1280px;height:720px;background:var(--bg);
+    border:1px solid var(--border);border-radius:18px;overflow:hidden;
+    box-shadow:0 30px 90px rgba(15,23,42,.18);padding:32px 40px 22px;display:flex;flex-direction:column;}
+  .slide::before{content:"";position:absolute;left:0;top:0;height:6px;width:100%;
+    background:linear-gradient(90deg,var(--cyanL) 0 25%,var(--violet) 25% 50%,var(--amber) 50% 75%,var(--rose) 75% 100%);}
+
+  header{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-top:4px}
+  .eyebrow{font-size:11px;letter-spacing:.28em;font-weight:800;color:var(--cyan);text-transform:uppercase}
+  h1{font-size:29px;font-weight:800;letter-spacing:-.01em;margin-top:6px;line-height:1.05;color:var(--ink)}
+  h1 .accent{color:var(--amber)}
+  .brand{text-align:right}
+  .brand .meta{font-size:11px;color:var(--muted);line-height:1.5}
+  .brand .meta b{color:var(--ink)}
+  .brand{display:flex;gap:12px;align-items:flex-start}
+  .logo{width:46px;height:46px;border-radius:12px;flex:none;background:#e8f3f7;border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--cyan);font-size:16px;}
+
+  .headline{margin-top:13px;background:var(--amberbg);border:1px solid #f3d793;border-radius:12px;
+    padding:11px 16px;font-size:14px;color:#7c4a03;font-weight:600;display:flex;gap:10px;align-items:center;}
+  .headline .dot{width:12px;height:12px;border-radius:99px;background:var(--amber);flex:none}
+  .headline b{color:var(--ink)}
+  .headline .rose{color:var(--rose)} .headline .em{color:var(--emerald)}
+
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:13px}
+  .kpi{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:13px 15px 13px 18px;position:relative;
+    box-shadow:0 6px 18px rgba(15,23,42,.05)}
+  .kpi .tick{position:absolute;left:10px;top:14px;bottom:14px;width:5px;border-radius:99px}
+  .kpi .label{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:800}
+  .kpi .num{font-size:34px;font-weight:800;line-height:1;margin-top:8px;letter-spacing:-.02em}
+  .kpi .sub{font-size:10.5px;color:var(--muted);margin-top:8px}
+  .kpi.total .num{color:var(--ink)} .kpi.total .tick{background:var(--cyan)}
+  .kpi.open .num{color:var(--amber)} .kpi.open .tick{background:var(--amber)}
+  .kpi.closed .num{color:var(--emerald)} .kpi.closed .tick{background:var(--emerald)}
+  .kpi.sos .num{color:var(--rose)} .kpi.sos .tick{background:var(--rose)}
+
+  .body{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:18px;margin-top:13px;flex:1;min-height:0}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:14px 16px;display:flex;flex-direction:column;min-height:0;
+    box-shadow:0 6px 18px rgba(15,23,42,.05)}
+  .card h3{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);font-weight:800;display:flex;align-items:center;gap:8px}
+  .card h3 .ic{width:6px;height:14px;border-radius:3px;background:var(--cyan);display:inline-block}
+  .card h3.mt{margin-top:16px}
+
+  .bars{margin-top:11px;display:flex;flex-direction:column;gap:10px}
+  .bars.tight{gap:7px}
+  .bar .row{display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px;color:var(--ink);font-weight:700}
+  .track{height:9px;border-radius:99px;background:var(--track);overflow:hidden}
+  .fill{height:100%;border-radius:99px;width:calc(var(--val,0)*1%)}
+  .fill.amber{background:var(--amber)} .fill.cyan{background:var(--cyan)} .fill.rose{background:var(--rose)}
+  .fill.violet{background:var(--violet)} .fill.emerald{background:var(--emerald)}
+
+  .openlist{margin-top:11px;display:flex;flex-direction:column;gap:9px}
+  .item{display:flex;gap:11px;align-items:center;background:var(--slatebg);border:1px solid var(--border);border-radius:12px;padding:9px 12px}
+  .item .rank{width:26px;height:26px;border-radius:8px;flex:none;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff}
+  .r1{background:var(--rose)} .r2{background:var(--amber)} .r3{background:var(--cyan)} .r4{background:var(--violet)}
+  .item .txt{min-width:0;flex:1}
+  .item .txt .t{font-size:12.5px;font-weight:800;color:var(--ink);line-height:1.2}
+  .item .txt .s{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.3}
+  .item .cnt{text-align:right;white-space:nowrap}
+  .item .cnt b{display:block;color:var(--ink);font-size:20px;font-weight:800;line-height:1}
+  .item .cnt small{font-size:8px;color:var(--muted);letter-spacing:.1em;font-weight:700}
+
+  footer{margin-top:12px;display:flex;gap:16px;align-items:stretch}
+  .reco{flex:1;background:var(--greenbg);border:1px solid #bfe8d4;border-radius:13px;padding:11px 16px}
+  .reco .lab{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--emerald);font-weight:800}
+  .reco .txt{font-size:11.5px;color:#26443a;margin-top:5px;line-height:1.45}
+  .reco .txt b{color:var(--ink)}
+  .pageno{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:64px;background:var(--card);
+    border:1px solid var(--border);border-radius:13px;color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.08em;line-height:1.5}
+  .pageno b{color:var(--ink);font-size:12px}
+  .foot-note{margin-top:8px;font-size:8.5px;color:#94a3b8}
+
+  @media print{@page{size:1280px 720px;margin:0}body{padding:0;background:#fff}.slide{box-shadow:none;border-radius:0;border:none}.hint{display:none!important}}
+  .hint{position:fixed;bottom:10px;left:0;right:0;text-align:center;color:#94a3b8;font-size:11px}
+</style>
+</head>
+<body>
+  <section class="slide">
+    <header>
+      <div>
+        <div class="eyebrow">Laporan Operasional · Keamanan Armada (PAM)</div>
+        <h1>Ringkasan <span class="accent">Temuan</span> — 18 Jun s/d 1 Jul 2026</h1>
+      </div>
+      <div class="brand">
+        <div class="meta"><b>SmartPatrol</b><br />Armada: <b>4 kapal (JKT02·04·05, BPP01)</b><br />Disusun: <b>1 Juli 2026</b></div>
+        <div class="logo">SP</div>
+      </div>
+    </header>
+
+    <div class="headline">
+      <span class="dot"></span>
+      <span>Tercatat <b>33 temuan substantif</b> — <b class="rose">26 masih OPEN (79%)</b>, hanya
+      <b class="em">7 selesai (21%)</b>. Didominasi <b>Fire Hose Box / APAR kosong (11 titik)</b>
+      di JKT04 &amp; JKT05. Tidak ada SOS.</span>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi total"><span class="tick"></span><div class="label">Total Temuan</div><div class="num">33</div><div class="sub">Substantif · dari 91 record</div></div>
+      <div class="kpi open"><span class="tick"></span><div class="label">Masih Open</div><div class="num">26</div><div class="sub">79% belum tuntas</div></div>
+      <div class="kpi closed"><span class="tick"></span><div class="label">Selesai (Closed)</div><div class="num">7</div><div class="sub">21% tingkat penyelesaian</div></div>
+      <div class="kpi sos"><span class="tick"></span><div class="label">SOS Darurat</div><div class="num">0</div><div class="sub">Tidak ada pada periode ini</div></div>
+    </div>
+
+    <div class="body">
+      <!-- Col 1 -->
+      <div class="card">
+        <h3><span class="ic"></span>Status Penyelesaian</h3>
+        <div class="bars">
+          <div class="bar"><div class="row"><span>Masih Open</span><span>26</span></div><div class="track"><div class="fill amber" style="--val:79"></div></div></div>
+          <div class="bar"><div class="row"><span>Selesai (Closed)</span><span>7</span></div><div class="track"><div class="fill emerald" style="--val:21"></div></div></div>
+        </div>
+        <h3 class="mt"><span class="ic"></span>Temuan per Kapal</h3>
+        <div class="bars tight">
+          <div class="bar"><div class="row"><span>JKT05</span><span>11</span></div><div class="track"><div class="fill amber" style="--val:100"></div></div></div>
+          <div class="bar"><div class="row"><span>BPP01</span><span>11</span></div><div class="track"><div class="fill violet" style="--val:100"></div></div></div>
+          <div class="bar"><div class="row"><span>JKT04</span><span>9</span></div><div class="track"><div class="fill amber" style="--val:82"></div></div></div>
+          <div class="bar"><div class="row"><span>JKT02</span><span>2</span></div><div class="track"><div class="fill cyan" style="--val:18"></div></div></div>
+        </div>
+      </div>
+
+      <!-- Col 2 -->
+      <div class="card">
+        <h3><span class="ic"></span>Kategori Temuan Open</h3>
+        <div class="bars tight">
+          <div class="bar"><div class="row"><span>APAR / Fire Hose Box kosong</span><span>11</span></div><div class="track"><div class="fill rose" style="--val:100"></div></div></div>
+          <div class="bar"><div class="row"><span>Genangan air / oli</span><span>5</span></div><div class="track"><div class="fill amber" style="--val:45"></div></div></div>
+          <div class="bar"><div class="row"><span>Penerangan / lampu surya</span><span>4</span></div><div class="track"><div class="fill cyan" style="--val:36"></div></div></div>
+          <div class="bar"><div class="row"><span>Navigasi / peralatan hilang</span><span>3</span></div><div class="track"><div class="fill violet" style="--val:27"></div></div></div>
+          <div class="bar"><div class="row"><span>Utilitas &amp; logistik</span><span>3</span></div><div class="track"><div class="fill emerald" style="--val:27"></div></div></div>
+        </div>
+        <h3 class="mt"><span class="ic"></span>Tren Temuan (Substantif)</h3>
+        <div class="bars tight">
+          <div class="bar"><div class="row"><span>18–21 Jun</span><span>4</span></div><div class="track"><div class="fill cyan" style="--val:17"></div></div></div>
+          <div class="bar"><div class="row"><span>22–28 Jun</span><span>24</span></div><div class="track"><div class="fill amber" style="--val:100"></div></div></div>
+          <div class="bar"><div class="row"><span>29 Jun–1 Jul</span><span>5</span></div><div class="track"><div class="fill cyan" style="--val:21"></div></div></div>
+        </div>
+      </div>
+
+      <!-- Col 3 -->
+      <div class="card">
+        <h3><span class="ic"></span>Sorotan Prioritas — Masih Open</h3>
+        <div class="openlist">
+          <div class="item"><span class="rank r1">1</span>
+            <div class="txt"><div class="t">Fire Hose Box / APAR kosong</div>
+              <div class="s">Nozzle &amp; selang hilang di banyak titik — JKT04 (6) &amp; JKT05 (5). Risiko kepatuhan keselamatan kebakaran.</div></div>
+            <div class="cnt"><b>11</b><small>TITIK</small></div></div>
+          <div class="item"><span class="rank r2">2</span>
+            <div class="txt"><div class="t">Genangan air &amp; oli — Engine / Pump Room</div>
+              <div class="s">BPP01 Engine Room ±60 cm air bercampur oli; JKT04 Pump Room ±10 cm.</div></div>
+            <div class="cnt"><b>5</b><small>TEMUAN</small></div></div>
+          <div class="item"><span class="rank r3">3</span>
+            <div class="txt"><div class="t">Penerangan / lampu panel surya rusak</div>
+              <div class="s">BPP01 &amp; JKT04 — penerangan malam sementara pakai senter.</div></div>
+            <div class="cnt"><b>4</b><small>TEMUAN</small></div></div>
+          <div class="item"><span class="rank r4">4</span>
+            <div class="txt"><div class="t">Peralatan navigasi / keamanan hilang</div>
+              <div class="s">JKT05: VHF &amp; ECDIS kosong, part cargo pump diambil, pintu store terbuka.</div></div>
+            <div class="cnt"><b>3</b><small>TEMUAN</small></div></div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="reco">
+        <div class="lab">Tindak Lanjut &amp; Rekomendasi</div>
+        <div class="txt"><b>Sudah dilakukan:</b> seluruh temuan terdokumentasi &amp; dilaporkan; 7 temuan ditutup.
+          <b>Butuh keputusan manajemen:</b> (1) pengadaan nozzle &amp; selang untuk 11 Fire Hose Box kosong (JKT04/JKT05);
+          (2) penanganan genangan air-oli Engine/Pump Room (BPP01); (3) penggantian lampu panel surya BPP01 &amp; JKT04.</div>
+      </div>
+      <div class="pageno">RAHASIA<br /><b>1 / 1</b></div>
+    </footer>
+
+    <div class="foot-note">Sumber: tabel incidents SmartPatrol, 18 Jun–1 Jul 2026. Basis 33 temuan substantif (deskripsi riil); 52 checkpoint kosong &amp; 6 titik “missed” dikeluarkan. Semua sumber = manual; SOS = 0.</div>
+  </section>
+  <div class="hint">Versi light-mode. File .pptx tersedia terpisah (editable).</div>
+</body>
+</html>
