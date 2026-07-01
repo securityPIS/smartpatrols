@@ -9766,11 +9766,17 @@ export function AppProvider({ children }) {
       photoUrl: stripLocalAssetUrlSync(localPhotoUrl),
     };
     const baseMeta = incidentMeta[incidentId] || {};
+    // Pertahankan status closed saat menambah progress. Di device yang incidentMeta-nya
+    // berasal dari hydrate cloud, baseMeta.status bisa undefined (cloud tidak menyimpan
+    // status di incidentMeta), sehingga fallback `|| 'open'` lama menimpa balik temuan
+    // yang sudah ditutup admin ke open. getIncidentStatus jatuh ke incident.status (baris
+    // durable = 'closed') agar update progress tidak pernah mereopen temuan.
+    const preservedStatus = getIncidentStatus(incident, baseMeta);
     const nextMeta = mergeIncidentMetaCollection({
       [incidentId]: baseMeta,
     }, {
       [incidentId]: {
-        status: baseMeta.status || 'open',
+        status: preservedStatus,
         progress: [progressRecord],
       },
     })[incidentId];
@@ -9778,7 +9784,7 @@ export function AppProvider({ children }) {
       [incidentId]: baseMeta,
     }, {
       [incidentId]: {
-        status: baseMeta.status || 'open',
+        status: preservedStatus,
         progress: [domainProgressRecord],
       },
     })[incidentId];
@@ -9786,7 +9792,7 @@ export function AppProvider({ children }) {
     // Simpan state dengan URL lokal dulu (instan muncul di UI)
     setIncidentMeta(prev => mergeIncidentMetaCollection(prev, {
       [incidentId]: {
-        status: prev[incidentId]?.status || 'open',
+        status: preservedStatus,
         progress: [progressRecord],
       },
     }));
@@ -9862,11 +9868,14 @@ export function AppProvider({ children }) {
       photoUrl: stripLocalAssetUrlSync(photoUrlFromCamera),
     };
     const baseMeta = incidentMeta[incidentId] || {};
+    // Sama seperti handleAddProgress: pertahankan status closed lewat getIncidentStatus
+    // agar menambah dokumentasi ke temuan yang sudah ditutup tidak mereopen ke open.
+    const preservedStatus = getIncidentStatus(incident, baseMeta);
     const domainMeta = mergeIncidentMetaCollection({
       [incidentId]: baseMeta,
     }, {
       [incidentId]: {
-        status: baseMeta.status || 'open',
+        status: preservedStatus,
         documentation: [domainDocumentationRecord],
       },
     })[incidentId];
@@ -9875,7 +9884,7 @@ export function AppProvider({ children }) {
       ...previousMeta,
       [incidentId]: {
         ...previousMeta[incidentId],
-        status: previousMeta[incidentId]?.status || 'open',
+        status: preservedStatus,
         documentation: [
           documentationRecord,
           ...(previousMeta[incidentId]?.documentation || []),

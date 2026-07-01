@@ -805,10 +805,19 @@ function buildStatePayload(
   const incidentMeta = {};
   const incidentsData = incidentRows.map((row) => {
     const incident = incidentRowToState(row);
-    incidentMeta[incident.id] = {
+    const metaEntry = {
       progress: row.payload?.progress || [],
       documentation: row.payload?.documentation || [],
     };
+    // Bawa status non-open (mis. 'closed') dari baris durable ke incidentMeta agar device
+    // yang hydrate dari cloud tahu temuan sudah ditutup. Tanpa ini incidentMeta.status
+    // selalu undefined lintas-device sehingga update progress/dokumentasi mereopen temuan.
+    // Status 'open' sengaja tidak dibawa supaya emit cloud lama tidak menimpa balik close
+    // optimistik lokal yang belum sempat round-trip ke baris durable.
+    if (incident.status && incident.status !== 'open') {
+      metaEntry.status = incident.status;
+    }
+    incidentMeta[incident.id] = metaEntry;
     return incident;
   });
 
