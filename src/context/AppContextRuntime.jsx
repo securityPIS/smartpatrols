@@ -2189,17 +2189,20 @@ function isCheckpointResetRecord(checkpoint) {
 function shouldApplyPatrolReportTombstoneToCheckpoint(checkpoint, tombstone) {
   if (!checkpoint || checkpoint.status !== 'completed') return false;
 
-  const tombstoneShiftKey = String(tombstone?.shiftKey || '');
-  const checkpointShiftKey = String(checkpoint?.shiftKey || '');
-  // Tombstone dengan shift_key sama persis = penghapusan untuk shift yang sama -> reset.
-  if (tombstoneShiftKey && checkpointShiftKey === tombstoneShiftKey) return true;
-
-  // Tombstone TANPA shift_key (natural-key dari RPC delete, shift_key=NULL) ATAU beda shift:
-  // HANYA reset bila timestamp patrol LEBIH LAMA dari waktu hapus admin, supaya laporan BARU
-  // tidak ikut hilang. Tanpa guard ini, tombstone natural (shift_key kosong) cocok TANPA BATAS
-  // WAKTU sehingga SETIAP laporan baru (aman/temuan, shift mana pun) di checkpoint yang pernah
-  // dihapus admin ikut ter-reset & lenyap -> akar "user submit laporan malah hilang".
+  // Hanya laporan TEMUAN yang bisa dihapus admin lewat tombstone. Laporan AMAN tidak pernah
+  // ikut direset walau tombstone kebetulan cocok (natural key / shift_key sama). Ini mencegah
+  // laporan aman yang baru di-submit ikut hilang saat admin menghapus SATU temuan pada
+  // checkpoint yang sama -> gejala "laporan JKT03 shift 2 hilang sebagian".
   if (checkpoint?.resultType !== 'temuan') return false;
+
+  // Guard waktu WAJIB untuk SEMUA kasus, termasuk shift_key yang sama persis. Ini mencermin
+  // trigger DB block_tombstoned_patrol_report (migrasi 20260531120000) yang hanya memblokir
+  // re-upsert BASI (completedAt <= deleted_at). Laporan yang dibuat SETELAH admin menghapus
+  // (checkpointAtMs > deletedAtMs) adalah patrol BARU yang sah dan HARUS tetap tampil.
+  //
+  // Versi lama mereset TANPA SYARAT begitu shift_key sama persis, sehingga submit ulang di
+  // shift yang sama langsung hilang lagi setiap kali poll tombstone berjalan (mis. saat app
+  // resume dari kamera "foto kondisi personil") -> akar "laporan yang sudah di-submit hilang".
   const deletedAtMs = new Date(tombstone?.deletedAt || '').getTime();
   const checkpointAtMs = getCheckpointMediaTimestamp(checkpoint);
   return Number.isFinite(deletedAtMs)
@@ -7091,6 +7094,11 @@ export function AppProvider({ children }) {
           shipChanged = true;
           return resetCheckpointForShift(checkpoint, {
             shiftKey: checkpoint?.shiftKey || tombstone.shiftKey || null,
+            // Pakai waktu hapus admin (deleted_at) sebagai timestamp reset, BUKAN "sekarang".
+            // Dengan begitu laporan patrol BARU (completedAt > deletedAt) selalu MENANG merge
+            // terhadap record reset ini, dan poll tombstone berkala (30 dtk) tidak terus
+            // "meremajakan" reset sehingga menutupi submit ulang yang sah sepanjang shift.
+            updatedAt: tombstone?.deletedAt || getTrustedDate().toISOString(),
             pendingOrigin: 'manual-reset',
           });
         });

@@ -146,23 +146,38 @@ where shift_key = '2026-07-02|shift-2-active' and ship_name ilike '%JKT%03%';
 Jika query (1) menghasilkan baris dengan `deleted_at` hari ini → diagnosa di atas terkonfirmasi;
 checkpoint pada kolom `checkpoint_id` itulah "sebagian" laporan yang hilang.
 
-## Rekomendasi perbaikan (belum diimplementasikan — menunggu konfirmasi)
+## Perbaikan yang sudah diimplementasikan
 
-1. **Persempit RPC** `admin_delete_patrol_report_findings`: hapus hanya baris temuan yang
-   dimaksud — prioritas `id` (uuid); jika pakai natural key, wajib difilter `shift_key`
-   milik temuan itu dan `result_type = 'temuan'`. Jangan pernah menghapus baris AMAN atau
-   baris shift lain.
-2. **Samakan guard klien dengan trigger DB**: pada cabang same-shift di
-   `shouldApplyPatrolReportTombstoneToCheckpoint`, tambahkan guard waktu
-   `checkpointAtMs <= deletedAtMs` (dan pertimbangkan hanya untuk `resultType === 'temuan'`)
-   supaya laporan yang dibuat SETELAH penghapusan tidak ikut direset. Perbarui juga
-   `tests/pages/patrol-report-tombstone-block-stale-only.test.mjs` yang saat ini mengunci
-   perilaku lama.
+Ketiga lapis di bawah sudah diterapkan pada branch ini (lihat commit fix, bukan commit analisa):
+
+1. **Persempit RPC** `admin_delete_patrol_report_findings` — migrasi baru
+   `supabase/migrations/20260702000000_narrow_admin_delete_patrol_findings.sql`. Sekarang:
+   - MODE A (presisi): bila `p_firestore_id` (uuid baris) ada → hapus/tombstone HANYA baris itu.
+     Jalur natural key dimatikan (`v_firestore_uuid is null`) sehingga baris shift lain aman.
+   - MODE B (fallback tanpa uuid): hapus HANYA baris `result_type = 'temuan'` pada
+     `(ship_id, checkpoint_id)`. Baris AMAN tidak pernah ikut terhapus.
+   - Tombstone natural (`shift_key = NULL`) tetap ditulis untuk anti-resurrection, tapi kini
+     aman karena diblokir trigger secara time-guarded dan guard klien juga time-guarded.
+
+2. **Samakan guard klien dengan trigger DB** — `shouldApplyPatrolReportTombstoneToCheckpoint`
+   (`src/context/AppContextRuntime.jsx`). Cabang same-shift tanpa syarat dihapus; sekarang
+   SEMUA kasus wajib `resultType === 'temuan'` DAN `checkpointAtMs <= deletedAtMs`. Laporan
+   AMAN maupun laporan yang dibuat SETELAH penghapusan tidak lagi ikut direset.
+
 3. **Reset tombstone pakai `updatedAt = deletedAt`** (bukan "sekarang") di
-   `applyPatrolReportTombstones`, agar laporan baru yang lebih muda dari waktu hapus selalu
-   menang merge dan poll 30 detik tidak terus "meremajakan" record reset.
-4. (Sekunder) Efek re-sync massal `AppContextRuntime.jsx:10763-10780` menulis ulang semua
-   checkpoint completed dari salinan lokal tiap device — device yang salinannya belum punya
-   foto (media masih `uploading`) bisa menimpa `photo_url` row milik petugas lain (race
-   dengan tulisan `ready`). Layak diperbaiki terpisah (tulis hanya laporan milik sendiri /
-   bandingkan `client_updated_at_ms` sebelum menimpa).
+   `applyPatrolReportTombstones` (`src/context/AppContextRuntime.jsx`), agar laporan baru
+   (completedAt > deletedAt) selalu menang merge dan poll 30 detik tidak terus meremajakan
+   record reset yang menutupi submit ulang yang sah.
+
+Test yang mengunci perilaku lama (`tests/pages/patrol-report-tombstone-block-stale-only.test.mjs`)
+sudah diperbarui ke perilaku benar dan ditambah assertion untuk migrasi baru. Seluruh 125 test
+halaman + 27 test security hijau, dan `npm run build` sukses.
+
+## Catatan lanjutan (di luar scope, belum dikerjakan)
+
+- (Sekunder) Efek re-sync massal `AppContextRuntime.jsx` (efek yang me-loop
+  `patrolReportSubscriptionTargets` lalu memanggil `syncPatrolReportToDomain`) menulis ulang
+  semua checkpoint completed dari salinan lokal tiap device — device yang salinannya belum
+  punya foto (media masih `uploading`) berpotensi menimpa `photo_url` row milik petugas lain
+  (race dengan tulisan `ready`). Layak diperbaiki terpisah (tulis hanya laporan milik sendiri /
+  bandingkan `client_updated_at_ms` sebelum menimpa).
