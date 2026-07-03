@@ -53,6 +53,7 @@ import {
 } from '../services/backend/cloudState';
 import {
   deletePatrolReport,
+  queuePatrolReportForRetry,
   savePatrolReport,
   subscribeToPatrolReports,
   subscribeToPatrolReportTombstones,
@@ -4268,6 +4269,9 @@ function compactCheckpointRecordForCloudSync(record = {}) {
 // di device lain sampai akarnya diperbaiki.
 function toPatrolSyncStatus(result) {
   if (!result || result.synced || result.unchanged) return { syncStatus: 'ok' };
+  if (result.queuedForRetry || result.syncDeferredReason) {
+    return { syncStatus: 'queued', reason: result.syncDeferredReason || 'retry' };
+  }
   if (result.offline) return { syncStatus: 'offline' };
   if (result.syncError) return { syncStatus: 'blocked', error: result.syncError };
   if (result.pendingOfflineSync) return { syncStatus: 'offline' };
@@ -6426,6 +6430,16 @@ export function AppProvider({ children }) {
       });
       return;
     }
+    if (status.syncStatus === 'queued') {
+      setConfirmDialog({
+        title: 'Laporan masuk antrean sinkronisasi',
+        message: 'Laporan tersimpan di perangkat dan sudah masuk antrean kirim ulang. Aplikasi akan mengirim otomatis begitu sesi cloud pulih, tanpa perlu submit ulang.',
+        confirmText: 'MENGERTI',
+        isAlert: true,
+        onConfirm: () => {},
+      });
+      return;
+    }
     if (status.syncStatus === 'offline') {
       setConfirmDialog({
         title: 'Sedang offline',
@@ -6503,11 +6517,6 @@ export function AppProvider({ children }) {
       if (options.notifyOnError) notifyPatrolSyncIssue(status);
       return status;
     }
-    if (!hasOperationalCloudAccess) {
-      const status = { syncStatus: 'no-access' };
-      if (options.notifyOnError) notifyPatrolSyncIssue(status);
-      return status;
-    }
     if (isCheckpointResetRecord(checkpoint) && !options.allowResetSync) {
       return { syncStatus: 'reset-skipped' };
     }
@@ -6541,6 +6550,32 @@ export function AppProvider({ children }) {
     });
 
     if (!pendingReport) return { syncStatus: 'invalid' };
+
+    if (!hasOperationalCloudAccess) {
+      const isDefinitiveAccessDenied = Boolean(
+        isFirebaseAuthEnabled
+        && firebaseAuthUid
+        && authAccessResolvedUid === firebaseAuthUid
+        && !authAccessEnabled
+        && authAccessOfflineUid !== firebaseAuthUid,
+      );
+      const canQueueForAccessRecovery = Boolean(currentUserRecord?.id || sessionUserId)
+        && !isDefinitiveAccessDenied;
+
+      if (!canQueueForAccessRecovery) {
+        const status = { syncStatus: 'no-access' };
+        if (options.notifyOnError) notifyPatrolSyncIssue(status);
+        return status;
+      }
+
+      const queuedResult = await queuePatrolReportForRetry(pendingReport, {
+        clientUpdatedAt: Date.now(),
+        reason: 'cloud-access-pending',
+      });
+      const queuedStatus = toPatrolSyncStatus(queuedResult);
+      if (options.notifyOnError) notifyPatrolSyncIssue(queuedStatus);
+      return queuedStatus;
+    }
 
     const writeIfChanged = async (report) => {
       const serializedReport = serializeSharedStateSnapshot(report);
@@ -6597,7 +6632,7 @@ export function AppProvider({ children }) {
     } finally {
       patrolReportDomainUploadInFlightRef.current.delete(reportKey);
     }
-  }, [hasOperationalCloudAccess, isOffline, notifyPatrolSyncIssue, uploadPatrolReportDomainMedia]);
+  }, [authAccessEnabled, authAccessOfflineUid, authAccessResolvedUid, currentUserRecord?.id, firebaseAuthUid, hasOperationalCloudAccess, isOffline, notifyPatrolSyncIssue, sessionUserId, uploadPatrolReportDomainMedia]);
   // Unggah ulang foto laporan patroli yang masih lokal (idb://) ke Storage saat online,
   // lalu tulis SEKALI ke patrol_reports dengan URL https. Dipakai untuk laporan yang
   // disubmit offline (fotonya belum sempat naik) — tanpa ini laporan muncul di device

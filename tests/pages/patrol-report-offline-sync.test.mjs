@@ -34,7 +34,7 @@ function extractSyncPatrolReportToDomain(source) {
   const startIndex = source.indexOf('const syncPatrolReportToDomain = useCallback');
   assert.notEqual(startIndex, -1, 'syncPatrolReportToDomain harus ada di runtime');
   // Cukup ambil potongan awal fungsi sampai penjaga + skip media.
-  return source.slice(startIndex, startIndex + 2500);
+  return source.slice(startIndex, startIndex + 4200);
 }
 
 test('syncPatrolReportToDomain TIDAK berhenti saat offline (agar masuk outbox)', () => {
@@ -46,8 +46,8 @@ test('syncPatrolReportToDomain TIDAK berhenti saat offline (agar masuk outbox)',
   );
   assert.match(
     fn,
-    /if \(!hasOperationalCloudAccess\) \{/,
-    'penjaga akses terpisah supaya bisa memunculkan status no-access ke layar',
+    /if \(!hasOperationalCloudAccess\) \{[\s\S]*?queuePatrolReportForRetry\(pendingReport/,
+    'akses cloud transient harus antre pendingReport, bukan berhenti lokal saja',
   );
   assert.doesNotMatch(
     fn,

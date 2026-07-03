@@ -1,6 +1,6 @@
 # SYSTEM_MAP - SmartPatrol SQL
 
-> Terakhir diperbarui: 2026-06-30.
+> Terakhir diperbarui: 2026-07-03.
 > Bahasa pemrograman: JavaScript (React 19 + Vite 8), SQL Postgres, Supabase Edge Functions (Deno).
 
 ## Project Summary
@@ -65,6 +65,8 @@ PatrolPage -> PatrolCameraModal -> imageStore IndexedDB
   -> patrol_reports upsert dengan client_event_id idempotent
   -> Supabase Realtime listener merge ke checkpointsByShip
   -> jika offline/gagal: outbox_mutations antre dan flush saat online
+  -> jika akses cloud transient saat resume kamera/session: queuePatrolReportForRetry
+     mengantre patrol_report.upsert agar laporan completed lokal tetap menuju patrol_reports
 ```
 
 ### Incident dan SOS

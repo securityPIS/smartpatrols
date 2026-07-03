@@ -3,9 +3,9 @@ Tujuan: Adapter SQL/Reatime untuk laporan checkpoint patroli.
 Caller: AppContextRuntime saat submit laporan, backfill offline, dan listener lintas-device.
 Dependensi: Supabase Postgres/Reatime dan outbox IndexedDB.
 Main Functions: Subscribe laporan per shift/kapal, delta merge realtime, upsert laporan
-        idempotent per checkpoint, dan tombstone delete lintas surface.
+        idempotent per checkpoint, queue retry eksplisit, dan tombstone delete lintas surface.
 Side Effects: Membaca/menulis tabel patrol_reports/patrol_report_tombstones dan
-        mengantre mutation saat offline.
+        mengantre mutation saat offline atau akses cloud sedang transient.
 */
 
 import { ensureSupabaseClient } from './app';
@@ -46,9 +46,15 @@ function createClientEventId(report = {}) {
 }
 
 function mapReportToRow(report = {}, options = {}) {
+  const reportClientUpdatedAt = Number(report.clientUpdatedAt);
+  const rowClientUpdatedAt = Number(report.client_updated_at_ms);
   const clientUpdatedAt = Number.isFinite(options.clientUpdatedAt)
     ? options.clientUpdatedAt
-    : Date.now();
+    : Number.isFinite(reportClientUpdatedAt)
+      ? reportClientUpdatedAt
+      : Number.isFinite(rowClientUpdatedAt)
+        ? rowClientUpdatedAt
+        : Date.now();
 
   return {
     client_event_id: report.clientEventId || report.client_event_id || createClientEventId(report),
@@ -106,6 +112,47 @@ async function writePatrolReport(report, options = {}) {
 }
 
 registerOutboxHandler('patrol_report.upsert', writePatrolReport);
+
+export async function queuePatrolReportForRetry(report, options = {}) {
+  const clientUpdatedAt = Number.isFinite(options.clientUpdatedAt)
+    ? Math.round(options.clientUpdatedAt)
+    : Date.now();
+  const queuedReport = {
+    ...report,
+    schemaVersion: PATROL_REPORTS_SCHEMA_VERSION,
+    clientUpdatedAt,
+  };
+
+  const queuedMutation = await enqueueOutboxMutation({
+    id: report?.clientEventId || report?.client_event_id || createClientEventId(report),
+    type: 'patrol_report.upsert',
+    payload: queuedReport,
+  });
+
+  if (!queuedMutation) {
+    return {
+      ...queuedReport,
+      synced: false,
+      pendingOfflineSync: false,
+      offline: false,
+      syncError: {
+        code: null,
+        message: 'Gagal menyimpan antrean offline laporan patroli.',
+        hint: null,
+        details: null,
+      },
+    };
+  }
+
+  return {
+    ...queuedReport,
+    pendingOfflineSync: true,
+    queuedForRetry: true,
+    synced: false,
+    offline: Boolean(options.offline),
+    syncDeferredReason: options.reason || 'cloud-access-pending',
+  };
+}
 
 export function subscribeToPatrolReports({ shiftKey, shipId, shipName }, callback, onError) {
   const supabase = ensureSupabaseClient();
