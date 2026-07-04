@@ -5,7 +5,8 @@ Tujuan: Mencegah regresi bug "laporan offline tak muncul di device lain" — sub
 Caller: Node test runner saat verifikasi jalur sinkronisasi laporan patroli lintas-device.
 Dependensi: src/context/AppContextRuntime.jsx, src/services/backend/patrolReports.js.
 Main Functions: Memastikan syncPatrolReportToDomain tidak bail saat offline namun tetap melewati
-        upload media saat offline, dan savePatrolReport mengantrekan ke outbox saat gagal tulis.
+        upload media saat offline, submit melakukan prequeue lokal, dan savePatrolReport
+        mengantrekan ke outbox saat gagal tulis.
 Side Effects: Tidak ada; test membaca file sumber secara read-only.
 */
 
@@ -34,7 +35,7 @@ function extractSyncPatrolReportToDomain(source) {
   const startIndex = source.indexOf('const syncPatrolReportToDomain = useCallback');
   assert.notEqual(startIndex, -1, 'syncPatrolReportToDomain harus ada di runtime');
   // Cukup ambil potongan awal fungsi sampai penjaga + skip media.
-  return source.slice(startIndex, startIndex + 4200);
+  return source.slice(startIndex, startIndex + 5200);
 }
 
 test('syncPatrolReportToDomain TIDAK berhenti saat offline (agar masuk outbox)', () => {
@@ -67,16 +68,43 @@ test('syncPatrolReportToDomain tetap melewati upload media saat offline', () => 
 test('savePatrolReport mengantrekan laporan gagal ke outbox dengan id deterministik', () => {
   assert.match(
     patrolReportsSource,
-    /enqueueOutboxMutation\(\{[\s\S]*?id: report\?\.clientEventId \|\| report\?\.client_event_id \|\| createClientEventId\(report\)[\s\S]*?type: 'patrol_report\.upsert'/,
+    /const mutationId = resolveReportMutationId\(report\);[\s\S]*?enqueueOutboxMutation\(\{[\s\S]*?id: mutationId[\s\S]*?type: 'patrol_report\.upsert'/,
     'kegagalan tulis (mis. offline) harus diantrekan ke outbox dengan id per-checkpoint',
   );
 });
 
-test('submit patroli meminta notifikasi error di layar (notifyOnError)', () => {
+test('savePatrolReport membersihkan outbox bila direct save berhasil', () => {
+  assert.match(
+    patrolReportsSource,
+    /import \{ enqueueOutboxMutation, registerOutboxHandler, removeOutboxMutation \} from '\.\/outbox';[\s\S]*?const saved = await writePatrolReport\(report, options\);[\s\S]*?await removeOutboxMutation\(mutationId\);/,
+    'direct save sukses harus menghapus antrean lokal checkpoint yang sama agar outbox lama tidak menimpa record ready',
+  );
+});
+
+test('submit patroli prequeue lokal sebelum sync cloud background', () => {
   assert.match(
     runtimeSource,
-    /void syncPatrolReportToDomain\(submittedItem, \{ notifyOnError: true \}\);/,
-    'handleSubmitPatrol harus minta notifikasi bila laporan gagal/terblokir sampai ke server',
+    /const durableSyncStatus = await syncPatrolReportToDomain\(submittedItem, \{[\s\S]*?durableQueueOnly: true,[\s\S]*?notifyOnError: true,[\s\S]*?skipMediaUpload: true,[\s\S]*?\}\);/,
+    'handleSubmitPatrol harus menunggu laporan masuk outbox lokal sebelum melepas flow submit',
+  );
+  assert.match(
+    runtimeSource,
+    /if \(!\['blocked', 'no-access'\]\.includes\(durableSyncStatus\?\.syncStatus\)\) \{[\s\S]*?void syncPatrolReportToDomain\(submittedItem, \{ notifyOnError: true \}\);/,
+    'setelah durable queue aman, sync cloud/media boleh lanjut di background dengan notifikasi error',
+  );
+});
+
+test('syncPatrolReportToDomain punya mode durableQueueOnly', () => {
+  const fn = extractSyncPatrolReportToDomain(runtimeSource);
+  assert.match(
+    fn,
+    /if \(options\.durableQueueOnly && !isDefinitiveAccessDenied\) \{[\s\S]*?queuePatrolReportForRetry\(pendingReport,[\s\S]*?reason: options\.durableQueueReason \|\| 'submit-durable-prequeue'/,
+    'mode durableQueueOnly harus menulis pendingReport ke outbox sebelum jalur network',
+  );
+  assert.match(
+    fn,
+    /patrolReportDomainWriteCacheRef\.current\.set\(reportKey, serializedPendingReport\)/,
+    'prequeue sukses harus mengisi write cache agar pending write direct tidak menduplikasi antrean',
   );
 });
 

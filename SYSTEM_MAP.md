@@ -385,7 +385,10 @@ Kunci alur (semua pembaca membaca-ulang dari tabel `patrol_reports`):
 
 1. Submit petugas → `handleSubmitPatrol` (`AppContextRuntime.jsx`) set checkpoint
    `status:'completed'` + `shiftKey/shipId/shipName` → `syncPatrolReportToDomain`
-   → `savePatrolReport` → upsert `patrol_reports` (onConflict `shift_key,ship_id,checkpoint_id`).
+   mode `durableQueueOnly` → outbox IndexedDB `patrol_report.upsert` → sync cloud
+   background → `savePatrolReport` → upsert `patrol_reports` (onConflict
+   `shift_key,ship_id,checkpoint_id`). Jika direct save sukses, outbox key checkpoint
+   yang sama dibersihkan agar antrean lama tidak menimpa record media `ready`.
 2. Admin & petugas lain menerima lewat `hydrateStateFromSql` (`cloudState.js`, baca
    SEMUA `patrol_reports`) dan `subscribeToPatrolReports` per kapal/shift.
 3. Admin On Going = `adminLiveHistoryEntries` membangun live entry dari

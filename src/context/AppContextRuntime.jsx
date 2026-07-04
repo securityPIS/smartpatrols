@@ -6551,14 +6551,32 @@ export function AppProvider({ children }) {
 
     if (!pendingReport) return { syncStatus: 'invalid' };
 
+    const isDefinitiveAccessDenied = Boolean(
+      isFirebaseAuthEnabled
+      && firebaseAuthUid
+      && authAccessResolvedUid === firebaseAuthUid
+      && !authAccessEnabled
+      && authAccessOfflineUid !== firebaseAuthUid,
+    );
+
+    if (options.durableQueueOnly && !isDefinitiveAccessDenied) {
+      const queuedResult = await queuePatrolReportForRetry(pendingReport, {
+        clientUpdatedAt: Date.now(),
+        reason: options.durableQueueReason || 'submit-durable-prequeue',
+        offline: isOffline,
+      });
+      if (queuedResult?.queuedForRetry) {
+        const serializedPendingReport = serializeSharedStateSnapshot(pendingReport);
+        if (reportKey && serializedPendingReport) {
+          patrolReportDomainWriteCacheRef.current.set(reportKey, serializedPendingReport);
+        }
+        return toPatrolSyncStatus(queuedResult);
+      }
+      // Jika IndexedDB gagal, lanjut ke jalur normal agar submit online masih bisa
+      // menulis langsung ke Supabase dan menampilkan error bila server menolak.
+    }
+
     if (!hasOperationalCloudAccess) {
-      const isDefinitiveAccessDenied = Boolean(
-        isFirebaseAuthEnabled
-        && firebaseAuthUid
-        && authAccessResolvedUid === firebaseAuthUid
-        && !authAccessEnabled
-        && authAccessOfflineUid !== firebaseAuthUid,
-      );
       const canQueueForAccessRecovery = Boolean(currentUserRecord?.id || sessionUserId)
         && !isDefinitiveAccessDenied;
 
@@ -8776,7 +8794,14 @@ export function AppProvider({ children }) {
       // bukan di sini. Sebelumnya signal prematur menyebabkan Device B fetch data lama.
       // notifyOnError menampilkan ke layar bila laporan gagal/terblokir sampai ke server
       // (RLS/izin/offline) — penting karena di HP Console tak bisa dibuka.
-      void syncPatrolReportToDomain(submittedItem, { notifyOnError: true });
+      const durableSyncStatus = await syncPatrolReportToDomain(submittedItem, {
+        durableQueueOnly: true,
+        notifyOnError: true,
+        skipMediaUpload: true,
+      });
+      if (!['blocked', 'no-access'].includes(durableSyncStatus?.syncStatus)) {
+        void syncPatrolReportToDomain(submittedItem, { notifyOnError: true });
+      }
       requestCloudSync('urgent');
 
       // GPS belum ada: antrekan untuk penempelan koordinat di latar belakang + beri tahu

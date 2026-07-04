@@ -3,13 +3,13 @@ Tujuan: Adapter SQL/Reatime untuk laporan checkpoint patroli.
 Caller: AppContextRuntime saat submit laporan, backfill offline, dan listener lintas-device.
 Dependensi: Supabase Postgres/Reatime dan outbox IndexedDB.
 Main Functions: Subscribe laporan per shift/kapal, delta merge realtime, upsert laporan
-        idempotent per checkpoint, queue retry eksplisit, dan tombstone delete lintas surface.
+        idempotent per checkpoint, queue retry/prequeue eksplisit, dan tombstone delete lintas surface.
 Side Effects: Membaca/menulis tabel patrol_reports/patrol_report_tombstones dan
         mengantre mutation saat offline atau akses cloud sedang transient.
 */
 
 import { ensureSupabaseClient } from './app';
-import { enqueueOutboxMutation, registerOutboxHandler } from './outbox';
+import { enqueueOutboxMutation, registerOutboxHandler, removeOutboxMutation } from './outbox';
 import { deleteStorageAsset } from './assets';
 
 const PATROL_REPORTS_TABLE = 'patrol_reports';
@@ -43,6 +43,10 @@ function createClientEventId(report = {}) {
     report.shipId || 'ship',
     report.checkpointId || 'checkpoint',
   ].join('|');
+}
+
+function resolveReportMutationId(report = {}) {
+  return report?.clientEventId || report?.client_event_id || createClientEventId(report);
 }
 
 function mapReportToRow(report = {}, options = {}) {
@@ -124,7 +128,7 @@ export async function queuePatrolReportForRetry(report, options = {}) {
   };
 
   const queuedMutation = await enqueueOutboxMutation({
-    id: report?.clientEventId || report?.client_event_id || createClientEventId(report),
+    id: resolveReportMutationId(report),
     type: 'patrol_report.upsert',
     payload: queuedReport,
   });
@@ -245,8 +249,10 @@ export function subscribeToPatrolReports({ shiftKey, shipId, shipName }, callbac
 }
 
 export async function savePatrolReport(report, options = {}) {
+  const mutationId = resolveReportMutationId(report);
   try {
     const saved = await writePatrolReport(report, options);
+    await removeOutboxMutation(mutationId);
     return { ...saved, synced: true };
   } catch (error) {
     // Jangan telan diam-diam: kegagalan permanen (RLS/constraint/auth) tampak sama
@@ -265,7 +271,7 @@ export async function savePatrolReport(report, options = {}) {
     await enqueueOutboxMutation({
       // Id deterministik per checkpoint agar submit offline berulang untuk titik yang
       // sama menimpa antrean lama, bukan menumpuk duplikat di outbox.
-      id: report?.clientEventId || report?.client_event_id || createClientEventId(report),
+      id: mutationId,
       type: 'patrol_report.upsert',
       payload: report,
     });

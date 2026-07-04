@@ -28,7 +28,7 @@ test('submit patrol saat akses cloud transient tetap antre ke patrol_report outb
 
   const startIndex = runtimeSource.indexOf('const syncPatrolReportToDomain = useCallback');
   assert.notEqual(startIndex, -1, 'syncPatrolReportToDomain harus ada');
-  const fnSlice = runtimeSource.slice(startIndex, startIndex + 3600);
+  const fnSlice = runtimeSource.slice(startIndex, startIndex + 5200);
 
   assert.match(
     fnSlice,

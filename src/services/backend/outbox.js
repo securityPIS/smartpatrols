@@ -2,7 +2,7 @@
 Tujuan: Menyediakan outbox IndexedDB ringan untuk mutation SQL saat offline.
 Caller: Adapter backend Supabase yang perlu menjamin aksi operasional tetap tercatat lokal.
 Dependensi: IndexedDB browser dan handler mutation yang diregistrasikan adapter domain.
-Main Functions: Enqueue mutation, register handler flush, retry batch kecil, dan eksponensial backoff.
+Main Functions: Enqueue/remove mutation, register handler flush, retry batch kecil, dan eksponensial backoff.
 Side Effects: Menulis IndexedDB `smartpatrol-sql/outbox_mutations`, memasang listener online, dan menghapus item saat flush sukses.
 */
 
@@ -124,6 +124,17 @@ async function readDueMutations(nowMs = Date.now()) {
 
 async function deleteMutation(id) {
   await runStoreTransaction(OUTBOX_STORE, 'readwrite', store => store.delete(id));
+}
+
+export async function removeOutboxMutation(id) {
+  if (!id) return false;
+  try {
+    await deleteMutation(id);
+    return true;
+  } catch (error) {
+    console.warn('Gagal menghapus mutation offline SmartPatrol SQL', error);
+    return false;
+  }
 }
 
 async function markMutationFailed(row, error) {
