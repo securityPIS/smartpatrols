@@ -69,6 +69,19 @@ PatrolPage -> PatrolCameraModal -> imageStore IndexedDB
      mengantre patrol_report.upsert agar laporan completed lokal tetap menuju patrol_reports
 ```
 
+### Shift History
+
+```
+pg_cron akhir shift -> finalize_shift(shift_id, date_key)
+  -> finalize_shift_for_ship membaca ships.custom_checkpoints + patrol_reports
+  -> upsert shift_history_entries (AMAN/TEMUAN/MISSED)
+
+patrol_reports late insert/update setelah jam akhir shift
+  -> trigger refresh_shift_history_after_late_patrol_report
+  -> finalize_shift_for_ship untuk kapal/shift terkait
+  -> history final diperbaiki bila outbox device baru flush setelah sinyal pulih
+```
+
 ### Incident dan SOS
 
 ```
